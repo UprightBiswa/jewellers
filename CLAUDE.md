@@ -89,6 +89,6 @@ src/components/storefront/            src/components/admin/
 prisma/schema.prisma  prisma/seed.ts  docs/
 ```
 
-Two gates gu­ard the admin: `src/proxy.ts` redirects a non-staff request, and
+Two gates guard the admin: `src/proxy.ts` redirects a non-staff request, and
 `src/app/admin/(panel)/layout.tsx` checks the role again. Keep both — a missed
 matcher pattern should not leak a page.
