@@ -50,3 +50,6 @@ next-env.d.ts
 # uploads while developing locally
 /public/uploads/
 /tmp/
+
+# prisma generated client
+/src/generated/
