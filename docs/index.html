@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Fill-in brief for a new silver jewellery website. No login needed; your answers stay on your own phone.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F1F2F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D0F14" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#128141;</text></svg>">
+<style>
+  html{color-scheme:light dark}
+  :root{
+    padding-top:env(safe-area-inset-top, 0px);
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+  }
+  img{max-width:100%}
+  [hidden]{display:none !important}
+</style>
+<title>Silver Store Brief</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&family=Noto+Sans+Devanagari:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg:#F1F2F5;
+    --surface:#FFFFFF;
+    --surface-2:#F7F8FA;
+    --ink:#171A20;
+    --ink-2:#3F4550;
+    --muted:#6B727E;
+    --line:#DBDEE5;
+    --line-2:#C5CAD3;
+    --brass:#8E6228;
+    --brass-2:#7A5320;
+    --brass-soft:#F3E9D9;
+    --on-brass:#FFF8EF;
+    --good:#2C6A4C;
+    --shadow:0 1px 2px rgba(20,24,32,.05), 0 14px 32px -22px rgba(20,24,32,.45);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0D0F14;
+      --surface:#161921;
+      --surface-2:#1C202A;
+      --ink:#E8EAEF;
+      --ink-2:#BCC2CD;
+      --muted:#8A919E;
+      --line:#262B35;
+      --line-2:#39404D;
+      --brass:#D2A263;
+      --brass-2:#E3B87C;
+      --brass-soft:#2A2114;
+      --on-brass:#1A1305;
+      --good:#6FBF93;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 32px -22px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0D0F14;
+    --surface:#161921;
+    --surface-2:#1C202A;
+    --ink:#E8EAEF;
+    --ink-2:#BCC2CD;
+    --muted:#8A919E;
+    --line:#262B35;
+    --line-2:#39404D;
+    --brass:#D2A263;
+    --brass-2:#E3B87C;
+    --brass-soft:#2A2114;
+    --on-brass:#1A1305;
+    --good:#6FBF93;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 32px -22px rgba(0,0,0,.8);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"IBM Plex Sans","Noto Sans Devanagari",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-text-size-adjust:100%;
+  }
+  .hi{font-family:"Noto Sans Devanagari","IBM Plex Sans",sans-serif;}
+
+  /* ---------- progress rail ---------- */
+  .rail{
+    position:sticky;
+    top:env(safe-area-inset-top, 0px);
+    z-index:20;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:saturate(1.4) blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .rail-in{
+    max-width:660px;margin:0 auto;
+    padding:10px 20px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .rail-label{
+    font-size:12px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--muted);white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+  }
+  .meter{flex:1;height:4px;background:var(--line);border-radius:99px;overflow:hidden}
+  .meter i{display:block;height:100%;width:0%;background:var(--brass);transition:width .35s ease}
+  .saved{font-size:12px;color:var(--good);white-space:nowrap;opacity:0;transition:opacity .3s}
+  .saved.on{opacity:1}
+
+  /* ---------- page ---------- */
+  .wrap{max-width:660px;margin:0 auto;padding:0 20px 140px}
+
+  header.masthead{padding-block:34px 26px;border-bottom:1px solid var(--line)}
+  .eyebrow{
+    font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--brass);font-weight:600;margin:0 0 12px
+  }
+  h1{
+    font-family:"Newsreader",Georgia,serif;
+    font-weight:500;
+    font-size:clamp(30px,7.5vw,42px);
+    line-height:1.12;
+    letter-spacing:-.015em;
+    margin:0 0 10px;
+    text-wrap:balance;
+  }
+  .sub{margin:0;color:var(--ink-2);max-width:52ch}
+  .sub-hi{margin:6px 0 0;color:var(--muted);font-size:14.5px}
+
+  .howto{
+    margin-top:22px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-left:3px solid var(--brass);
+    border-radius:10px;
+    padding:14px 16px;
+    display:grid;gap:8px;
+  }
+  .howto p{margin:0;font-size:14.5px;color:var(--ink-2)}
+  .howto b{color:var(--ink);font-weight:600}
+
+  section.block{padding-block:30px;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;gap:12px;align-items:baseline;margin-bottom:4px}
+  .sec-num{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:12px;color:var(--brass);
+    padding-top:4px;letter-spacing:.04em;
+  }
+  h2{
+    font-family:"Newsreader",Georgia,serif;
+    font-weight:500;font-size:24px;line-height:1.2;margin:0;letter-spacing:-.01em;
+  }
+  .sec-note{margin:2px 0 0 30px;color:var(--muted);font-size:14px;max-width:50ch}
+  .fields{display:grid;gap:22px;margin-top:22px}
+
+  .f-label{display:block;margin-bottom:7px}
+  .f-en{display:block;font-weight:600;font-size:15px;color:var(--ink)}
+  .f-hi{display:block;font-size:13.5px;color:var(--muted);margin-top:1px}
+  .f-hint{display:block;font-size:13px;color:var(--muted);margin-top:5px;font-style:italic}
+
+  input[type="text"],textarea{
+    width:100%;
+    font:inherit;font-size:16px;
+    color:var(--ink);
+    background:var(--surface);
+    border:1px solid var(--line-2);
+    border-radius:8px;
+    padding:11px 13px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  textarea{min-height:88px;resize:vertical;line-height:1.5}
+  input[type="text"]::placeholder,textarea::placeholder{color:var(--muted);opacity:.8}
+  input[type="text"]:focus-visible,textarea:focus-visible{
+    outline:none;border-color:var(--brass);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--brass) 22%, transparent);
+  }
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{position:relative;display:inline-flex}
+  .chip input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+  .chip span{
+    display:inline-block;
+    padding:8px 13px;
+    font-size:14.5px;
+    color:var(--ink-2);
+    background:var(--surface);
+    border:1px solid var(--line-2);
+    border-radius:99px;
+    transition:background .15s,border-color .15s,color .15s;
+    cursor:pointer;
+  }
+  .chip input:checked + span{
+    background:var(--brass-soft);
+    border-color:var(--brass);
+    color:var(--brass-2);
+    font-weight:600;
+  }
+  .chip input:focus-visible + span{
+    outline:2px solid var(--brass);outline-offset:2px;
+  }
+
+  /* ---------- output ---------- */
+  .finish{padding-block:32px}
+  .out-card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .out-head{padding:18px 18px 0}
+  .out-head h2{font-size:21px}
+  .out-head p{margin:8px 0 0;font-size:14.5px;color:var(--ink-2)}
+  .out-body{padding:16px 18px 18px}
+  #summary{
+    width:100%;min-height:150px;max-height:280px;
+    font-family:"IBM Plex Mono","Noto Sans Devanagari",monospace;
+    font-size:12.5px;line-height:1.6;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    color:var(--ink-2);
+    border-radius:8px;padding:12px;
+    resize:vertical;
+  }
+  .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  button{
+    font:inherit;font-weight:600;font-size:15px;
+    border-radius:8px;padding:12px 18px;cursor:pointer;
+    border:1px solid transparent;
+    transition:transform .12s ease, filter .15s ease;
+  }
+  button:active{transform:translateY(1px)}
+  button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .btn-primary{background:var(--brass);color:var(--on-brass);flex:1 1 180px}
+  .btn-primary:hover{filter:brightness(1.07)}
+  .btn-ghost{background:var(--surface);color:var(--ink);border-color:var(--line-2);flex:0 1 auto}
+  .btn-ghost:hover{background:var(--surface-2)}
+  .btn-danger{background:transparent;color:var(--muted);border-color:transparent;padding:12px 4px;font-weight:400;font-size:13.5px}
+  .btn-danger:hover{color:var(--ink)}
+  .toast{margin-top:10px;font-size:14px;color:var(--good);min-height:20px;font-weight:500}
+
+  footer.foot{padding-block:8px 0;color:var(--muted);font-size:13px;text-align:center}
+
+  /* ---------- sticky action bar ---------- */
+  .dock{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    background:color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter:saturate(1.4) blur(10px);
+    border-top:1px solid var(--line);
+    padding:10px 20px calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .dock-in{max-width:660px;margin:0 auto;display:flex;gap:10px;align-items:center}
+  .dock-in .btn-primary{flex:1}
+  .dock-note{font-size:12.5px;color:var(--muted);line-height:1.3;flex:1}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;animation:none !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="rail">
+  <div class="rail-in">
+    <span class="rail-label" id="count">0 / 0 answered</span>
+    <span class="meter"><i id="bar"></i></span>
+    <span class="saved" id="saved">Saved</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">Website brief &middot; Silver jewellery store</p>
+    <h1>Tell us about your shop</h1>
+    <p class="sub">Answer whatever you can. Every answer here becomes a real part of your website &mdash; your prices, your delivery rules, your return policy, your product photos.</p>
+    <p class="sub sub-hi hi">जो भी आप जानते हैं, वही भरिए। जो नहीं पता, उसे छोड़ दीजिए — हम बाद में पूछ लेंगे।</p>
+
+    <div class="howto">
+      <p><b>No login needed.</b> Nothing is sent anywhere while you type.</p>
+      <p><b>Your answers save on this phone automatically</b> &mdash; you can close this page and come back later.</p>
+      <p><b>When you finish</b>, scroll to the bottom and tap <b>Copy all answers</b>, then paste it back in WhatsApp.</p>
+      <p class="hi" style="color:var(--muted)">कोई लॉगिन नहीं चाहिए। अंत में “Copy all answers” दबाकर WhatsApp में भेज दीजिए।</p>
+    </div>
+  </header>
+
+  <main id="form"></main>
+
+  <div class="finish">
+    <div class="out-card">
+      <div class="out-head">
+        <h2>Send your answers</h2>
+        <p>This is everything you filled in, ready to paste. Tap the button, then paste it into WhatsApp.</p>
+      </div>
+      <div class="out-body">
+        <textarea id="summary" readonly aria-label="Your answers, ready to copy"></textarea>
+        <div class="btns">
+          <button class="btn-primary" id="copy" type="button">Copy all answers</button>
+          <button class="btn-ghost" id="wa" type="button">Open WhatsApp</button>
+        </div>
+        <p class="toast" id="toast" role="status" aria-live="polite"></p>
+        <div class="btns" style="margin-top:2px">
+          <button class="btn-danger" id="clear" type="button">Clear everything and start again</button>
+        </div>
+      </div>
+    </div>
+    <footer class="foot">
+      <p>Prepared for your new online store &middot; 925 sterling &amp; 999 fine silver</p>
+    </footer>
+  </div>
+</div>
+
+<div class="dock">
+  <div class="dock-in">
+    <span class="dock-note" id="dockNote">Answers save as you type</span>
+    <button class="btn-primary" id="dockCopy" type="button">Copy all answers</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // Your WhatsApp number in international form, digits only, no + or spaces.
+  // Example: "919876543210". Leave "" to let the client pick a contact themselves.
+  var DEV_WHATSAPP = "";
+
+  var SCHEMA = [
+    {
+      title:"Your shop",
+      note:"The basics we need for invoices, the contact page and Google.",
+      fields:[
+        {id:"shop_name", label:"Shop / brand name for the website", hi:"दुकान या ब्रांड का नाम", type:"text", ph:"e.g. Shree Silver Arts"},
+        {id:"owner_name", label:"Owner's full name", hi:"मालिक का पूरा नाम", type:"text"},
+        {id:"phone", label:"WhatsApp number customers can call", hi:"ग्राहक किस नंबर पर संपर्क करें", type:"text", ph:"+91 ..."},
+        {id:"email", label:"Email address for orders", hi:"ऑर्डर के लिए ईमेल", type:"text", ph:"name@gmail.com"},
+        {id:"address", label:"Full shop address with pincode", hi:"दुकान का पूरा पता, पिनकोड सहित", type:"textarea", hint:"This goes on the Contact page and on every invoice."},
+        {id:"since", label:"Shop running since which year?", hi:"दुकान कब से चल रही है?", type:"text", ph:"e.g. 2011"},
+        {id:"gst", label:"Are you registered for GST?", hi:"क्या GST रजिस्ट्रेशन है?", type:"choice",
+          options:["Yes, I have GST","No, not registered","Applying for it","Don't know"]},
+        {id:"docs", label:"Which of these do you already have ready?", hi:"इनमें से आपके पास क्या तैयार है?", type:"multi",
+          options:["PAN card","GST certificate","Current bank account","Cancelled cheque","Aadhaar","Shop photo / signboard photo"],
+          hint:"Just tick them. Do NOT type any card or account numbers on this page."}
+      ]
+    },
+    {
+      title:"Your look and feel",
+      note:"How the website should feel to a customer who has never met you.",
+      fields:[
+        {id:"logo", label:"Do you have a logo?", hi:"क्या आपके पास लोगो है?", type:"choice",
+          options:["Yes, I have the logo file","I have one but it is blurry / low quality","No, I need one designed"]},
+        {id:"tagline", label:"One line that describes your shop", hi:"एक लाइन में अपनी दुकान बताइए", type:"text", ph:"e.g. Hand-made 925 silver from Jaipur since 2011"},
+        {id:"story", label:"Tell us your story in your own words", hi:"अपनी कहानी अपने शब्दों में लिखिए", type:"textarea",
+          hint:"Who makes the jewellery, how long you've been doing it, what you're proud of. We'll turn this into the About page."},
+        {id:"lang", label:"Which languages should the website be in?", hi:"वेबसाइट किस भाषा में हो?", type:"multi",
+          options:["English only","Hindi only","Both English and Hindi"]},
+        {id:"vibe", label:"Which style suits your jewellery best?", hi:"आपकी ज्वेलरी किस स्टाइल की है?", type:"choice",
+          options:["Traditional / temple / puja","Modern and minimal","Trendy fashion for young buyers","A mix of all"]},
+        {id:"likes", label:"Websites you liked (paste links)", hi:"कौन सी वेबसाइट आपको पसंद आई?", type:"textarea",
+          ph:"Paste any jewellery website links you like, and say in one line what you liked about each."}
+      ]
+    },
+    {
+      title:"What you sell",
+      note:"Tick everything you make or plan to sell online.",
+      fields:[
+        {id:"cats", label:"Product categories", hi:"आप क्या-क्या बनाते / बेचते हैं?", type:"multi",
+          options:["Rings","Anklets (Payal)","Toe rings (Bichhiya)","Bracelets","Bangles / Kada","Chains","Pendants","Earrings","Nose pins (Nath)","Necklaces","Mangalsutra","Waist chain (Kamarbandh)","Kids' jewellery","Idols & puja items","Rudraksha / Yantra","Silver coins","Gift items","Utensils / gift articles"]},
+        {id:"purity", label:"What purity do you sell?", hi:"कौन सी शुद्धता?", type:"multi",
+          options:["925 sterling silver","999 fine silver","Silver plated","Gold plated on silver","Oxidised silver","Silver with stones / kundan"]},
+        {id:"hallmark", label:"Is your jewellery BIS hallmarked?", hi:"क्या BIS हॉलमार्क है?", type:"choice",
+          options:["Yes, hallmarked with HUID","Only some items","No","Planning to start"]},
+        {id:"count_now", label:"How many different designs can you put online right now?", hi:"अभी कितने डिज़ाइन ऑनलाइन डाल सकते हैं?", type:"text", ph:"e.g. about 60"},
+        {id:"count_month", label:"How many new designs do you add in a month?", hi:"महीने में कितने नए डिज़ाइन आते हैं?", type:"text", ph:"e.g. 10–15"},
+        {id:"stock", label:"How do you sell?", hi:"आप कैसे बेचते हैं?", type:"choice",
+          options:["Ready stock only","Made to order only","Both ready stock and made to order"]},
+        {id:"sizes", label:"Do rings and bangles need size options?", hi:"क्या रिंग / चूड़ी के साइज़ चाहिए?", type:"choice",
+          options:["Yes, Indian ring sizes (e.g. 8–24)","Yes, but free size mostly","No sizes needed"]},
+        {id:"custom", label:"Do you take custom orders, engraving or name jewellery?", hi:"क्या कस्टम ऑर्डर या नाम की ज्वेलरी बनाते हैं?", type:"choice",
+          options:["Yes, regularly","Sometimes","No"]}
+      ]
+    },
+    {
+      title:"How you price",
+      note:"This is the most important section. It decides how the whole website calculates money.",
+      fields:[
+        {id:"price_model", label:"How do you decide the price of one item?", hi:"एक आइटम की कीमत कैसे तय होती है?", type:"choice",
+          options:["Fixed price per design (₹ printed on the tag)","Weight × today's silver rate + making charges","Both, depends on the item"],
+          hint:"If prices change with the silver rate, the website needs a daily rate setting — tell us so we build it."},
+        {id:"rate_update", label:"If weight-based: who updates the silver rate, and how often?", hi:"चाँदी का भाव कौन और कितनी बार अपडेट करेगा?", type:"text", ph:"e.g. I will update it every morning"},
+        {id:"making", label:"What is your making charge?", hi:"मेकिंग चार्ज कितना है?", type:"text", ph:"e.g. ₹12 per gram, or 15% of silver value"},
+        {id:"show_weight", label:"Should the website show weight and purity on each product?", hi:"क्या हर प्रोडक्ट पर वज़न और शुद्धता दिखाएँ?", type:"choice",
+          options:["Yes, show weight and purity","Show purity only","Show neither"]},
+        {id:"range", label:"Your cheapest and costliest item", hi:"सबसे सस्ता और सबसे महँगा आइटम", type:"text", ph:"e.g. ₹299 to ₹25,000"},
+        {id:"gst_price", label:"Should the price shown include GST?", hi:"दिखाई गई कीमत में GST शामिल हो?", type:"choice",
+          options:["Price includes GST","GST added at checkout","Not GST registered, no GST"]},
+        {id:"wholesale", label:"Do you also want wholesale / bulk pricing for dealers?", hi:"क्या होलसेल रेट भी चाहिए?", type:"choice",
+          options:["Yes, separate dealer login and rates","Maybe later","No, retail only"]}
+      ]
+    },
+    {
+      title:"Taking payment",
+      note:"How money reaches your bank account.",
+      fields:[
+        {id:"pay", label:"Which payment options do you want?", hi:"कौन से पेमेंट ऑप्शन चाहिए?", type:"multi",
+          options:["UPI / GPay / PhonePe","Debit & credit cards","Net banking","Wallets","Cash on delivery (COD)","Direct bank transfer"]},
+        {id:"pg", label:"Do you already have a payment gateway account?", hi:"क्या पेमेंट गेटवे अकाउंट है?", type:"choice",
+          options:["Yes, Razorpay","Yes, another one","No, need to create one","Don't know what this is"]},
+        {id:"cod", label:"If COD: any limit or extra charge?", hi:"COD पर कोई सीमा या चार्ज?", type:"text", ph:"e.g. COD only up to ₹5,000, ₹50 extra"},
+        {id:"advance", label:"For custom orders, how much advance do you take?", hi:"कस्टम ऑर्डर पर कितना एडवांस लेते हैं?", type:"text", ph:"e.g. 50% advance"}
+      ]
+    },
+    {
+      title:"Delivery",
+      note:"Customers ask this before they pay, so we must show it clearly.",
+      fields:[
+        {id:"courier", label:"Which courier will you use?", hi:"कौन सी कूरियर सेवा?", type:"multi",
+          options:["India Post / Speed Post","Delhivery","DTDC","Blue Dart","Shiprocket","Local delivery boy","Not decided yet"]},
+        {id:"free_ship", label:"Free delivery above how much?", hi:"कितने से ऊपर फ्री डिलीवरी?", type:"text", ph:"e.g. free above ₹999, else ₹70"},
+        {id:"ship_days", label:"How many days to pack, and how many to deliver?", hi:"पैक करने और पहुँचाने में कितने दिन?", type:"text", ph:"e.g. pack in 2 days, delivery in 4–7 days"},
+        {id:"ship_area", label:"Where will you deliver?", hi:"कहाँ-कहाँ डिलीवरी करेंगे?", type:"choice",
+          options:["All India","Only my state / nearby areas","All India and abroad too"]},
+        {id:"packing", label:"How will you pack it? Any insurance?", hi:"पैकिंग कैसी होगी? बीमा है?", type:"textarea", ph:"e.g. velvet box + bubble wrap, insured through courier"}
+      ]
+    },
+    {
+      title:"Returns and exchange",
+      note:"Silver buyers worry about this most. Clear rules mean fewer arguments later.",
+      fields:[
+        {id:"return_days", label:"How many days can a customer return an item?", hi:"कितने दिन में वापसी हो सकती है?", type:"text", ph:"e.g. 7 days from delivery"},
+        {id:"return_type", label:"What will you give back?", hi:"वापसी में क्या देंगे?", type:"multi",
+          options:["Full money refund","Exchange with another item","Store credit / coupon","No returns at all"]},
+        {id:"buyback", label:"Do you buy back old silver from customers?", hi:"क्या पुरानी चाँदी वापस खरीदते हैं?", type:"choice",
+          options:["Yes, lifetime buyback","Yes, exchange with some deduction","No"]},
+        {id:"no_return", label:"Which items can never be returned?", hi:"कौन से आइटम वापस नहीं होंगे?", type:"text", ph:"e.g. engraved items, custom size, nose pins"},
+        {id:"damage", label:"What if the parcel arrives broken?", hi:"अगर पार्सल टूटा हुआ पहुँचे तो?", type:"textarea", ph:"e.g. customer sends unboxing video within 24 hours, we replace free"}
+      ]
+    },
+    {
+      title:"Offers and marketing",
+      note:"These are the buttons and banners we will build into the site.",
+      fields:[
+        {id:"first_offer", label:"Discount for a customer's first order?", hi:"पहले ऑर्डर पर छूट?", type:"text", ph:"e.g. 10% off with code WELCOME10"},
+        {id:"offers", label:"Which offers do you want to run?", hi:"कौन से ऑफर चलाना चाहेंगे?", type:"multi",
+          options:["Festival sale (Diwali, Karwa Chauth, Rakhi)","Buy 1 Get 1","Free gift above a certain amount","An 'Under ₹999' section","Combo sets at a lower price","No offers for now"]},
+        {id:"social", label:"Your Instagram / Facebook / YouTube", hi:"आपके सोशल मीडिया लिंक", type:"textarea", ph:"Paste the links"},
+        {id:"wa_order", label:"Want a 'Order on WhatsApp' button on every product?", hi:"क्या हर प्रोडक्ट पर WhatsApp बटन चाहिए?", type:"choice",
+          options:["Yes, definitely","Maybe later","No"]},
+        {id:"reviews", label:"Should customers be able to write reviews with photos?", hi:"क्या ग्राहक फोटो के साथ रिव्यू लिख सकें?", type:"choice",
+          options:["Yes","Yes, but I want to approve them first","No"]}
+      ]
+    },
+    {
+      title:"Photos",
+      note:"Photos sell jewellery more than anything else. Be honest here so we can plan.",
+      fields:[
+        {id:"photo_who", label:"Who will take the product photos?", hi:"फोटो कौन खींचेगा?", type:"choice",
+          options:["I will click them on my phone","A photographer will do it","Some phone, some professional"]},
+        {id:"photo_ready", label:"How many products already have photos?", hi:"कितने प्रोडक्ट की फोटो तैयार है?", type:"choice",
+          options:["All of them","About half","Only a few","None yet"]},
+        {id:"photo_bg", label:"What background do you use?", hi:"फोटो का बैकग्राउंड कैसा है?", type:"choice",
+          options:["White background","Black velvet cloth","Model wearing the jewellery","Mixed / not consistent","I need guidance on this"]},
+        {id:"photo_count", label:"How many photos per product can you give?", hi:"एक प्रोडक्ट की कितनी फोटो दे सकते हैं?", type:"choice",
+          options:["1 photo","2–3 photos","4 or more photos from different angles"]},
+        {id:"video", label:"Can you shoot a short video of each product?", hi:"क्या हर प्रोडक्ट का छोटा वीडियो बना सकते हैं?", type:"choice",
+          options:["Yes","Only for costly items","No"]}
+      ]
+    },
+    {
+      title:"Website and running it",
+      note:"Last few things, then you're done.",
+      fields:[
+        {id:"domain", label:"What website name do you want?", hi:"वेबसाइट का नाम क्या रखें?", type:"text", ph:"e.g. shreesilverarts.com — write 2–3 choices"},
+        {id:"domain_have", label:"Do you already own a domain or website?", hi:"क्या पहले से कोई वेबसाइट है?", type:"choice",
+          options:["Yes, I own one already","I had one before, it's closed","No, this is the first"]},
+        {id:"existing", label:"Links to any online shop you already sell on", hi:"अगर कहीं ऑनलाइन बेचते हैं तो लिंक दीजिए", type:"text", ph:"Amazon, Meesho, Instagram shop, etc."},
+        {id:"staff", label:"Who will handle orders daily?", hi:"रोज़ के ऑर्डर कौन देखेगा?", type:"text", ph:"e.g. me and my son, 2 people"},
+        {id:"comfort", label:"How comfortable are you with a computer?", hi:"कंप्यूटर कितना चला लेते हैं?", type:"choice",
+          options:["Only mobile, no computer","Mobile is easy, computer is slow","Comfortable with both"],
+          hint:"We will design the admin panel to match. If it's mobile only, you'll be able to add a product from your phone."},
+        {id:"launch", label:"By when do you want it live?", hi:"वेबसाइट कब तक चालू चाहिए?", type:"text", ph:"e.g. before Diwali"},
+        {id:"budget", label:"Monthly running cost you are comfortable with", hi:"हर महीने का खर्च कितना ठीक रहेगा?", type:"text", ph:"Hosting, domain and payment charges, e.g. ₹1,500/month"},
+        {id:"notes", label:"Anything else you want on the website", hi:"और कुछ जो वेबसाइट पर चाहिए", type:"textarea", ph:"Write freely — anything you've seen somewhere and liked."}
+      ]
+    }
+  ];
+
+  var KEY = "silver-store-brief-v1";
+  var state = {};
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(raw) state = JSON.parse(raw) || {};
+  }catch(e){ state = {}; }
+
+  var form = document.getElementById("form");
+  var total = 0;
+
+  function el(tag, cls, text){
+    var n = document.createElement(tag);
+    if(cls) n.className = cls;
+    if(text != null) n.textContent = text;
+    return n;
+  }
+
+  SCHEMA.forEach(function(sec, si){
+    var s = el("section","block");
+
+    var head = el("div","sec-head");
+    head.appendChild(el("span","sec-num", String(si+1).padStart(2,"0")));
+    head.appendChild(el("h2", null, sec.title));
+    s.appendChild(head);
+    if(sec.note) s.appendChild(el("p","sec-note", sec.note));
+
+    var fields = el("div","fields");
+
+    sec.fields.forEach(function(f){
+      total++;
+      var wrap = el("div","field");
+
+      var lab = el("div","f-label");
+      var en = el("span","f-en", f.label);
+      lab.appendChild(en);
+      if(f.hi){
+        var hi = el("span","f-hi hi", f.hi);
+        lab.appendChild(hi);
+      }
+      wrap.appendChild(lab);
+
+      if(f.type === "text" || f.type === "textarea"){
+        var input = document.createElement(f.type === "textarea" ? "textarea" : "input");
+        if(f.type === "text") input.type = "text";
+        input.id = f.id;
+        input.setAttribute("aria-label", f.label);
+        if(f.ph) input.placeholder = f.ph;
+        input.value = state[f.id] || "";
+        input.addEventListener("input", function(){
+          state[f.id] = input.value;
+          persist();
+        });
+        wrap.appendChild(input);
+      } else {
+        var multi = f.type === "multi";
+        if(multi && !Array.isArray(state[f.id])) state[f.id] = state[f.id] ? [state[f.id]] : [];
+        var chips = el("div","chips");
+        chips.setAttribute("role", multi ? "group" : "radiogroup");
+        chips.setAttribute("aria-label", f.label);
+
+        f.options.forEach(function(opt, oi){
+          var chip = el("label","chip");
+          var inp = document.createElement("input");
+          inp.type = multi ? "checkbox" : "radio";
+          inp.name = f.id;
+          inp.id = f.id + "_" + oi;
+          inp.value = opt;
+          if(multi){
+            inp.checked = (state[f.id] || []).indexOf(opt) > -1;
+          } else {
+            inp.checked = state[f.id] === opt;
+          }
+          inp.addEventListener("change", function(){
+            if(multi){
+              var arr = (state[f.id] || []).slice();
+              var at = arr.indexOf(opt);
+              if(inp.checked && at === -1) arr.push(opt);
+              if(!inp.checked && at > -1) arr.splice(at,1);
+              state[f.id] = arr;
+            } else {
+              state[f.id] = opt;
+            }
+            persist();
+          });
+          chip.appendChild(inp);
+          chip.appendChild(el("span", null, opt));
+          chips.appendChild(chip);
+        });
+        wrap.appendChild(chips);
+      }
+
+      if(f.hint) wrap.appendChild(el("span","f-hint", f.hint));
+      fields.appendChild(wrap);
+    });
+
+    s.appendChild(fields);
+    form.appendChild(s);
+  });
+
+  var bar = document.getElementById("bar");
+  var count = document.getElementById("count");
+  var savedTag = document.getElementById("saved");
+  var summary = document.getElementById("summary");
+  var toast = document.getElementById("toast");
+  var savedTimer = null;
+
+  function answered(){
+    var n = 0;
+    SCHEMA.forEach(function(sec){
+      sec.fields.forEach(function(f){
+        var v = state[f.id];
+        if(Array.isArray(v) ? v.length > 0 : (v && String(v).trim() !== "")) n++;
+      });
+    });
+    return n;
+  }
+
+  function buildSummary(){
+    var lines = [];
+    lines.push("SILVER STORE — WEBSITE BRIEF");
+    lines.push("Filled on " + new Date().toLocaleDateString("en-IN", {day:"numeric", month:"short", year:"numeric"}));
+    lines.push("");
+
+    SCHEMA.forEach(function(sec, si){
+      var rows = [];
+      sec.fields.forEach(function(f){
+        var v = state[f.id];
+        if(Array.isArray(v)) v = v.join(", ");
+        if(v && String(v).trim() !== ""){
+          rows.push("- " + f.label + ": " + String(v).trim());
+        }
+      });
+      if(rows.length){
+        lines.push((si+1) + ". " + sec.title.toUpperCase());
+        lines = lines.concat(rows);
+        lines.push("");
+      }
+    });
+
+    var a = answered();
+    lines.push("(" + a + " of " + total + " questions answered)");
+    return lines.join("\n");
+  }
+
+  function refresh(){
+    var a = answered();
+    var pct = total ? Math.round(a / total * 100) : 0;
+    bar.style.width = pct + "%";
+    count.textContent = a + " / " + total + " answered";
+    summary.value = a ? buildSummary() : "Your answers will appear here as you fill the form above.";
+  }
+
+  function persist(){
+    try{
+      localStorage.setItem(KEY, JSON.stringify(state));
+      savedTag.classList.add("on");
+      clearTimeout(savedTimer);
+      savedTimer = setTimeout(function(){ savedTag.classList.remove("on"); }, 1200);
+    }catch(e){ /* private mode — the form still works for this session */ }
+    refresh();
+  }
+
+  function say(msg){
+    toast.textContent = msg;
+    clearTimeout(say._t);
+    say._t = setTimeout(function(){ toast.textContent = ""; }, 3500);
+  }
+
+  function doCopy(){
+    if(!answered()){ say("Fill in at least one answer first."); return; }
+    var text = buildSummary();
+    var done = function(){ say("Copied. Now open WhatsApp and paste it."); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else {
+      fallback();
+    }
+    function fallback(){
+      try{
+        summary.removeAttribute("readonly");
+        summary.focus();
+        summary.setSelectionRange(0, summary.value.length);
+        var ok = document.execCommand("copy");
+        summary.setAttribute("readonly","readonly");
+        ok ? done() : say("Couldn't copy. Select the text in the box above and copy it by hand.");
+      }catch(e){
+        say("Couldn't copy. Select the text in the box above and copy it by hand.");
+      }
+    }
+  }
+
+  document.getElementById("copy").addEventListener("click", doCopy);
+  document.getElementById("dockCopy").addEventListener("click", function(){
+    doCopy();
+    document.getElementById("summary").scrollIntoView({behavior:"smooth", block:"center"});
+  });
+
+  document.getElementById("wa").addEventListener("click", function(){
+    if(!answered()){ say("Fill in at least one answer first."); return; }
+    var text = buildSummary();
+    var base = DEV_WHATSAPP ? ("https://wa.me/" + DEV_WHATSAPP) : "https://wa.me/";
+    window.open(base + "?text=" + encodeURIComponent(text), "_blank", "noopener");
+  });
+
+  document.getElementById("clear").addEventListener("click", function(){
+    if(!confirm("This erases every answer you have typed. Are you sure?")) return;
+    state = {};
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    form.innerHTML = "";
+    location.reload();
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
