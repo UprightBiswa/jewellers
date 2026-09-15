@@ -1,0 +1,288 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Design tokens
+
+   Every colour is declared once in :root, then re-declared for the two dark
+   states (system dark, and an explicit data-theme="dark"). Components only ever
+   use the semantic Tailwind utilities (bg-surface, text-ink, border-line), so
+   the whole site flips theme without a single dark: variant.
+--------------------------------------------------------------------------- */
+
+:root {
+  /* surfaces — cool, like polished metal, never a warm cream */
+  --c-bg: #f5f6f8;
+  --c-surface: #ffffff;
+  --c-surface-2: #eef0f3;
+  --c-overlay: rgb(14 17 20 / 0.55);
+
+  /* type */
+  --c-ink: #14171a;
+  --c-ink-2: #3c434c;
+  --c-muted: #6a717b;
+
+  /* lines */
+  --c-line: #e1e5ea;
+  --c-line-strong: #c8cfd7;
+
+  /* brand: garnet, the stone a silver shop actually sets */
+  --c-brand: #7e2b3a;
+  --c-brand-hover: #692331;
+  --c-brand-soft: #f6e9eb;
+  --c-on-brand: #fdf7f8;
+
+  /* secondary metal accent for badges and rules */
+  --c-gold: #9a7b4f;
+  --c-gold-soft: #f4eee4;
+
+  /* semantic */
+  --c-success: #2f7d5b;
+  --c-success-soft: #e6f2ec;
+  --c-warn: #a86a18;
+  --c-warn-soft: #fbf0dd;
+  --c-danger: #b23b3b;
+  --c-danger-soft: #fbeaea;
+
+  --c-shadow: 14 17 20;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --c-bg: #0e1013;
+    --c-surface: #16191e;
+    --c-surface-2: #1d2128;
+    --c-overlay: rgb(0 0 0 / 0.7);
+
+    --c-ink: #e9ecef;
+    --c-ink-2: #bfc5cd;
+    --c-muted: #929aa4;
+
+    --c-line: #232830;
+    --c-line-strong: #343b45;
+
+    --c-brand: #d4737f;
+    --c-brand-hover: #e08b95;
+    --c-brand-soft: #2a171b;
+    --c-on-brand: #1a0d10;
+
+    --c-gold: #c9a46b;
+    --c-gold-soft: #241d12;
+
+    --c-success: #5fb98d;
+    --c-success-soft: #13251d;
+    --c-warn: #d9a04e;
+    --c-warn-soft: #251c0f;
+    --c-danger: #e07a7a;
+    --c-danger-soft: #2a1414;
+
+    --c-shadow: 0 0 0;
+  }
+}
+
+:root[data-theme="dark"] {
+  --c-bg: #0e1013;
+  --c-surface: #16191e;
+  --c-surface-2: #1d2128;
+  --c-overlay: rgb(0 0 0 / 0.7);
+
+  --c-ink: #e9ecef;
+  --c-ink-2: #bfc5cd;
+  --c-muted: #929aa4;
+
+  --c-line: #232830;
+  --c-line-strong: #343b45;
+
+  --c-brand: #d4737f;
+  --c-brand-hover: #e08b95;
+  --c-brand-soft: #2a171b;
+  --c-on-brand: #1a0d10;
+
+  --c-gold: #c9a46b;
+  --c-gold-soft: #241d12;
+
+  --c-success: #5fb98d;
+  --c-success-soft: #13251d;
+  --c-warn: #d9a04e;
+  --c-warn-soft: #251c0f;
+  --c-danger: #e07a7a;
+  --c-danger-soft: #2a1414;
+
+  --c-shadow: 0 0 0;
+}
+
+@theme inline {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-overlay: var(--c-overlay);
+
+  --color-ink: var(--c-ink);
+  --color-ink-2: var(--c-ink-2);
+  --color-muted: var(--c-muted);
+
+  --color-line: var(--c-line);
+  --color-line-strong: var(--c-line-strong);
+
+  --color-brand: var(--c-brand);
+  --color-brand-hover: var(--c-brand-hover);
+  --color-brand-soft: var(--c-brand-soft);
+  --color-on-brand: var(--c-on-brand);
+
+  --color-gold: var(--c-gold);
+  --color-gold-soft: var(--c-gold-soft);
+
+  --color-success: var(--c-success);
+  --color-success-soft: var(--c-success-soft);
+  --color-warn: var(--c-warn);
+  --color-warn-soft: var(--c-warn-soft);
+  --color-danger: var(--c-danger);
+  --color-danger-soft: var(--c-danger-soft);
+
+  --font-display: var(--font-marcellus), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-deva: var(--font-noto-deva), var(--font-manrope), sans-serif;
+
+  --radius-card: 0.875rem;
+  --radius-pill: 999px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --animate-fade-up: fade-up 0.6s var(--ease-out-expo) both;
+  --animate-fade-in: fade-in 0.45s var(--ease-out-soft) both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-marquee: marquee 26s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    color-scheme: light dark;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  :lang(hi), .deva {
+    font-family: var(--font-deva);
+  }
+
+  ::selection {
+    background: var(--color-brand);
+    color: var(--color-on-brand);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Tabular figures wherever prices line up in a column */
+  .tnum, td.price, .price-col {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Loading placeholder for product cards */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-2) 25%,
+      color-mix(in srgb, var(--color-surface-2) 60%, var(--color-line-strong)) 50%,
+      var(--color-surface-2) 75%
+    );
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+
+  /* A hairline rule with a small gold diamond at its centre — used between
+     homepage sections. The shop's own motif, not a generic divider. */
+  .rule-diamond {
+    position: relative;
+    height: 1px;
+    background: var(--color-line);
+  }
+  .rule-diamond::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    translate: -50% -50%;
+    rotate: 45deg;
+    background: var(--color-gold);
+  }
+
+  .container-page {
+    width: 100%;
+    margin-inline: auto;
+    max-width: 80rem;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 768px) {
+    .container-page { padding-inline: 2rem; }
+  }
+
+  /* Hide scrollbars on horizontal category rails without losing the scroll */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+}
