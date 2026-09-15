@@ -6,7 +6,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 
 import { cart, useCart } from "@/lib/cart/store";
 import { formatPaise } from "@/lib/money";
-import { imageUrl } from "@/lib/images/cloudinary";
+import { imageUrl } from "@/lib/images/url";
 import { shippingFee } from "@/lib/pricing";
 import { Button } from "@/components/ui/button";
 

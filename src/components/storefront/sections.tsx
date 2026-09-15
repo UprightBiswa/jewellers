@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-import { imageUrl } from "@/lib/images/cloudinary";
+import { imageUrl } from "@/lib/images/url";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/ui/reveal";

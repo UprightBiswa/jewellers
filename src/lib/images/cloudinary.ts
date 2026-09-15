@@ -1,11 +1,11 @@
+import "server-only";
 import { v2 as cloudinary } from "cloudinary";
 import {
-  IMAGE_PRESETS,
   type ImageProvider,
-  type ImageTransform,
   type SignedUpload,
   type UploadResult,
 } from "./provider";
+import { cdnUrl } from "./url";
 
 const cloudName = process.env.CLOUDINARY_CLOUD_NAME ?? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const apiKey = process.env.CLOUDINARY_API_KEY;
@@ -21,35 +21,11 @@ if (cloudName && apiKey && apiSecret) {
   });
 }
 
-const FIT_MAP: Record<NonNullable<ImageTransform["fit"]>, string> = {
-  cover: "c_fill,g_auto",
-  contain: "c_fit",
-  pad: "c_pad",
-};
-
-function buildTransform(t: ImageTransform = {}): string {
-  const parts = [`f_${t.format ?? "auto"}`, `q_${t.quality ?? "auto"}`];
-
-  if (t.width) parts.push(`w_${t.width}`);
-  if (t.height) parts.push(`h_${t.height}`);
-  if (t.fit) parts.push(FIT_MAP[t.fit]);
-  if (t.background) parts.push(`b_${t.background.replace("#", "rgb:")}`);
-  if (t.blur) parts.push(`e_blur:${t.blur}`);
-  parts.push("dpr_auto");
-
-  return parts.join(",");
-}
-
 export const cloudinaryProvider: ImageProvider = {
   name: "cloudinary",
   configured: Boolean(cloudName && apiKey && apiSecret),
 
-  url(publicId, transform) {
-    if (!cloudName) return "";
-    // Already an absolute URL (seed data, Google avatars) — pass it through.
-    if (/^https?:\/\//.test(publicId)) return publicId;
-    return `https://res.cloudinary.com/${cloudName}/image/upload/${buildTransform(transform)}/${publicId}`;
-  },
+  url: cdnUrl,
 
   async signUpload(folder): Promise<SignedUpload> {
     if (!cloudName || !apiKey || !apiSecret) {
@@ -126,13 +102,7 @@ export const placeholderProvider: ImageProvider = {
   name: "placeholder",
   configured: true,
 
-  url(publicId, transform) {
-    if (/^https?:\/\//.test(publicId)) return publicId;
-    const w = transform?.width ?? 600;
-    const h = transform?.height ?? 600;
-    const label = encodeURIComponent(publicId.split("/").pop() ?? "silver");
-    return `https://placehold.co/${w}x${h}/eef0f3/6a717b/png?text=${label}`;
-  },
+  url: cdnUrl,
 
   async signUpload(): Promise<SignedUpload> {
     throw new Error("Image uploads need Cloudinary keys. Add CLOUDINARY_* to .env.local");
@@ -149,13 +119,3 @@ export function getImageProvider(): ImageProvider {
   return cloudinaryProvider.configured ? cloudinaryProvider : placeholderProvider;
 }
 
-/** Convenience used all over the storefront. */
-export function imageUrl(
-  publicId: string | null | undefined,
-  preset: keyof typeof IMAGE_PRESETS = "card",
-): string {
-  if (!publicId) {
-    return getImageProvider().url("placeholder", IMAGE_PRESETS[preset]);
-  }
-  return getImageProvider().url(publicId, IMAGE_PRESETS[preset]);
-}

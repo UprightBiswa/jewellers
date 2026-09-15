@@ -24,10 +24,24 @@ That second user is the constraint that shapes the whole project.
 
 ## Stack
 
-Next.js 15 App Router · TypeScript · Tailwind v4 · shadcn/ui · Motion · Prisma 6 ·
-PostgreSQL (Neon) · Auth.js v5 · Cloudinary · Razorpay · Resend · Upstash Redis · Zod
+Next 16 (App Router) · TypeScript 7 · Tailwind 4 · Motion · Prisma 7 ·
+PostgreSQL (Neon) · Auth.js v5 · Cloudinary · Razorpay · Resend · Upstash · Zod 4
 
-Full reasoning in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Full reasoning in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), setup in
+[docs/SETUP.md](docs/SETUP.md), API in [docs/API.md](docs/API.md).
+
+### Version traps
+
+Most tutorials online are a major behind. These are the ones that bite:
+
+- **Prisma 7** — connection URLs live in `prisma.config.ts`, not `schema.prisma`.
+  The client needs a driver adapter: `new PrismaClient({ adapter: new PrismaPg(...) })`.
+  `datasourceUrl` no longer exists.
+- **TypeScript 7** — `baseUrl` was removed from `tsconfig.json`.
+- **Next 16** — the file is `src/proxy.ts`, not `src/middleware.ts`.
+- **zod 4** — for an object whose every field has a default, use `.prefault({})`;
+  `.default({})` is a type error.
+- **lucide-react v1** — no brand icons. Social marks are local SVGs.
 
 ## Conventions
 
@@ -36,8 +50,9 @@ Full reasoning in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - `OrderItem` snapshots title, image and price at checkout; orders never change when a
   product is later edited.
 - Prices are always recalculated server-side. A client-sent amount is never trusted.
-- Cloudinary is reached only through `lib/images/provider.ts`. Components import the
-  provider, never the SDK.
+- Image URLs come from `lib/images/url.ts`, which is client-safe. The Cloudinary
+  SDK lives in `lib/images/cloudinary.ts` behind `server-only` — importing it
+  from a client component pulls `fs` into the browser bundle and the build fails.
 - Pagination is cursor-based, never `OFFSET`.
 - Admin list queries `select` only the columns the table renders.
 - Server Components by default. `"use client"` only where interaction requires it.
@@ -62,3 +77,18 @@ Full reasoning in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 - Do not introduce a second styling system alongside Tailwind.
 - Do not confirm an order from the browser callback. Only the verified Razorpay webhook
   marks a payment as captured.
+
+## Where things are
+
+```
+src/app/(shop)/      storefront       src/app/admin/(panel)/  the panel
+src/app/(auth)/      customer auth    src/app/admin/(auth)/   staff sign-in
+src/app/api/v1/      public REST API  src/app/admin/actions.ts admin server actions
+src/lib/queries/     read models      src/lib/cart/           cart, client + server
+src/components/storefront/            src/components/admin/
+prisma/schema.prisma  prisma/seed.ts  docs/
+```
+
+Two gates gu­ard the admin: `src/proxy.ts` redirects a non-staff request, and
+`src/app/admin/(panel)/layout.tsx` checks the role again. Keep both — a missed
+matcher pattern should not leak a page.

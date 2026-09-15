@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { imageUrl } from "@/lib/images/cloudinary";
+import { imageUrl } from "@/lib/images/url";
 import { discountPercent, formatPaise } from "@/lib/money";
 import { PURITY_LABEL } from "@/lib/pricing";
 import { Badge } from "@/components/ui/badge";

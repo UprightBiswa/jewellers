@@ -5,7 +5,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { getProductBySlug, getRelated } from "@/lib/queries/catalog";
 import { getSettings } from "@/lib/settings";
-import { imageUrl } from "@/lib/images/cloudinary";
+import { imageUrl } from "@/lib/images/url";
 import { discountPercent, formatPaise } from "@/lib/money";
 import { PURITY_LABEL } from "@/lib/pricing";
 import { absoluteUrl } from "@/lib/utils";

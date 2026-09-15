@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { imageUrl } from "@/lib/images/cloudinary";
+import { imageUrl } from "@/lib/images/url";
 import { cn } from "@/lib/utils";
 
 type GalleryImage = { id: string; publicId: string; alt: string | null };
