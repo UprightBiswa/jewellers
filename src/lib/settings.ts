@@ -1,6 +1,8 @@
 import { cache } from "react";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { devFallback } from "@/lib/demo/fallback";
+import { DEMO_SETTINGS } from "@/lib/demo/data";
 
 /**
  * Store settings live in the database, not in code, because the owner changes
@@ -92,17 +94,18 @@ export const DEFAULT_SETTINGS: Settings = settingsSchema.parse({});
  * and this is a single indexed read.
  */
 export const getSettings = cache(async (): Promise<Settings> => {
-  try {
-    const rows = await db.setting.findMany();
-    const raw: Record<string, unknown> = {};
-    for (const row of rows) raw[row.key] = row.value;
+  return devFallback(
+    async () => {
+      const rows = await db.setting.findMany();
+      const raw: Record<string, unknown> = {};
+      for (const row of rows) raw[row.key] = row.value;
 
-    const parsed = settingsSchema.safeParse(raw);
-    return parsed.success ? parsed.data : DEFAULT_SETTINGS;
-  } catch {
-    // A store that cannot reach its database should still render its shell.
-    return DEFAULT_SETTINGS;
-  }
+      const parsed = settingsSchema.safeParse(raw);
+      return parsed.success ? parsed.data : DEFAULT_SETTINGS;
+    },
+    // No database: demo shop details, so the header and footer are worth looking at.
+    () => settingsSchema.parse(DEMO_SETTINGS),
+  );
 });
 
 /** Write one top-level group. Callers are admin-only route handlers. */

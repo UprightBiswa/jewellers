@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 
 import { db } from "@/lib/db";
+import { devFallback } from "@/lib/demo/fallback";
 import { getProductBySlug, getRelated } from "@/lib/queries/catalog";
 import { getSettings } from "@/lib/settings";
 import { imageUrl } from "@/lib/images/url";
@@ -22,9 +23,11 @@ type Params = Promise<{ slug: string }>;
 export const revalidate = 300;
 
 export async function generateStaticParams() {
-  const products = await db.product
-    .findMany({ where: { status: "ACTIVE" }, select: { slug: true }, take: 200 })
-    .catch(() => []);
+  const products = await devFallback(
+    () =>
+      db.product.findMany({ where: { status: "ACTIVE" }, select: { slug: true }, take: 200 }),
+    () => [] as { slug: string }[],
+  );
   return products.map((p) => ({ slug: p.slug }));
 }
 

@@ -3,7 +3,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 
 import { db } from "@/lib/db";
-import { getCategoryBySlug, listProducts, type SortKey } from "@/lib/queries/catalog";
+import { devFallback } from "@/lib/demo/fallback";
+import {
+  countProducts,
+  getCategoryBySlug,
+  listProducts,
+  type SortKey,
+} from "@/lib/queries/catalog";
 import { ProductListing } from "@/components/storefront/product-listing";
 
 type Params = Promise<{ slug: string }>;
@@ -12,9 +18,10 @@ type Search = Promise<{ sort?: string }>;
 export const revalidate = 300;
 
 export async function generateStaticParams() {
-  const categories = await db.category
-    .findMany({ where: { isActive: true }, select: { slug: true } })
-    .catch(() => []);
+  const categories = await devFallback(
+    () => db.category.findMany({ where: { isActive: true }, select: { slug: true } }),
+    () => [] as { slug: string }[],
+  );
   return categories.map((c) => ({ slug: c.slug }));
 }
 
@@ -45,10 +52,15 @@ export default async function CategoryPage({
   const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
-  const [{ products, nextCursor }, total] = await Promise.all([
-    listProducts({ categorySlug: slug, sort: (sort as SortKey) ?? "newest", limit: 24 }),
-    db.product.count({ where: { status: "ACTIVE", category: { slug } } }),
-  ]);
+  const { products, nextCursor } = await listProducts({
+    categorySlug: slug,
+    sort: (sort as SortKey) ?? "newest",
+    limit: 24,
+  });
+  const total = await countProducts(
+    { status: "ACTIVE", category: { slug } },
+    products.length,
+  );
 
   return (
     <div className="container-page py-8">

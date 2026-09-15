@@ -16,7 +16,9 @@ export async function GET() {
   const startedAt = Date.now();
 
   try {
-    await db.$queryRaw`SELECT 1`;
+    // Not $queryRaw — see lib/demo/fallback.ts: the raw path throws
+    // asynchronously when the server is unreachable, which no catch here sees.
+    await db.setting.findFirst({ select: { key: true } });
 
     return ok({
       status: "ok",

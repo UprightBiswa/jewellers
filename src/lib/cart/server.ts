@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { computePrice } from "@/lib/pricing";
 import { getMetalRate } from "@/lib/queries/catalog";
 import { ApiException } from "@/lib/api/response";
+import { databaseReachable } from "@/lib/demo/fallback";
 
 const COOKIE = "cart_session";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 60; // 60 days
@@ -36,6 +37,18 @@ async function readSessionId(): Promise<string | null> {
  * site leaves an empty cart behind.
  */
 export async function getCart(create = false) {
+  // Preview mode has no bag: the cart is pure database state, so in development
+  // without one we return empty rather than crashing on the first "Add".
+  if (!(await databaseReachable())) {
+    if (create) {
+      throw new ApiException(
+        "internal_error",
+        "The bag needs a database. Connect one and run the migration — see the banner at the top of the page.",
+      );
+    }
+    return null;
+  }
+
   const session = await auth();
   const userId = session?.user?.id ?? null;
   let sessionId = await readSessionId();

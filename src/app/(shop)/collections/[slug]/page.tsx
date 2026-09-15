@@ -2,8 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-import { db } from "@/lib/db";
-import { getCollectionBySlug, listProducts, type SortKey } from "@/lib/queries/catalog";
+import {
+  countProducts,
+  getCollectionBySlug,
+  listProducts,
+  type SortKey,
+} from "@/lib/queries/catalog";
 import { ProductListing } from "@/components/storefront/product-listing";
 
 type Params = Promise<{ slug: string }>;
@@ -49,19 +53,18 @@ export default async function CollectionPage({
   const collection = isAll ? null : await getCollectionBySlug(slug);
   if (!isAll && !collection) notFound();
 
-  const [{ products, nextCursor }, total] = await Promise.all([
-    listProducts({
-      collectionSlug: isAll ? undefined : slug,
-      sort: (sort as SortKey) ?? "newest",
-      limit: 24,
-    }),
-    db.product.count({
-      where: {
-        status: "ACTIVE",
-        ...(isAll ? {} : { collections: { some: { collection: { slug } } } }),
-      },
-    }),
-  ]);
+  const { products, nextCursor } = await listProducts({
+    collectionSlug: isAll ? undefined : slug,
+    sort: (sort as SortKey) ?? "newest",
+    limit: 24,
+  });
+  const total = await countProducts(
+    {
+      status: "ACTIVE",
+      ...(isAll ? {} : { collections: { some: { collection: { slug } } } }),
+    },
+    products.length,
+  );
 
   const title = isAll ? "All jewellery" : (collection?.name ?? "");
   const subtitle = isAll

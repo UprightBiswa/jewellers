@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 
 import { db } from "@/lib/db";
+import { devFallback } from "@/lib/demo/fallback";
+import { DEMO_PAGES } from "@/lib/demo/data";
 import { Markdown } from "@/lib/markdown";
 import { formatDate } from "@/lib/utils";
 
@@ -11,18 +13,26 @@ type Params = Promise<{ slug: string }>;
 export const revalidate = 600;
 
 export async function generateStaticParams() {
-  const pages = await db.page
-    .findMany({ where: { isPublished: true }, select: { slug: true } })
-    .catch(() => []);
+  const pages = await devFallback(
+    () => db.page.findMany({ where: { isPublished: true }, select: { slug: true } }),
+    () => Object.keys(DEMO_PAGES).map((slug) => ({ slug })),
+  );
   return pages.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const page = await db.page.findFirst({
-    where: { slug, isPublished: true },
-    select: { title: true, metaTitle: true, metaDescription: true },
-  });
+  const page = await devFallback(
+    () =>
+      db.page.findFirst({
+        where: { slug, isPublished: true },
+        select: { title: true, metaTitle: true, metaDescription: true },
+      }),
+    () => {
+      const demo = DEMO_PAGES[slug];
+      return demo ? { title: demo.title, metaTitle: null, metaDescription: null } : null;
+    },
+  );
   if (!page) return {};
 
   return {
@@ -39,10 +49,17 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function ContentPage({ params }: { params: Params }) {
   const { slug } = await params;
 
-  const page = await db.page.findFirst({
-    where: { slug, isPublished: true },
-    select: { title: true, bodyMd: true, updatedAt: true },
-  });
+  const page = await devFallback(
+    () =>
+      db.page.findFirst({
+        where: { slug, isPublished: true },
+        select: { title: true, bodyMd: true, updatedAt: true },
+      }),
+    () => {
+      const demo = DEMO_PAGES[slug];
+      return demo ? { ...demo, updatedAt: new Date() } : null;
+    },
+  );
   if (!page) notFound();
 
   return (

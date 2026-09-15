@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { getShelf, listCategories, listCollections } from "@/lib/queries/catalog";
+import { devFallback } from "@/lib/demo/fallback";
 import {
   CategoryRail,
   CollectionBanners,
@@ -23,18 +24,23 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 async function getTestimonials() {
-  const reviews = await db.review.findMany({
-    where: { status: "APPROVED", rating: { gte: 4 } },
-    select: {
-      id: true,
-      rating: true,
-      body: true,
-      user: { select: { name: true } },
-      product: { select: { title: true } },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 3,
-  });
+  // Nice to have, never load-bearing: an empty list just hides the section.
+  const reviews = await devFallback(
+    () =>
+      db.review.findMany({
+        where: { status: "APPROVED", rating: { gte: 4 } },
+        select: {
+          id: true,
+          rating: true,
+          body: true,
+          user: { select: { name: true } },
+          product: { select: { title: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 3,
+      }),
+    () => [],
+  );
 
   return reviews.map((r) => ({
     id: r.id,

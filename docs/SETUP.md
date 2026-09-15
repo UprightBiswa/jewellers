@@ -18,6 +18,25 @@ emails are printed to the console.
 
 ---
 
+## Looking at the UI before you have a database
+
+```bash
+npm install
+npm run dev
+```
+
+The storefront runs on **preview data** — the same catalogue the seed writes,
+served from memory — with an amber "Preview data" banner across the top so it can
+never be mistaken for the real shop. Good for reviewing the design and for
+showing a client before any account exists.
+
+What does not work in preview mode, by design: the bag, checkout, and the whole
+admin panel. Those are database state, and faking them would only mislead.
+`/admin` shows a short note explaining what to connect.
+
+Preview mode is **development only**. In production an unreachable database
+fails loudly, as it should.
+
 ## First run
 
 ```bash
@@ -145,6 +164,11 @@ come from `@/lib/images/url`; only server code touches the Cloudinary SDK.
 **Product images are grey boxes with text**
 Cloudinary keys are not set. Expected until you add them — the placeholder is
 deliberate, not a broken image.
+
+**`npm run dev` fails with `'${PORT:-3000}' is not a non-negative number`**
+An old checkout. The script is now plain `next dev`; that shell syntax only
+works in bash and breaks in PowerShell and cmd. Use `PORT=4000 npm run dev` to
+change the port.
 
 **Emails never arrive**
 Without `RESEND_API_KEY` they are logged to the console instead. With one, check
