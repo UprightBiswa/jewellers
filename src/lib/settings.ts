@@ -54,6 +54,8 @@ export const settingsSchema = z.object({
     /** paise added to a COD order */
     codFee: z.number().default(5000),
     onlineEnabled: z.boolean().default(true),
+    /** Advance taken before a made-to-order piece is started. */
+    advancePercent: z.number().min(0).max(100).default(50),
   }).prefault({}),
 
   returns: z.object({

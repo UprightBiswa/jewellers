@@ -76,8 +76,8 @@ export default async function CategoryPage({
         <h1 className="font-display text-[clamp(1.8rem,5vw,2.6rem)] text-ink">
           {category.name}
         </h1>
-        {category.nameHi ? (
-          <p className="deva mt-1 text-lg text-muted">{category.nameHi}</p>
+        {category.nameBn ? (
+          <p className="bangla mt-1 text-lg text-muted">{category.nameBn}</p>
         ) : null}
         {category.description ? (
           <p className="mt-3 text-[15px] leading-relaxed text-ink-2">{category.description}</p>

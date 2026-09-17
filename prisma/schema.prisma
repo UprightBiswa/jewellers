@@ -201,7 +201,7 @@ model Category {
   id              String   @id @default(cuid())
   slug            String   @unique
   name            String
-  nameHi          String?
+  nameBn          String?
   description     String?
   imagePublicId   String?
   parentId        String?
@@ -243,7 +243,7 @@ model Product {
   slug        String  @unique
   sku         String  @unique
   title       String
-  titleHi     String?
+  titleBn     String?
   shortDesc   String?
   description String? @db.Text
   categoryId  String

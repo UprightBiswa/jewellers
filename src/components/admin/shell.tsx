@@ -17,6 +17,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/storefront/theme-toggle";
+import { Mark } from "@/components/brand/logo";
 
 type NavItem = {
   href: string;
@@ -62,9 +63,12 @@ export function AdminShell({
     <div className="min-h-dvh bg-bg lg:grid lg:grid-cols-[240px_1fr]">
       {/* Sidebar — desktop only */}
       <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-surface lg:flex">
-        <div className="border-b border-line px-5 py-4">
-          <p className="font-display text-lg leading-tight text-ink">{storeName}</p>
-          <p className="text-[11px] uppercase tracking-[0.14em] text-muted">Shop admin</p>
+        <div className="flex items-center gap-2.5 border-b border-line px-5 py-4">
+          <Mark className="size-7 shrink-0 text-brand" />
+          <div>
+            <p className="font-display text-lg leading-tight text-ink">{storeName}</p>
+            <p className="text-[11px] uppercase tracking-[0.14em] text-muted">Shop admin</p>
+          </div>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3">
@@ -127,7 +131,10 @@ export function AdminShell({
       <div className="flex min-h-dvh flex-col">
         {/* Top bar — mobile only */}
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-line bg-bg/90 px-4 backdrop-blur lg:hidden">
-          <p className="font-display text-[17px] text-ink">{storeName}</p>
+          <p className="flex items-center gap-2 font-display text-[17px] text-ink">
+            <Mark className="size-6 shrink-0 text-brand" />
+            {storeName}
+          </p>
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <button

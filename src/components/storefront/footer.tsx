@@ -4,6 +4,7 @@ import { FacebookIcon, InstagramIcon, YoutubeIcon } from "./social-icons";
 
 import { listCategories } from "@/lib/queries/catalog";
 import { getSettings } from "@/lib/settings";
+import { Logo } from "@/components/brand/logo";
 import { NewsletterForm } from "./newsletter-form";
 
 const HELP_LINKS = [
@@ -43,8 +44,8 @@ export async function Footer() {
 
       <div className="container-page grid gap-10 py-12 md:grid-cols-2 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <p className="font-display text-xl text-ink">{store.name}</p>
-          <p className="mt-1 text-sm text-muted">{store.tagline}</p>
+          <Logo storeName={store.name} markClassName="size-9" />
+          <p className="mt-2 text-sm text-muted">{store.tagline}</p>
 
           <address className="mt-5 grid gap-2.5 not-italic text-sm text-ink-2">
             {store.addressLines.length > 0 ? (

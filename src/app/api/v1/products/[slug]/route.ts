@@ -23,7 +23,7 @@ export async function GET(
         slug: product.slug,
         sku: product.sku,
         title: product.title,
-        titleHi: product.titleHi,
+        titleBn: product.titleBn,
         shortDesc: product.shortDesc,
         description: product.description,
         price: product.price,

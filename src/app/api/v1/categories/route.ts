@@ -17,7 +17,7 @@ export async function GET() {
         id: c.id,
         slug: c.slug,
         name: c.name,
-        nameHi: c.nameHi,
+        nameBn: c.nameBn,
         image: c.imagePublicId,
         productCount: c._count.products,
       })),

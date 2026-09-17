@@ -30,7 +30,7 @@ export type ProductCard = {
   id: string;
   slug: string;
   title: string;
-  titleHi: string | null;
+  titleBn: string | null;
   shortDesc: string | null;
   price: number;
   compareAtPrice: number | null;
@@ -51,7 +51,7 @@ const cardSelect = {
   id: true,
   slug: true,
   title: true,
-  titleHi: true,
+  titleBn: true,
   shortDesc: true,
   price: true,
   compareAtPrice: true,
@@ -109,7 +109,7 @@ function toCard(p: RawCard, ratePerGram: number | null): ProductCard {
     id: p.id,
     slug: p.slug,
     title: p.title,
-    titleHi: p.titleHi,
+    titleBn: p.titleBn,
     shortDesc: p.shortDesc,
     price: total,
     compareAtPrice: p.compareAtPrice,
@@ -260,7 +260,7 @@ async function queryProductBySlug(slug: string) {
         select: { id: true, label: true, sku: true, stock: true, priceDelta: true, weightG: true },
         orderBy: { sortOrder: "asc" },
       },
-      category: { select: { id: true, slug: true, name: true, nameHi: true } },
+      category: { select: { id: true, slug: true, name: true, nameBn: true } },
       reviews: {
         where: { status: "APPROVED" },
         select: {
@@ -323,7 +323,7 @@ function demoProductDetail(slug: string): ProductDetail | null {
     slug: card.slug,
     sku: `SS-${card.categorySlug.slice(0, 3).toUpperCase()}-0000`,
     title: card.title,
-    titleHi: card.titleHi,
+    titleBn: card.titleBn,
     shortDesc: card.shortDesc,
     description:
       `${card.shortDesc} Made by hand in 925 sterling on our own bench, finished and ` +
@@ -347,7 +347,7 @@ function demoProductDetail(slug: string): ProductDetail | null {
       id: category?.id ?? "demo",
       slug: card.categorySlug,
       name: card.categoryName,
-      nameHi: category?.nameHi ?? null,
+      nameBn: category?.nameBn ?? null,
     },
     images: [1, 2, 3].map((n) => ({
       id: `${card.id}-img-${n}`,
@@ -383,7 +383,7 @@ export const listCategories = cache(async () =>
       db.category.findMany({
         where: { isActive: true },
         select: {
-          id: true, slug: true, name: true, nameHi: true, imagePublicId: true,
+          id: true, slug: true, name: true, nameBn: true, imagePublicId: true,
           _count: { select: { products: { where: { status: "ACTIVE" } } } },
         },
         orderBy: { sortOrder: "asc" },
@@ -393,7 +393,7 @@ export const listCategories = cache(async () =>
         id: c.id,
         slug: c.slug,
         name: c.name,
-        nameHi: c.nameHi,
+        nameBn: c.nameBn,
         imagePublicId: c.imagePublicId,
         _count: { products: c.count },
       })),
@@ -418,7 +418,7 @@ export const getCategoryBySlug = cache(async (slug: string) =>
       db.category.findUnique({
         where: { slug },
         select: {
-          id: true, slug: true, name: true, nameHi: true, description: true,
+          id: true, slug: true, name: true, nameBn: true, description: true,
           imagePublicId: true, metaTitle: true, metaDescription: true,
         },
       }),
@@ -426,7 +426,7 @@ export const getCategoryBySlug = cache(async (slug: string) =>
       const c = DEMO_CATEGORIES.find((x) => x.slug === slug);
       return c
         ? {
-            id: c.id, slug: c.slug, name: c.name, nameHi: c.nameHi,
+            id: c.id, slug: c.slug, name: c.name, nameBn: c.nameBn,
             description: null, imagePublicId: c.imagePublicId,
             metaTitle: null, metaDescription: null,
           }

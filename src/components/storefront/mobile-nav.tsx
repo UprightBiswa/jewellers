@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Menu, X, ChevronRight } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 
-type NavCategory = { slug: string; name: string; nameHi: string | null; count: number };
+type NavCategory = { slug: string; name: string; nameBn: string | null; count: number };
 
 export function MobileNav({
   categories,
@@ -101,8 +101,8 @@ export function MobileNav({
                       >
                         <span className="flex flex-col">
                           {c.name}
-                          {c.nameHi ? (
-                            <span className="deva text-[12.5px] text-muted">{c.nameHi}</span>
+                          {c.nameBn ? (
+                            <span className="bangla text-[12.5px] text-muted">{c.nameBn}</span>
                           ) : null}
                         </span>
                         <span className="flex items-center gap-2 text-muted">

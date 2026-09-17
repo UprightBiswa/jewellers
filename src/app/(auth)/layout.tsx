@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSettings } from "@/lib/settings";
+import { Logo } from "@/components/brand/logo";
 
 /**
  * Auth pages get their own minimal chrome: no header, no nav, no offer strip.
@@ -13,8 +14,8 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
     <div className="flex min-h-dvh flex-col bg-bg">
       <header className="border-b border-line">
         <div className="container-page flex h-16 items-center">
-          <Link href="/" className="font-display text-xl text-ink">
-            {store.name}
+          <Link href="/" aria-label={`${store.name} home`}>
+            <Logo storeName={store.name} />
           </Link>
         </div>
       </header>

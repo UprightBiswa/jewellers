@@ -65,7 +65,7 @@ const variantSchema = z.object({
 const productSchema = z.object({
   id: z.string().optional(),
   title: z.string().min(2, "A product needs a name.").max(140),
-  titleHi: z.string().max(140).optional(),
+  titleBn: z.string().max(140).optional(),
   slug: z.string().optional(),
   sku: z.string().optional(),
   categoryId: z.string().min(1, "Choose a category."),
@@ -131,7 +131,7 @@ export async function saveProduct(input: ProductInput): Promise<ActionResult<{ i
   const slug = p.slug?.trim() || slugify(p.title);
   const data = {
     title: p.title.trim(),
-    titleHi: p.titleHi?.trim() || null,
+    titleBn: p.titleBn?.trim() || null,
     shortDesc: p.shortDesc?.trim() || null,
     description: p.description?.trim() || null,
     categoryId: p.categoryId,

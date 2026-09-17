@@ -4,6 +4,7 @@ import { User } from "lucide-react";
 
 import { listCategories, listCollections } from "@/lib/queries/catalog";
 import { getSettings } from "@/lib/settings";
+import { Logo } from "@/components/brand/logo";
 import { AnnouncementBar } from "./announcement-bar";
 import { CartButton } from "./cart-button";
 import { MobileNav } from "./mobile-nav";
@@ -20,7 +21,7 @@ export async function Header() {
   const navCategories = categories.map((c) => ({
     slug: c.slug,
     name: c.name,
-    nameHi: c.nameHi,
+    nameBn: c.nameBn,
     count: c._count.products,
   }));
 
@@ -40,13 +41,8 @@ export async function Header() {
             whatsapp={settings.store.whatsapp}
           />
 
-          <Link href="/" className="flex shrink-0 flex-col leading-none">
-            <span className="font-display text-xl tracking-tight text-ink sm:text-[22px]">
-              {settings.store.name}
-            </span>
-            <span className="hidden text-[10.5px] uppercase tracking-[0.18em] text-muted sm:block">
-              {settings.store.tagline}
-            </span>
+          <Link href="/" className="shrink-0" aria-label={`${settings.store.name} home`}>
+            <Logo storeName={settings.store.name} tagline={settings.store.tagline} />
           </Link>
 
           <Suspense fallback={<div className="mx-auto hidden h-10 w-full max-w-md lg:block" />}>

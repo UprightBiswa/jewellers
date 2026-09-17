@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Charubala Silver">
+  <rect width="32" height="32" rx="7" fill="#7E2B3A"/>
+  <path d="M23 10.2A8.6 8.6 0 1 0 23 21.8"
+        fill="none" stroke="#F6E9EB" stroke-width="2.8" stroke-linecap="round"/>
+  <rect x="21.6" y="13.6" width="4.8" height="4.8" rx="0.7"
+        transform="rotate(45 24 16)" fill="#C9A46B"/>
+</svg>

@@ -140,7 +140,7 @@
 
   --font-display: var(--font-marcellus), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-deva: var(--font-noto-deva), var(--font-manrope), sans-serif;
+  --font-bn: var(--font-noto-bengali), var(--font-manrope), sans-serif;
 
   --radius-card: 0.875rem;
   --radius-pill: 999px;
@@ -207,8 +207,8 @@
     text-wrap: balance;
   }
 
-  :lang(hi), .deva {
-    font-family: var(--font-deva);
+  :lang(bn), .bangla {
+    font-family: var(--font-bn);
   }
 
   ::selection {

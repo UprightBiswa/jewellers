@@ -135,7 +135,7 @@ export function SectionHeading({
 export function CategoryRail({
   categories,
 }: {
-  categories: { slug: string; name: string; nameHi: string | null; imagePublicId: string | null }[];
+  categories: { slug: string; name: string; nameBn: string | null; imagePublicId: string | null }[];
 }) {
   return (
     <ul
@@ -159,7 +159,7 @@ export function CategoryRail({
             <p className="mt-2.5 text-[13.5px] font-medium text-ink group-hover:text-brand">
               {c.name}
             </p>
-            {c.nameHi ? <p className="deva text-[12px] text-muted">{c.nameHi}</p> : null}
+            {c.nameBn ? <p className="bangla text-[12px] text-muted">{c.nameBn}</p> : null}
           </Link>
         </li>
       ))}

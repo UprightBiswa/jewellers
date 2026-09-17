@@ -25,7 +25,7 @@ export default async function EditProductPage({
     db.product.findUnique({
       where: { id },
       select: {
-        id: true, title: true, titleHi: true, slug: true, shortDesc: true, description: true,
+        id: true, title: true, titleBn: true, slug: true, shortDesc: true, description: true,
         categoryId: true, status: true, purity: true, priceMode: true,
         price: true, compareAtPrice: true, makingCharge: true, weightG: true,
         stock: true, hallmarked: true, huid: true,
@@ -59,7 +59,7 @@ export default async function EditProductPage({
   const initial: ProductFormValues = {
     id: product.id,
     title: product.title,
-    titleHi: product.titleHi ?? "",
+    titleBn: product.titleBn ?? "",
     categoryId: product.categoryId,
     shortDesc: product.shortDesc ?? "",
     description: product.description ?? "",

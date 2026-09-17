@@ -148,8 +148,8 @@ export default async function ProductPage({ params }: { params: Params }) {
             <h1 className="mt-3 font-display text-[clamp(1.7rem,4.5vw,2.4rem)] leading-tight text-ink">
               {product.title}
             </h1>
-            {product.titleHi ? (
-              <p className="deva mt-1 text-lg text-muted">{product.titleHi}</p>
+            {product.titleBn ? (
+              <p className="bangla mt-1 text-lg text-muted">{product.titleBn}</p>
             ) : null}
 
             {product.ratingAvg ? (

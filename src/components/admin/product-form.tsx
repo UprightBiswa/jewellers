@@ -15,7 +15,7 @@ type Option = { id: string; name: string };
 export type ProductFormValues = {
   id?: string;
   title: string;
-  titleHi: string;
+  titleBn: string;
   categoryId: string;
   shortDesc: string;
   description: string;
@@ -39,7 +39,7 @@ export type ProductFormValues = {
 };
 
 export const EMPTY_PRODUCT: ProductFormValues = {
-  title: "", titleHi: "", categoryId: "", shortDesc: "", description: "",
+  title: "", titleBn: "", categoryId: "", shortDesc: "", description: "",
   status: "DRAFT", purity: "S925", priceMode: "FIXED",
   priceRupees: "", compareAtRupees: "", makingChargeRupees: "", weightG: "",
   stock: "1", hallmarked: false, huid: "",
@@ -93,7 +93,7 @@ export function ProductForm({
     const payload: ProductInput = {
       id: values.id,
       title: values.title,
-      titleHi: values.titleHi || undefined,
+      titleBn: values.titleBn || undefined,
       categoryId: values.categoryId,
       shortDesc: values.shortDesc || undefined,
       description: values.description || undefined,
@@ -175,13 +175,13 @@ export function ProductForm({
           />
         </Field>
 
-        <Field label="Name in Hindi" htmlFor="titleHi" hint="Optional — shown under the English name">
+        <Field label="Name in Bengali" htmlFor="titleBn" hint="Optional — shown under the English name">
           <Input
-            id="titleHi"
-            value={values.titleHi}
-            onChange={(e) => set("titleHi", e.target.value)}
+            id="titleBn"
+            value={values.titleBn}
+            onChange={(e) => set("titleBn", e.target.value)}
             placeholder="ऑक्सीडाइज़्ड मोर अंगूठी"
-            className="font-deva"
+            className="font-bn"
           />
         </Field>
 

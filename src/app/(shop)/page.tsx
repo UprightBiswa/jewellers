@@ -13,6 +13,7 @@ import {
   StoryStrip,
   Testimonials,
 } from "@/components/storefront/sections";
+import { StoreSchema } from "@/components/storefront/store-schema";
 import { Reveal } from "@/components/ui/reveal";
 
 export const metadata: Metadata = {
@@ -70,6 +71,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <StoreSchema />
       <Hero storeName={settings.store.name} since={settings.store.sinceYear} />
 
       <section className="container-page py-12" aria-labelledby="categories-heading">
@@ -84,7 +86,7 @@ export default async function HomePage() {
             categories={categories.map((c) => ({
               slug: c.slug,
               name: c.name,
-              nameHi: c.nameHi,
+              nameBn: c.nameBn,
               imagePublicId: c.imagePublicId,
             }))}
           />

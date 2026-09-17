@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Marcellus, Manrope, Noto_Sans_Devanagari } from "next/font/google";
+import { Marcellus, Manrope, Noto_Sans_Bengali } from "next/font/google";
 import { Toaster } from "sonner";
+
+import { getSettings } from "@/lib/settings";
 
 import "./globals.css";
 
@@ -17,38 +19,55 @@ const manrope = Manrope({
   display: "swap",
 });
 
-const notoDeva = Noto_Sans_Devanagari({
-  subsets: ["devanagari"],
+const notoBengali = Noto_Sans_Bengali({
+  subsets: ["bengali"],
   weight: ["400", "500", "600"],
-  variable: "--font-noto-deva",
+  variable: "--font-noto-bengali",
   display: "swap",
 });
 
-const siteName = process.env.NEXT_PUBLIC_SITE_NAME ?? "Silver Store";
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: `${siteName} — Handcrafted 925 Sterling Silver`,
-    template: `%s · ${siteName}`,
-  },
-  description:
-    "Hallmarked 925 sterling and 999 fine silver jewellery, made by hand and shipped across India. Rings, payal, bracelets, pendants and puja silver.",
-  keywords: [
-    "silver jewellery", "925 sterling silver", "chandi jewellery",
-    "silver payal", "silver rings", "BIS hallmark silver", "buy silver online India",
-  ],
-  openGraph: {
-    type: "website",
-    locale: "en_IN",
-    siteName,
-    url: siteUrl,
-  },
-  twitter: { card: "summary_large_image" },
-  robots: { index: true, follow: true },
-  formatDetection: { telephone: true, address: false, email: false },
-};
+/**
+ * Titles and descriptions come from Settings, so the owner renaming his shop in
+ * the admin renames it in the browser tab, in search results and on every
+ * shared link — without a deploy.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const { store } = await getSettings();
+  const place = [store.city, store.state].filter(Boolean).join(", ");
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: `${store.name} — Handmade 925 Silver${place ? ` in ${place}` : ""}`,
+      template: `%s · ${store.name}`,
+    },
+    description:
+      `${store.tagline}. Earrings, rings, chains, bracelets, payel, toe rings and baby ` +
+      `sets in 925 silver, made by hand${place ? ` in ${place}` : ""} and shipped across India.`,
+    applicationName: store.name,
+    keywords: [
+      "silver jewellery", "925 silver", "rupor gohona", "silver payel",
+      "silver anklet", "silver earrings", "jhumka", "toe ring", "baby silver set",
+      "silver jewellery Coochbehar", "silver shop Tufanganj", "buy silver online India",
+    ],
+    authors: [{ name: store.name }],
+    openGraph: {
+      type: "website",
+      locale: "en_IN",
+      alternateLocale: "bn_IN",
+      siteName: store.name,
+      url: siteUrl,
+      title: `${store.name} — Handmade 925 Silver`,
+      description: store.tagline,
+    },
+    twitter: { card: "summary_large_image", title: store.name, description: store.tagline },
+    robots: { index: true, follow: true },
+    formatDetection: { telephone: true, address: false, email: false },
+    alternates: { canonical: "/" },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -80,7 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${marcellus.variable} ${manrope.variable} ${notoDeva.variable}`}
+      className={`${marcellus.variable} ${manrope.variable} ${notoBengali.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

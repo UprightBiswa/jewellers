@@ -76,8 +76,8 @@ export function ProductCard({ product, priority }: { product: Card; priority?: b
             {product.title}
           </h3>
 
-          {product.titleHi ? (
-            <p className="deva text-[13px] text-muted">{product.titleHi}</p>
+          {product.titleBn ? (
+            <p className="bangla text-[13px] text-muted">{product.titleBn}</p>
           ) : null}
 
           <div className="mt-0.5 flex items-baseline gap-2 tnum">
