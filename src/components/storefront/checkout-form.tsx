@@ -293,7 +293,7 @@ export function CheckoutForm({
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       ) : null}
 
-      <form onSubmit={onSubmit} className="mt-8 grid gap-10 lg:grid-cols-[1fr_380px]" noValidate>
+      <form onSubmit={onSubmit} method="post" className="mt-8 grid gap-10 lg:grid-cols-[1fr_380px]" noValidate>
         <div className="grid gap-8">
           {!signedIn ? (
             <p className="rounded-lg border border-line bg-surface px-4 py-3 text-[14.5px] text-ink-2">

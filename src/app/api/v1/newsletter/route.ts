@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 
 import { db } from "@/lib/db";
 import { fail, handleError, ok } from "@/lib/api/response";
+import { isCrossSiteRequest } from "@/lib/api/csrf";
 import { callerKey, rateLimit } from "@/lib/api/ratelimit";
 
 export const runtime = "nodejs";
@@ -15,6 +16,10 @@ const schema = z.object({
 /** POST /api/v1/newsletter */
 export async function POST(req: NextRequest) {
   try {
+    if (isCrossSiteRequest(req)) {
+      return fail("forbidden", "This request did not come from the shop.");
+    }
+
     const limit = await rateLimit("email", callerKey(req, "newsletter"));
     if (!limit.success) {
       return fail("rate_limited", "You have already signed up. Check your inbox.");

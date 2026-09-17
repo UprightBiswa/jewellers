@@ -1,21 +1,58 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { useState, type FormEvent } from "react";
+import { useActionState, useEffect } from "react";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
 import {
+  loginAction,
   registerUser,
   requestPasswordReset,
   resetPassword,
   type ActionResult,
 } from "@/app/(auth)/actions";
 
-type Errors = Record<string, string>;
+/**
+ * Auth forms, driven by server actions.
+ *
+ * Every form here submits with `action={...}`, never an onSubmit fetch. A form
+ * with only an onSubmit handler and no method falls back to a NATIVE GET when it
+ * is submitted before React hydrates — which is how an email and password ended
+ * up in the URL. With a server action the browser posts, and the form still
+ * works with JavaScript switched off.
+ */
+
+function SubmitButton({ children, pendingLabel }: { children: string; pendingLabel: string }) {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button type="submit" size="lg" block disabled={pending}>
+      {pending ? (
+        <>
+          <Spinner label={pendingLabel} />
+          {pendingLabel}
+        </>
+      ) : (
+        children
+      )}
+    </Button>
+  );
+}
+
+function ErrorNotice({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <p role="alert" className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
+      {message}
+    </p>
+  );
+}
 
 function GoogleButton({ next }: { next: string }) {
   return (
@@ -47,43 +84,23 @@ function Divider() {
   );
 }
 
+/** Surfaces a server action's message as a toast, once per result. */
+function useResultToast(state: ActionResult | null) {
+  useEffect(() => {
+    if (!state) return;
+    if (state.ok && state.message) toast.success(state.message);
+    if (!state.ok) toast.error(state.message);
+  }, [state]);
+}
+
 /* -------------------------------------------------------------------------- */
 
 export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
-  const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") ?? "/account";
 
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (pending) return;
-
-    const data = new FormData(e.currentTarget);
-    setPending(true);
-    setError(null);
-
-    const res = await signIn("credentials", {
-      email: String(data.get("email") ?? ""),
-      password: String(data.get("password") ?? ""),
-      scope: "store",
-      redirect: false,
-    });
-
-    setPending(false);
-
-    if (res?.error) {
-      // One message for every failure mode — a login form that distinguishes
-      // "no such account" from "wrong password" is an account enumeration tool.
-      setError("That email and password do not match an account.");
-      return;
-    }
-
-    router.push(next);
-    router.refresh();
-  }
+  const [state, formAction] = useActionState<ActionResult | null, FormData>(loginAction, null);
+  useResultToast(state);
 
   return (
     <div className="grid gap-5">
@@ -99,24 +116,23 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
         </>
       ) : null}
 
-      <form onSubmit={onSubmit} className="grid gap-4" noValidate>
+      <form action={formAction} method="post" className="grid gap-4">
+        <input type="hidden" name="next" value={next} />
+
         <Field label="Email" htmlFor="email" required>
           <Input id="email" name="email" type="email" autoComplete="email" required autoFocus />
         </Field>
 
         <Field label="Password" htmlFor="password" required>
-          <Input id="password" name="password" type="password" autoComplete="current-password" required />
+          <Input
+            id="password" name="password" type="password"
+            autoComplete="current-password" required
+          />
         </Field>
 
-        {error ? (
-          <p role="alert" className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
-            {error}
-          </p>
-        ) : null}
+        <ErrorNotice message={state && !state.ok ? state.message : undefined} />
 
-        <Button type="submit" size="lg" block disabled={pending}>
-          {pending ? "Signing in…" : "Sign in"}
-        </Button>
+        <SubmitButton pendingLabel="Signing in…">Sign in</SubmitButton>
       </form>
 
       <div className="flex items-center justify-between text-sm">
@@ -134,56 +150,18 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
 /* -------------------------------------------------------------------------- */
 
 export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [errors, setErrors] = useState<Errors>({});
-  const [error, setError] = useState<string | null>(null);
+  const [state, formAction] = useActionState<ActionResult | null, FormData>(registerUser, null);
+  useResultToast(state);
 
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (pending) return;
-
-    const data = new FormData(e.currentTarget);
-    setPending(true);
-    setErrors({});
-    setError(null);
-
-    const result: ActionResult = await registerUser(data);
-
-    if (!result.ok) {
-      setError(result.message);
-      setErrors(result.fieldErrors ?? {});
-      setPending(false);
-      return;
-    }
-
-    // Registration succeeded; sign them straight in rather than making them
-    // type the same password again.
-    const signedIn = await signIn("credentials", {
-      email: String(data.get("email") ?? ""),
-      password: String(data.get("password") ?? ""),
-      scope: "store",
-      redirect: false,
-    });
-
-    setPending(false);
-
-    if (signedIn?.error) {
-      toast.success("Account created — please sign in.");
-      router.push("/login");
-      return;
-    }
-
-    router.push("/account");
-    router.refresh();
-  }
+  const fieldErrors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
 
   return (
     <div className="grid gap-5">
       <div>
         <h1 className="font-display text-2xl text-ink">Create your account</h1>
         <p className="mt-1 text-sm text-muted">
-          Saves your addresses and keeps every order in one place.
+          Saves your addresses, keeps your orders in one place, and unlocks 20% off your
+          first order.
         </p>
       </div>
 
@@ -194,38 +172,37 @@ export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
         </>
       ) : null}
 
-      <form onSubmit={onSubmit} className="grid gap-4" noValidate>
-        <Field label="Your name" htmlFor="name" required error={errors.name}>
+      <form action={formAction} method="post" className="grid gap-4">
+        <Field label="Your name" htmlFor="name" required error={fieldErrors.name}>
           <Input id="name" name="name" autoComplete="name" required autoFocus />
         </Field>
 
-        <Field label="Email" htmlFor="email" required error={errors.email}>
+        <Field label="Email" htmlFor="email" required error={fieldErrors.email}>
           <Input id="email" name="email" type="email" autoComplete="email" required />
         </Field>
 
-        <Field label="Phone" htmlFor="phone" error={errors.phone} hint="Optional — for delivery updates">
+        <Field
+          label="Phone" htmlFor="phone" error={fieldErrors.phone}
+          hint="Optional — for delivery updates on WhatsApp"
+        >
           <Input id="phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" />
         </Field>
 
         <Field
-          label="Password"
-          htmlFor="password"
-          required
-          error={errors.password}
+          label="Password" htmlFor="password" required error={fieldErrors.password}
           hint="At least 8 characters, with a number"
         >
-          <Input id="password" name="password" type="password" autoComplete="new-password" required />
+          <Input
+            id="password" name="password" type="password"
+            autoComplete="new-password" required
+          />
         </Field>
 
-        {error ? (
-          <p role="alert" className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
-            {error}
-          </p>
-        ) : null}
+        <ErrorNotice
+          message={state && !state.ok && !state.fieldErrors ? state.message : undefined}
+        />
 
-        <Button type="submit" size="lg" block disabled={pending}>
-          {pending ? "Creating…" : "Create account"}
-        </Button>
+        <SubmitButton pendingLabel="Creating…">Create account</SubmitButton>
       </form>
 
       <p className="text-sm text-muted">
@@ -241,24 +218,16 @@ export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
 /* -------------------------------------------------------------------------- */
 
 export function ForgotPasswordForm() {
-  const [pending, setPending] = useState(false);
-  const [done, setDone] = useState<string | null>(null);
+  const [state, formAction] = useActionState<ActionResult | null, FormData>(
+    requestPasswordReset,
+    null,
+  );
 
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (pending) return;
-
-    setPending(true);
-    const result = await requestPasswordReset(new FormData(e.currentTarget));
-    setPending(false);
-    setDone(result.message ?? "Check your inbox.");
-  }
-
-  if (done) {
+  if (state?.ok) {
     return (
       <div className="grid gap-4">
         <h1 className="font-display text-2xl text-ink">Check your inbox</h1>
-        <p className="text-[15px] text-ink-2">{done}</p>
+        <p className="text-[15px] text-ink-2">{state.message}</p>
         <p className="text-sm text-muted">
           The link works once and expires in an hour. If it does not arrive in a few
           minutes, look in spam.
@@ -279,14 +248,14 @@ export function ForgotPasswordForm() {
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="grid gap-4" noValidate>
+      <form action={formAction} method="post" className="grid gap-4">
         <Field label="Email" htmlFor="email" required>
           <Input id="email" name="email" type="email" autoComplete="email" required autoFocus />
         </Field>
 
-        <Button type="submit" size="lg" block disabled={pending}>
-          {pending ? "Sending…" : "Send reset link"}
-        </Button>
+        <ErrorNotice message={state && !state.ok ? state.message : undefined} />
+
+        <SubmitButton pendingLabel="Sending…">Send reset link</SubmitButton>
       </form>
 
       <Link href="/login" className="text-sm text-brand underline-offset-4 hover:underline">
@@ -299,34 +268,10 @@ export function ForgotPasswordForm() {
 /* -------------------------------------------------------------------------- */
 
 export function ResetPasswordForm({ token }: { token: string }) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [errors, setErrors] = useState<Errors>({});
-  const [error, setError] = useState<string | null>(null);
+  const [state, formAction] = useActionState<ActionResult | null, FormData>(resetPassword, null);
+  useResultToast(state);
 
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (pending) return;
-
-    const data = new FormData(e.currentTarget);
-    data.set("token", token);
-
-    setPending(true);
-    setError(null);
-    setErrors({});
-
-    const result = await resetPassword(data);
-    setPending(false);
-
-    if (!result.ok) {
-      setError(result.message);
-      setErrors(result.fieldErrors ?? {});
-      return;
-    }
-
-    toast.success("Password changed. Sign in with your new one.");
-    router.push("/login");
-  }
+  const fieldErrors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
 
   if (!token) {
     return (
@@ -342,35 +287,47 @@ export function ResetPasswordForm({ token }: { token: string }) {
     );
   }
 
+  if (state?.ok) {
+    return (
+      <div className="grid gap-4">
+        <h1 className="font-display text-2xl text-ink">Password changed</h1>
+        <p className="text-[15px] text-ink-2">
+          You can sign in with your new password now.
+        </p>
+        <Button asChild size="lg">
+          <Link href="/login">Sign in</Link>
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-5">
       <div>
         <h1 className="font-display text-2xl text-ink">Choose a new password</h1>
         <p className="mt-1 text-sm text-muted">
-          Signing you out everywhere else, just to be safe.
+          This signs you out everywhere else, just to be safe.
         </p>
       </div>
 
-      <form onSubmit={onSubmit} className="grid gap-4" noValidate>
+      <form action={formAction} method="post" className="grid gap-4">
+        <input type="hidden" name="token" value={token} />
+
         <Field
-          label="New password"
-          htmlFor="password"
-          required
-          error={errors.password}
+          label="New password" htmlFor="password" required error={fieldErrors.password}
           hint="At least 8 characters, with a number"
         >
-          <Input id="password" name="password" type="password" autoComplete="new-password" required autoFocus />
+          <Input
+            id="password" name="password" type="password"
+            autoComplete="new-password" required autoFocus
+          />
         </Field>
 
-        {error ? (
-          <p role="alert" className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
-            {error}
-          </p>
-        ) : null}
+        <ErrorNotice
+          message={state && !state.ok && !state.fieldErrors ? state.message : undefined}
+        />
 
-        <Button type="submit" size="lg" block disabled={pending}>
-          {pending ? "Saving…" : "Save new password"}
-        </Button>
+        <SubmitButton pendingLabel="Saving…">Save new password</SubmitButton>
       </form>
     </div>
   );

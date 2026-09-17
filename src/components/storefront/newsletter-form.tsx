@@ -47,7 +47,7 @@ export function NewsletterForm({ className }: { className?: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className={cn("flex gap-2", className)}>
+    <form onSubmit={onSubmit} method="post" className={cn("flex gap-2", className)}>
       <Input
         type="email"
         required

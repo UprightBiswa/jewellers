@@ -144,6 +144,7 @@ export function ProductForm({
 
   return (
     <form
+      method="post"
       className="grid max-w-3xl gap-8 pb-8"
       onSubmit={(e) => {
         e.preventDefault();

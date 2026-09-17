@@ -66,7 +66,7 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-5" noValidate>
+    <form onSubmit={onSubmit} method="post" className="grid gap-5" noValidate>
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Your name" htmlFor="name" required error={errors.name}>
           <Input id="name" name="name" autoComplete="name" required

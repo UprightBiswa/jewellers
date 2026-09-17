@@ -18,7 +18,8 @@ import { Reveal } from "@/components/ui/reveal";
 
 export const metadata: Metadata = {
   description:
-    "Handmade 925 sterling and 999 fine silver — rings, payal, bracelets, pendants, mangalsutra and puja silver. Hallmarked, shipped across India.",
+    "Handmade 925 silver earrings, rings, chains, bracelets, payel, toe rings and baby sets — made in Tufanganj, Coochbehar and shipped across India.",
+  alternates: { canonical: "/" },
 };
 
 // The catalogue changes when the owner publishes, not on every request.

@@ -8,8 +8,19 @@ import { PrismaClient } from "@/generated/prisma";
  */
 const createClient = () => {
   const connectionString = process.env.DATABASE_URL;
+
   if (!connectionString) {
-    throw new Error("DATABASE_URL is not set — see .env.example");
+    // Production must not start without a database — fail at boot, loudly.
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("DATABASE_URL is not set — see .env.example");
+    }
+    // Development: point at a local address that is almost certainly closed.
+    // Nothing connects, the TCP probe in lib/demo/fallback.ts sees that, and the
+    // storefront renders on preview data instead of crashing on import.
+    console.warn("  DATABASE_URL is not set — running on preview data.");
+    return new PrismaClient({
+      adapter: new PrismaPg({ connectionString: "postgresql://localhost:1/none" }),
+    });
   }
 
   const adapter = new PrismaPg({

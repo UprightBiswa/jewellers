@@ -53,31 +53,41 @@ Ticked only when the thing actually runs, not when it is written.
 
 ## Phase 4 — Money
 
-- [ ] Coupon validation endpoint
-- [ ] Checkout: address, shipping, server-side totals
-- [ ] Razorpay order + checkout
-- [ ] **Webhook with signature verification** — the only thing that confirms an order
-- [ ] COD flow with the settings limit
-- [ ] Order confirmation page
-- [ ] Stock decrement in the same transaction as the order
+- [x] Coupon validation endpoint, with first-order and per-user rules
+- [x] Checkout: saved or new address, guest checkout, server-side totals
+- [x] Razorpay order creation (inert until the keys exist)
+- [x] **Webhook with signature verification**, plus a server-verified browser callback
+- [x] COD flow with the settings limit and fee
+- [x] Order confirmation page
+- [x] Stock decrement in the same transaction as the order, released on failure
 
 ## Phase 5 — After the sale
 
 - [x] Email templates: welcome, password reset, order confirmation, shipped, contact
-- [ ] Wire order emails to the checkout and shipping actions
-- [ ] GST invoice PDF
-- [ ] Customer account order history
+- [x] Order emails fire from confirmPayment (customer + owner)
+- [ ] **Customer account area** — orders, addresses, wishlist, profile
+- [ ] Wishlist UI (the `WishlistItem` model exists)
+- [ ] Invoice PDF (no GST, so a plain bill)
 - [ ] Reviews with admin approval
 
 ## Phase 6 — Launch
 
 - [x] API reference ([API.md](API.md)) and setup guide ([SETUP.md](SETUP.md))
-- [ ] sitemap.xml, robots.txt, per-page canonical URLs
-- [ ] Analytics: GA4, Meta Pixel
+- [x] sitemap.xml, robots.txt, canonical URLs, JewelryStore structured data
+- [x] Logo, favicon and share card, all driven by Settings
+- [x] Loading skeletons on the storefront and admin lists
+- [ ] Error pages (`error.tsx`, `not-found.tsx`) for every route
+- [ ] Analytics: Vercel Analytics, GA4, Meta Pixel
 - [ ] Lighthouse pass on mobile
-- [ ] Error pages and loading skeletons for every route
-- [ ] Owner walkthrough + a short Hindi how-to video
+- [ ] Owner walkthrough + a short **Bengali** how-to video
 - [ ] Production deploy, domain pointed, test order placed
+
+## Phase 7 — Owner-editable homepage (requested, not started)
+
+- [ ] `HomeSection` model: hero slides, banner strips, section order
+- [ ] Hero carousel driven by those rows
+- [ ] Admin editor for each homepage section
+- [ ] Image by URL in the admin, alongside device upload
 
 ---
 
@@ -90,7 +100,11 @@ Ticked only when the thing actually runs, not when it is written.
 | 3 | Mobile-only admin, or does he use a computer? | Already built mobile-first; answer only confirms | waiting on client |
 | 4 | Vercel Pro (₹1,750/mo) or VPS (₹600/mo)? | Deploy target | waiting on developer + client |
 | 5 | Developer's WhatsApp number for the brief's send button | `docs/index.html` line 326 | waiting on developer |
-| 6 | **Neon connection strings** | Migration, seed, and every page that reads data | **waiting on developer** |
+| 6 | **Neon connection strings** | Migration, seed, admin login, real orders | **waiting on developer** |
+| 7 | Rahul's email address | Order confirmations, contact page | **waiting on client** |
+| 8 | Free-delivery threshold | Set to ₹1,500 as a guess | **confirm with client** |
+| 9 | Delivery area — Coochbehar/Tufanganj only, or all India? | Shipping copy, courier setup | **confirm with client** |
+| 10 | Is the 50% advance for made-to-order only, or COD too? | Checkout rules | **confirm with client** |
 
 ---
 

@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { fail, handleError, ok } from "@/lib/api/response";
+import { isCrossSiteRequest } from "@/lib/api/csrf";
 import { callerKey, rateLimit } from "@/lib/api/ratelimit";
 import { getCart } from "@/lib/cart/server";
 import { createOrder } from "@/lib/orders/create";
@@ -47,6 +48,10 @@ const schema = z.object({
  */
 export async function POST(req: NextRequest) {
   try {
+    if (isCrossSiteRequest(req)) {
+      return fail("forbidden", "This request did not come from the shop.");
+    }
+
     const limit = await rateLimit("checkout", callerKey(req, "checkout"));
     if (!limit.success) {
       return fail("rate_limited", "Too many attempts. Wait a minute and try again.");

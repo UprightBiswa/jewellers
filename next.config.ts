@@ -28,9 +28,9 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
       { protocol: "https", hostname: "ik.imagekit.io", pathname: "/**" },
       { protocol: "https", hostname: "lh3.googleusercontent.com", pathname: "/**" },
-      // Preview placeholders, development only — production keeps a tight list.
+      // Stand-in photography, development only — production keeps a tight list.
       ...(process.env.NODE_ENV === "development"
-        ? [{ protocol: "https" as const, hostname: "placehold.co", pathname: "/**" }]
+        ? [{ protocol: "https" as const, hostname: "images.unsplash.com", pathname: "/**" }]
         : []),
     ],
     formats: ["image/avif", "image/webp"],

@@ -44,7 +44,7 @@ export async function Footer() {
 
       <div className="container-page grid gap-10 py-12 md:grid-cols-2 lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <Logo storeName={store.name} markClassName="size-9" />
+          <Logo storeName={store.name} />
           <p className="mt-2 text-sm text-muted">{store.tagline}</p>
 
           <address className="mt-5 grid gap-2.5 not-italic text-sm text-ink-2">

@@ -1,48 +1,47 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
-import { useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
+import { loginAction, type ActionResult } from "@/app/(auth)/actions";
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" size="lg" block disabled={pending}>
+      {pending ? (
+        <>
+          <Spinner label="Signing in" />
+          Signing in…
+        </>
+      ) : (
+        "Sign in"
+      )}
+    </Button>
+  );
+}
+
+/**
+ * Staff sign-in.
+ *
+ * Same server action as the storefront, with `scope=admin`, which makes the
+ * credentials provider refuse a customer account outright — a customer's
+ * password cannot open the panel even when it is correct.
+ *
+ * Submits through a server action rather than an onSubmit fetch: an unhydrated
+ * form with no method does a native GET, which would put a staff password in
+ * the URL and the server logs.
+ */
 export function AdminLoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") ?? "/admin";
 
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (pending) return;
-
-    const data = new FormData(e.currentTarget);
-    setPending(true);
-    setError(null);
-
-    // scope:"admin" makes the provider refuse a customer account outright, so
-    // a customer's password can never open the panel even if it is correct.
-    const res = await signIn("credentials", {
-      email: String(data.get("email") ?? ""),
-      password: String(data.get("password") ?? ""),
-      scope: "admin",
-      redirect: false,
-    });
-
-    setPending(false);
-
-    if (res?.error) {
-      setError("Those details do not match a staff account.");
-      return;
-    }
-
-    router.push(next);
-    router.refresh();
-  }
+  const [state, formAction] = useActionState<ActionResult | null, FormData>(loginAction, null);
 
   return (
     <div className="rounded-[var(--radius-card)] border border-line bg-surface p-7">
@@ -56,24 +55,28 @@ export function AdminLoginForm() {
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="grid gap-4" noValidate>
+      <form action={formAction} method="post" className="grid gap-4">
+        <input type="hidden" name="scope" value="admin" />
+        <input type="hidden" name="next" value={next} />
+
         <Field label="Email" htmlFor="email" required>
           <Input id="email" name="email" type="email" autoComplete="username" required autoFocus />
         </Field>
 
         <Field label="Password" htmlFor="password" required>
-          <Input id="password" name="password" type="password" autoComplete="current-password" required />
+          <Input
+            id="password" name="password" type="password"
+            autoComplete="current-password" required
+          />
         </Field>
 
-        {error ? (
+        {state && !state.ok ? (
           <p role="alert" className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger">
-            {error}
+            {state.message}
           </p>
         ) : null}
 
-        <Button type="submit" size="lg" block disabled={pending}>
-          {pending ? "Signing in…" : "Sign in"}
-        </Button>
+        <SubmitButton />
       </form>
 
       <p className="mt-5 text-[13px] leading-relaxed text-muted">

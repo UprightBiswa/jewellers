@@ -64,7 +64,7 @@ export function AdminShell({
       {/* Sidebar — desktop only */}
       <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-surface lg:flex">
         <div className="flex items-center gap-2.5 border-b border-line px-5 py-4">
-          <Mark className="size-7 shrink-0 text-brand" />
+          <Mark className="size-7 shrink-0" />
           <div>
             <p className="font-display text-lg leading-tight text-ink">{storeName}</p>
             <p className="text-[11px] uppercase tracking-[0.14em] text-muted">Shop admin</p>
@@ -132,7 +132,7 @@ export function AdminShell({
         {/* Top bar — mobile only */}
         <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-line bg-bg/90 px-4 backdrop-blur lg:hidden">
           <p className="flex items-center gap-2 font-display text-[17px] text-ink">
-            <Mark className="size-6 shrink-0 text-brand" />
+            <Mark className="size-6 shrink-0" />
             {storeName}
           </p>
           <div className="flex items-center gap-1">

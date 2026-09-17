@@ -1,4 +1,5 @@
 import { IMAGE_PRESETS, type ImageTransform } from "./provider";
+import { placeholderPhoto } from "./placeholders";
 
 /**
  * Pure URL building — safe in a client component.
@@ -32,12 +33,12 @@ export function buildTransform(t: ImageTransform = {}): string {
   return parts.join(",");
 }
 
-/** A grey tile with the asset's name on it, used before Cloudinary is set up. */
+/** Stand-in photography, used before Cloudinary is set up. See ./placeholders.ts. */
 function placeholderUrl(publicId: string, transform?: ImageTransform): string {
-  const w = transform?.width ?? 600;
-  const h = transform?.height ?? 600;
-  const label = encodeURIComponent(publicId.split("/").pop() ?? "silver");
-  return `https://placehold.co/${w}x${h}/eef0f3/6a717b/png?text=${label}`;
+  return placeholderPhoto(publicId, {
+    width: transform?.width ?? 600,
+    height: transform?.height ?? transform?.width ?? 600,
+  });
 }
 
 export function cdnUrl(publicId: string, transform?: ImageTransform): string {

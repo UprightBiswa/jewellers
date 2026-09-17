@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 
 import { db } from "@/lib/db";
 import { fail, handleError, ok } from "@/lib/api/response";
+import { isCrossSiteRequest } from "@/lib/api/csrf";
 import { callerKey, rateLimit } from "@/lib/api/ratelimit";
 import { notifyAdmin } from "@/lib/email/send";
 import ContactNotificationEmail from "@/emails/contact-notification";
@@ -27,6 +28,10 @@ const schema = z.object({
 /** POST /api/v1/contact */
 export async function POST(req: NextRequest) {
   try {
+    if (isCrossSiteRequest(req)) {
+      return fail("forbidden", "This request did not come from the shop.");
+    }
+
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
       req.headers.get("x-real-ip") ??

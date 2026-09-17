@@ -17,9 +17,11 @@ const bool = z
 const serverSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
-  // --- required --------------------------------------------------------
-  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
-  DIRECT_URL: z.string().min(1).optional(),
+  // --- required in production ------------------------------------------
+  // Optional in development so the storefront can run on preview data before
+  // the database exists; production still refuses to boot without them.
+  DATABASE_URL: z.string().optional(),
+  DIRECT_URL: z.string().optional(),
   AUTH_SECRET: z.string().min(16, "AUTH_SECRET must be at least 16 characters"),
 
   // --- optional integrations -------------------------------------------
@@ -62,6 +64,13 @@ const clientSchema = z.object({
 
 function parseServer() {
   const parsed = serverSchema.safeParse(process.env);
+
+  if (parsed.success && process.env.NODE_ENV === "production" && !parsed.data.DATABASE_URL) {
+    throw new Error(
+      "DATABASE_URL is required in production. Set it in the host's environment — see .env.example.",
+    );
+  }
+
   if (!parsed.success) {
     const issues = parsed.error.issues
       .map((i) => `  ${i.path.join(".")}: ${i.message}`)

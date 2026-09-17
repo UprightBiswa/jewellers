@@ -2,6 +2,8 @@
 
 import { z } from "zod";
 import { headers } from "next/headers";
+import { AuthError } from "next-auth";
+import { signIn } from "@/auth";
 
 import { db } from "@/lib/db";
 import {
@@ -19,6 +21,55 @@ import { absoluteUrl, PHONE_RE } from "@/lib/utils";
 export type ActionResult =
   | { ok: true; message?: string }
   | { ok: false; message: string; fieldErrors?: Record<string, string> };
+
+/**
+ * Sign in.
+ *
+ * A server action, not a fetch from an onSubmit handler. That matters for more
+ * than tidiness: a plain `<form onSubmit>` with no method falls back to a NATIVE
+ * GET if it is submitted before React has hydrated — which put the customer's
+ * email and password in the URL, the browser history and every access log in
+ * between. A server action posts, and works with JavaScript disabled entirely.
+ *
+ * `signIn` throws a redirect on success; that has to propagate, so only
+ * AuthError is caught here.
+ */
+export async function loginAction(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const limit = await rateLimit("auth", await clientKey("login"));
+  if (!limit.success) {
+    return { ok: false, message: "Too many attempts. Please try again in a few minutes." };
+  }
+
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const scope = formData.get("scope") === "admin" ? "admin" : "store";
+  const next = String(formData.get("next") ?? "") || (scope === "admin" ? "/admin" : "/account");
+
+  if (!email || !password) {
+    return { ok: false, message: "Enter your email and password." };
+  }
+
+  try {
+    await signIn("credentials", { email, password, scope, redirectTo: next });
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof AuthError) {
+      // One message for every cause. A login form that distinguishes "no such
+      // account" from "wrong password" is an account-enumeration tool.
+      return {
+        ok: false,
+        message:
+          scope === "admin"
+            ? "Those details do not match a staff account."
+            : "That email and password do not match an account.",
+      };
+    }
+    throw error;
+  }
+}
 
 async function clientKey(scope: string): Promise<string> {
   const h = await headers();
@@ -50,7 +101,10 @@ const registerSchema = z.object({
   password: z.string().min(8, "Use at least 8 characters."),
 });
 
-export async function registerUser(formData: FormData): Promise<ActionResult> {
+export async function registerUser(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
   const limit = await rateLimit("auth", await clientKey("register"));
   if (!limit.success) {
     return { ok: false, message: "Too many attempts. Please try again in a few minutes." };
@@ -105,18 +159,36 @@ export async function registerUser(formData: FormData): Promise<ActionResult> {
     react: WelcomeEmail({
       name: parsed.data.name.split(" ")[0],
       shopUrl: absoluteUrl("/collections/all"),
-      couponCode: "WELCOME10",
+      couponCode: "WELCOME20",
     }),
   });
 
-  return { ok: true, message: "Account created. You can sign in now." };
+  // Straight in — making someone retype the password they just chose is friction
+  // with no security benefit. signIn redirects, so nothing after this runs.
+  try {
+    await signIn("credentials", {
+      email,
+      password: parsed.data.password,
+      scope: "store",
+      redirectTo: "/account",
+    });
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return { ok: true, message: "Account created. Please sign in." };
+    }
+    throw error;
+  }
 }
 
 /* -------------------------------------------------------------------------- */
 /* Forgot password                                                            */
 /* -------------------------------------------------------------------------- */
 
-export async function requestPasswordReset(formData: FormData): Promise<ActionResult> {
+export async function requestPasswordReset(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
   const limit = await rateLimit("email", await clientKey("reset-request"));
   if (!limit.success) {
     return { ok: false, message: "We have already sent a link. Please check your inbox." };
@@ -169,7 +241,10 @@ const resetSchema = z.object({
   password: z.string().min(8, "Use at least 8 characters."),
 });
 
-export async function resetPassword(formData: FormData): Promise<ActionResult> {
+export async function resetPassword(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
   const limit = await rateLimit("auth", await clientKey("reset-submit"));
   if (!limit.success) {
     return { ok: false, message: "Too many attempts. Please try again shortly." };

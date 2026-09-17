@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 
 import { auth, isAdminRole } from "@/auth";
 import { fail, forbidden, handleError, ok } from "@/lib/api/response";
+import { isCrossSiteRequest } from "@/lib/api/csrf";
 import { callerKey, rateLimit } from "@/lib/api/ratelimit";
 import { getImageProvider } from "@/lib/images/cloudinary";
 
@@ -23,6 +24,10 @@ const schema = z.object({
  */
 export async function POST(req: NextRequest) {
   try {
+    if (isCrossSiteRequest(req)) {
+      return fail("forbidden", "This request did not come from the shop.");
+    }
+
     const session = await auth();
     if (!session?.user || !isAdminRole(session.user.role)) throw forbidden();
 

@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { NextRequest } from "next/server";
 
 import { fail, handleError, ok } from "@/lib/api/response";
+import { isCrossSiteRequest } from "@/lib/api/csrf";
 import { callerKey, rateLimit } from "@/lib/api/ratelimit";
 import {
   addToCart,
@@ -49,6 +50,10 @@ export async function GET() {
 /** POST /api/v1/cart — add a line. */
 export async function POST(req: NextRequest) {
   try {
+    if (isCrossSiteRequest(req)) {
+      return fail("forbidden", "This request did not come from the shop.");
+    }
+
     const limit = await rateLimit("api", callerKey(req, "cart-add"));
     if (!limit.success) {
       return fail("rate_limited", "That is a lot of taps. Give it a moment.");
@@ -64,6 +69,10 @@ export async function POST(req: NextRequest) {
 /** PATCH /api/v1/cart — change a line's quantity. 0 removes it. */
 export async function PATCH(req: NextRequest) {
   try {
+    if (isCrossSiteRequest(req)) {
+      return fail("forbidden", "This request did not come from the shop.");
+    }
+
     const { lineId, qty } = patchSchema.parse(await req.json());
     return ok(summarise(await setCartQty(lineId, qty)));
   } catch (err) {
@@ -74,6 +83,10 @@ export async function PATCH(req: NextRequest) {
 /** DELETE /api/v1/cart — remove a line. */
 export async function DELETE(req: NextRequest) {
   try {
+    if (isCrossSiteRequest(req)) {
+      return fail("forbidden", "This request did not come from the shop.");
+    }
+
     const { lineId } = deleteSchema.parse(await req.json());
     return ok(summarise(await removeCartLine(lineId)));
   } catch (err) {
