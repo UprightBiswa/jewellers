@@ -5,8 +5,15 @@ import { preflight, withCors } from "@/lib/api/cors";
 
 const { auth } = NextAuth(authConfig);
 
-/** Routes a signed-out visitor must never reach. */
-const CUSTOMER_PROTECTED = ["/account", "/checkout"];
+/**
+ * Routes a signed-out visitor must never reach.
+ *
+ * Checkout is deliberately NOT in this list. Someone in Tufanganj buying a pair
+ * of toe rings should not have to create an account first — guest checkout takes
+ * an email and an address. Signing in only buys you the first-order discount and
+ * a list of past orders, and the checkout page says so.
+ */
+const CUSTOMER_PROTECTED = ["/account"];
 
 /** The only /admin path a signed-out visitor may load. */
 const ADMIN_LOGIN = "/admin/login";
