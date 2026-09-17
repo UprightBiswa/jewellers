@@ -17,6 +17,13 @@ export default async function ShopNotFound() {
 
   return (
     <div className="container-page py-20">
+      {/*
+        The status will be 200 because of the Next 16.3.5 notFound() bug (see
+        the note on the product and category pages). React 19 hoists this into
+        <head>, which is what actually keeps a dead URL out of the index.
+      */}
+      <meta name="robots" content="noindex, nofollow" />
+
       <div className="mx-auto max-w-xl text-center">
         <p className="text-[11px] uppercase tracking-[0.16em] text-gold">Page not found</p>
 

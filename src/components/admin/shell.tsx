@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Package,
@@ -11,13 +10,13 @@ import {
   MessageSquare,
   Settings,
   Coins,
-  LogOut,
   Store,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/storefront/theme-toggle";
 import { Mark } from "@/components/brand/logo";
+import { SignOutButton } from "@/app/admin/sign-out";
 
 type NavItem = {
   href: string;
@@ -116,14 +115,7 @@ export function AdminShell({
           </div>
           <div className="mt-2 flex items-center justify-between gap-2 px-1">
             <ThemeToggle />
-            <button
-              type="button"
-              onClick={() => signOut({ redirectTo: "/admin/login" })}
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13px] text-muted hover:bg-surface-2 hover:text-ink"
-            >
-              <LogOut className="size-3.5" aria-hidden />
-              Sign out
-            </button>
+            <SignOutButton />
           </div>
         </div>
       </aside>
@@ -137,14 +129,7 @@ export function AdminShell({
           </p>
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            <button
-              type="button"
-              onClick={() => signOut({ redirectTo: "/admin/login" })}
-              aria-label="Sign out"
-              className="grid size-9 place-items-center rounded-full text-muted hover:bg-surface-2 hover:text-ink"
-            >
-              <LogOut className="size-4" aria-hidden />
-            </button>
+            <SignOutButton compact />
           </div>
         </header>
 

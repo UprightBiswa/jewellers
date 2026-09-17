@@ -21,7 +21,8 @@
     "db:reset": "prisma migrate reset --force && npm run db:seed",
     "email:dev": "email dev --dir src/emails --port 3002",
     "db:local": "node scripts/dev-db.mjs",
-    "db:local:reset": "node scripts/dev-db.mjs --reset"
+    "db:local:reset": "node scripts/dev-db.mjs --reset",
+    "audit": "node scripts/audit.mjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

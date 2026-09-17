@@ -29,6 +29,17 @@ if (reset) {
   console.log("Wiped " + DATA_DIR);
 }
 
+/**
+ * Next's connection pool hangs up abruptly on every hot reload, and the socket
+ * server surfaces that as an unhandled 'error' event which takes the whole
+ * process down. Swallow exactly those two codes — anything else still crashes
+ * loudly, because a database that fails silently is worse than one that stops.
+ */
+process.on("uncaughtException", (err) => {
+  if (err?.code === "ECONNRESET" || err?.code === "EPIPE") return;
+  throw err;
+});
+
 const db = await PGlite.create({ dataDir: DATA_DIR });
 
 // Prisma's shadow database for `migrate dev` opens a second connection, and the
@@ -37,7 +48,7 @@ const server = new PGLiteSocketServer({
   db,
   port: PORT,
   host: "127.0.0.1",
-  maxConnections: 10,
+  maxConnections: 40,
 });
 
 await server.start();

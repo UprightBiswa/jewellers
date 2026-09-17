@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-import { db } from "@/lib/db";
-import { devFallback } from "@/lib/demo/fallback";
 import {
   countProducts,
   getCategoryBySlug,
@@ -17,14 +15,19 @@ type Search = Promise<{ sort?: string }>;
 
 export const revalidate = 300;
 
-export async function generateStaticParams() {
-  const categories = await devFallback(
-    () => db.category.findMany({ where: { isActive: true }, select: { slug: true } }),
-    () => [] as { slug: string }[],
-  );
-  return categories.map((c) => ({ slug: c.slug }));
-}
-
+/*
+ * `notFound()` returns a 200 status on Next 16.3.5.
+ *
+ * Established by elimination in a production build: a bare page whose only
+ * statement is notFound(), with no proxy, no error boundary and no custom
+ * not-found file anywhere, still answers 200 — while a genuinely unmatched URL
+ * correctly answers 404. It is a framework bug, not this page's doing, and
+ * removing generateStaticParams did not help (that was an earlier wrong guess).
+ *
+ * Mitigation until it is fixed upstream: the not-found page carries
+ * `robots: noindex`, so Google will not index a dead product URL as a real
+ * page even though the status is wrong. Re-test after each Next upgrade.
+ */
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const category = await getCategoryBySlug(slug);

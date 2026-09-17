@@ -26,15 +26,19 @@ const createClient = () => {
   // The local development database (scripts/dev-db.mjs) is PGlite behind a
   // socket. It serialises queries and hangs up on spare connections, so a pool
   // larger than one produces "Server has closed the connection" at random.
-  // A single developer needs exactly one connection anyway.
-  const isLocalPglite =
-    process.env.NODE_ENV !== "production" && /127\.0\.0\.1|localhost/.test(connectionString);
+  //
+  // Detected from the connection string alone, deliberately not from NODE_ENV:
+  // `next build` runs as production while still pointing at the local database,
+  // and that mismatch made every local build fail on a closed connection.
+  const isLocalPostgres = /^postgresql:\/\/[^@]*@(127\.0\.0\.1|localhost)[:/]/.test(
+    connectionString,
+  );
 
   const adapter = new PrismaPg({
     connectionString,
     // Serverless functions are short-lived; a large pool just exhausts Postgres.
-    max: isLocalPglite ? 1 : process.env.NODE_ENV === "production" ? 5 : 5,
-    idleTimeoutMillis: isLocalPglite ? 0 : 30_000,
+    max: isLocalPostgres ? 1 : 5,
+    idleTimeoutMillis: isLocalPostgres ? 0 : 30_000,
     connectionTimeoutMillis: 10_000,
   });
 

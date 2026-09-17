@@ -45,6 +45,12 @@ const nextConfig: NextConfig = {
       // ever carry JSON. Keep this small on purpose.
       bodySizeLimit: "2mb",
     },
+
+    // A production build fans out across a worker per core, and each worker
+    // opens its own database connection. The local PGlite database serves one
+    // query at a time, so `NEXT_SINGLE_WORKER=1 npm run build` keeps a local
+    // build from exhausting it. Builds against Neon leave this unset.
+    ...(process.env.NEXT_SINGLE_WORKER === "1" ? { cpus: 1 } : {}),
   },
 
   async headers() {

@@ -12,14 +12,19 @@ type Params = Promise<{ slug: string }>;
 
 export const revalidate = 600;
 
-export async function generateStaticParams() {
-  const pages = await devFallback(
-    () => db.page.findMany({ where: { isPublished: true }, select: { slug: true } }),
-    () => Object.keys(DEMO_PAGES).map((slug) => ({ slug })),
-  );
-  return pages.map((p) => ({ slug: p.slug }));
-}
-
+/*
+ * `notFound()` returns a 200 status on Next 16.3.5.
+ *
+ * Established by elimination in a production build: a bare page whose only
+ * statement is notFound(), with no proxy, no error boundary and no custom
+ * not-found file anywhere, still answers 200 — while a genuinely unmatched URL
+ * correctly answers 404. It is a framework bug, not this page's doing, and
+ * removing generateStaticParams did not help (that was an earlier wrong guess).
+ *
+ * Mitigation until it is fixed upstream: the not-found page carries
+ * `robots: noindex`, so Google will not index a dead product URL as a real
+ * page even though the status is wrong. Re-test after each Next upgrade.
+ */
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
   const page = await devFallback(

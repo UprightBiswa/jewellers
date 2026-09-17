@@ -4,11 +4,16 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
-import { auth, isAdminRole } from "@/auth";
+import { auth, isAdminRole, signOut } from "@/auth";
 import { rupeesToPaise } from "@/lib/money";
 import { makeSku, slugify } from "@/lib/utils";
 import { saveSettingsGroup, settingsSchema, type SettingsGroup } from "@/lib/settings";
 import { getImageProvider } from "@/lib/images/cloudinary";
+
+/** Ends the staff session and returns to the sign-in screen. */
+export async function signOutAction(): Promise<void> {
+  await signOut({ redirectTo: "/admin/login" });
+}
 
 export type ActionResult<T = undefined> =
   | { ok: true; data?: T; message?: string }

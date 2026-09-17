@@ -8,6 +8,7 @@ import Link from "next/link";
 export default function NotFound() {
   return (
     <div className="grid min-h-dvh place-items-center bg-bg px-4 text-center">
+      <meta name="robots" content="noindex, nofollow" />
       <div className="max-w-sm">
         <h1 className="font-display text-2xl text-ink">Page not found</h1>
         <p className="mt-2 text-[15px] text-ink-2">
