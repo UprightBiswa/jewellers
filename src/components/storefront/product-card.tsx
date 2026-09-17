@@ -4,6 +4,7 @@ import { imageUrl } from "@/lib/images/url";
 import { discountPercent, formatPaise } from "@/lib/money";
 import { PURITY_LABEL } from "@/lib/pricing";
 import { Badge } from "@/components/ui/badge";
+import { WishlistButton } from "./wishlist-button";
 import type { ProductCard as Card } from "@/lib/queries/catalog";
 import { cn } from "@/lib/utils";
 
@@ -59,6 +60,13 @@ export function ProductCard({ product, priority }: { product: Card; priority?: b
               <Badge tone="neutral" size="xs">Live rate</Badge>
             ) : null}
           </div>
+
+          {/* Outside the <Link>, so tapping the heart does not open the product. */}
+          <WishlistButton
+            productId={product.id}
+            productTitle={product.title}
+            className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 max-sm:opacity-100"
+          />
 
           {!product.inStock ? (
             <div className="absolute inset-0 grid place-items-center bg-surface/75 backdrop-blur-[2px]">

@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { headers } from "next/headers";
 import { AuthError } from "next-auth";
-import { signIn } from "@/auth";
+import { signIn, signOut } from "@/auth";
 
 import { db } from "@/lib/db";
 import {
@@ -21,6 +21,15 @@ import { absoluteUrl, PHONE_RE } from "@/lib/utils";
 export type ActionResult =
   | { ok: true; message?: string }
   | { ok: false; message: string; fieldErrors?: Record<string, string> };
+
+/**
+ * Sign out. Used by both the admin shell and the customer account nav, which is
+ * why it lives here rather than in either one's actions file.
+ */
+export async function signOutAction(formData: FormData): Promise<void> {
+  const to = String(formData.get("redirectTo") ?? "") || "/";
+  await signOut({ redirectTo: to });
+}
 
 /**
  * Sign in.

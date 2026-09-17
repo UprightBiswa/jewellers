@@ -14,6 +14,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { BuyBox } from "@/components/storefront/buy-box";
 import { PincodeCheck } from "@/components/storefront/pincode-check";
 import { ProductGallery } from "@/components/storefront/product-gallery";
+import { WishlistButton } from "@/components/storefront/wishlist-button";
 import { ProductGrid, SectionHeading } from "@/components/storefront/sections";
 
 type Params = Promise<{ slug: string }>;
@@ -208,6 +209,15 @@ export default async function ProductPage({ params }: { params: Params }) {
                 stock={product.stock}
                 whatsapp={settings.store.whatsapp}
                 productUrl={url}
+              />
+            </div>
+
+            <div className="mt-4">
+              <WishlistButton
+                productId={product.id}
+                productTitle={product.title}
+                variant="full"
+                className="w-full sm:w-auto"
               />
             </div>
 

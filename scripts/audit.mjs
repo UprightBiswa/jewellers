@@ -267,6 +267,48 @@ if (simple) {
   }
 }
 
+// --- 5b. Account area ------------------------------------------------------
+{
+  const jar = makeJar();
+  const ok = await login(jar, "demo.customer@example.com", "Demo!2345", "store");
+
+  if (ok) {
+    for (const [path, needle] of [
+      ["/account", "Your details"],
+      ["/account/orders", "CS-"],
+      ["/account/addresses", "Delivery addresses"],
+      ["/account/wishlist", "Saved"],
+    ]) {
+      const res = await req(path, { jar, redirect: "follow" });
+      const html = await res.text();
+      record("account", path, res.status === 200 && html.includes(needle),
+        res.status !== 200 ? `status ${res.status}` : `missing "${needle}"`);
+    }
+
+    // The wishlist round trip
+    const list = await (await req("/api/v1/wishlist", { jar })).json();
+    record("account", "wishlist reads", list.ok && list.data.signedIn === true);
+
+    const target = products[0];
+    if (target) {
+      const on = await (await req("/api/v1/wishlist", {
+        method: "POST", jar, body: { productId: target.id },
+      })).json();
+      record("account", "wishlist save", on.ok && on.data.saved === true, on.error?.message ?? "");
+
+      const off = await (await req("/api/v1/wishlist", {
+        method: "POST", jar, body: { productId: target.id },
+      })).json();
+      record("account", "wishlist remove", off.ok && off.data.saved === false);
+    }
+  }
+
+  // Signed-out customers must not reach the account area
+  const anon = await req("/account", { redirect: "manual" });
+  record("security", "/account refuses anonymous",
+    anon.status === 307 || anon.status === 302, `status ${anon.status}`);
+}
+
 // --- 6. Admin --------------------------------------------------------------
 {
   const admin = makeJar();

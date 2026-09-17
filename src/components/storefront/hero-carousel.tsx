@@ -44,6 +44,16 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   const [paused, setPaused] = useState(false);
   const touchStart = useRef<number | null>(null);
 
+  /**
+   * The first slide must render VISIBLE, on the server and on the first client
+   * paint. An entrance animation that starts at opacity 0 means the server
+   * sends a blank hero, and on a slow phone the shop looks broken until React
+   * hydrates. So no `initial` until after mount; from then on, slide changes
+   * animate normally.
+   */
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const count = slides.length;
   const go = useCallback(
     (next: number) => setIndex(((next % count) + count) % count),
@@ -97,7 +107,12 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
       <div className="container-page grid items-center gap-8 py-12 md:grid-cols-2 md:py-20">
         <div className="max-w-xl">
           <AnimatePresence mode="wait">
-            <motion.div key={slide.id} initial="hidden" animate="show" exit="hidden">
+            <motion.div
+              key={slide.id}
+              initial={mounted ? "hidden" : false}
+              animate="show"
+              exit="hidden"
+            >
               <motion.p
                 custom={0}
                 variants={lines}
@@ -161,7 +176,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
             <motion.div
               key={slide.id}
               className="absolute inset-0"
-              initial={{ opacity: 0, scale: reduced ? 1 : 1.06 }}
+              initial={mounted ? { opacity: 0, scale: reduced ? 1 : 1.06 } : false}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{

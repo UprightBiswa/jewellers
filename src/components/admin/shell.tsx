@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/storefront/theme-toggle";
 import { Mark } from "@/components/brand/logo";
-import { SignOutButton } from "@/app/admin/sign-out";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 
 type NavItem = {
   href: string;
@@ -115,7 +115,7 @@ export function AdminShell({
           </div>
           <div className="mt-2 flex items-center justify-between gap-2 px-1">
             <ThemeToggle />
-            <SignOutButton />
+            <SignOutButton redirectTo={"/admin/login"} />
           </div>
         </div>
       </aside>
@@ -129,7 +129,7 @@ export function AdminShell({
           </p>
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            <SignOutButton compact />
+            <SignOutButton compact redirectTo={"/admin/login"} />
           </div>
         </header>
 

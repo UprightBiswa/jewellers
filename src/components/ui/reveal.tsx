@@ -1,45 +1,41 @@
-"use client";
-
-import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 /**
- * Scroll reveal.
+ * A gentle entrance for a section.
  *
- * Deliberately starts at opacity 0.001 rather than 0 and animates on `whileInView`
- * with `once`: content above the fold is already in view on first paint, so the
- * page never shows a blank frame waiting for an observer. With reduced motion
- * requested, it renders plain children and skips the wrapper entirely.
+ * CSS only, and deliberately so. The previous version used a scroll-triggered
+ * JavaScript animation starting at opacity 0, which meant the server sent a
+ * homepage whose hero and ten sections were all invisible until React hydrated.
+ * If hydration was slow — a mid-range phone on Tufanganj mobile data, exactly
+ * our customer — the shop looked blank and broken.
+ *
+ * A CSS animation starts at first paint whether or not JavaScript ever arrives,
+ * so the content is guaranteed on screen within 600ms. `prefers-reduced-motion`
+ * is handled globally in globals.css, which collapses every animation to
+ * nothing — leaving the content simply visible.
  */
 export function Reveal({
   children,
   delay = 0,
-  y = 16,
   className,
 }: {
   children: ReactNode;
+  /** seconds — stagger sections that appear together */
   delay?: number;
-  y?: number;
   className?: string;
 }) {
-  const reduced = useReducedMotion();
-
-  if (reduced) return <div className={className}>{children}</div>;
-
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0.001, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] }}
+    <div
+      className={cn("animate-[fade-up_0.6s_var(--ease-out-expo)_both]", className)}
+      style={delay ? { animationDelay: `${delay}s` } : undefined}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
-/** Staggers its children by index — used for product grids and category rails. */
+/** Staggers its children, for product grids and category rails. */
 export function RevealGroup({
   children,
   className,
@@ -49,22 +45,16 @@ export function RevealGroup({
   className?: string;
   stagger?: number;
 }) {
-  const reduced = useReducedMotion();
-
-  if (reduced) return <div className={className}>{children}</div>;
-
   return (
     <div className={className}>
       {children.map((child, i) => (
-        <motion.div
+        <div
           key={i}
-          initial={{ opacity: 0.001, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.5, delay: Math.min(i * stagger, 0.4), ease: [0.16, 1, 0.3, 1] }}
+          className="animate-[fade-up_0.5s_var(--ease-out-expo)_both]"
+          style={{ animationDelay: `${Math.min(i * stagger, 0.4)}s` }}
         >
           {child}
-        </motion.div>
+        </div>
       ))}
     </div>
   );
