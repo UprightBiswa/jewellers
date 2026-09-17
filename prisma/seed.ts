@@ -1,4 +1,8 @@
-import "dotenv/config";
+import { config as loadEnv } from "dotenv";
+
+// .env.local overrides .env, matching how Next.js itself resolves them. Prisma
+// runs outside Next, so it does not get that for free.
+loadEnv({ path: [".env.local", ".env"], quiet: true });
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/index.js";
@@ -8,6 +12,7 @@ import {
   COUPONS,
   PAGES,
   PRODUCTS,
+  REVIEWS,
   STORE,
 } from "../src/lib/demo/catalogue.js";
 
@@ -343,6 +348,37 @@ async function main() {
       console.log("  orders: 1 demo order");
     }
   }
+
+  // --- reviews -----------------------------------------------------------
+  // Each needs its own customer: one person cannot review the same piece twice,
+  // and four reviews all signed "Ananya Roy" would fool nobody.
+  for (const r of REVIEWS) {
+    const product = await db.product.findUnique({
+      where: { slug: r.productSlug },
+      select: { id: true },
+    });
+    if (!product) continue;
+
+    const reviewer = await db.user.upsert({
+      where: { email: r.email },
+      create: { email: r.email, name: r.name, role: "CUSTOMER", emailVerified: new Date() },
+      update: {},
+    });
+
+    await db.review.upsert({
+      where: { productId_userId: { productId: product.id, userId: reviewer.id } },
+      create: {
+        productId: product.id,
+        userId: reviewer.id,
+        rating: r.rating,
+        title: r.title,
+        body: r.body,
+        status: "APPROVED",
+      },
+      update: { status: "APPROVED" },
+    });
+  }
+  console.log(`  reviews: ${REVIEWS.length}`);
 
   // --- metal rate, for the day he starts pricing by weight ---------------
   const rateCount = await db.metalRate.count();

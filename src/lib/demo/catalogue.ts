@@ -382,3 +382,46 @@ Write to us at any time and we will delete your account and everything in it wit
 **Stock.** If something sells out between your order and our packing, we will call you the same day and refund you in full.`,
   },
 ];
+
+/**
+ * Seed reviews.
+ *
+ * Written as the kind of thing customers in Coochbehar actually say — a size
+ * that fit, a delivery that arrived, a gift that landed. The owner approves or
+ * deletes each one in the admin; they exist so the homepage is not missing a
+ * section on day one.
+ */
+export const REVIEWS = [
+  {
+    productSlug: "ghungur-payel-pair",
+    name: "Sumita Barman",
+    email: "sumita.barman@example.com",
+    rating: 5,
+    title: "The sound is lovely",
+    body: "Bought these for my sister's wedding. Light on the ankle and the ghungur sound is soft, not loud. The extender chain was needed and it was there.",
+  },
+  {
+    productSlug: "chhoto-jhumka",
+    name: "Priyanka Saha",
+    email: "priyanka.saha@example.com",
+    rating: 5,
+    title: "Wear them every day",
+    body: "I wanted a jhumka I could wear to work without my ears hurting by evening. These are the first pair that managed it.",
+  },
+  {
+    productSlug: "lightweight-daily-ring",
+    name: "Arindam Dutta",
+    email: "arindam.dutta@example.com",
+    rating: 4,
+    title: "Made to my size",
+    body: "Ordered size 18 and it fits exactly. Took about a week because they made it, which they told me before I paid. Simple and well finished.",
+  },
+  {
+    productSlug: "newborn-silver-gift-set",
+    name: "Moushumi Roy",
+    email: "moushumi.roy@example.com",
+    rating: 5,
+    title: "Gave it at the annaprashan",
+    body: "Everything is smooth, no sharp edges anywhere, which was my worry. Came in a proper box so I did not have to wrap it.",
+  },
+];

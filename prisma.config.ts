@@ -1,4 +1,8 @@
-import "dotenv/config";
+import { config as loadEnv } from "dotenv";
+
+// .env.local overrides .env, matching how Next.js itself resolves them. Prisma
+// runs outside Next, so it does not get that for free.
+loadEnv({ path: [".env.local", ".env"], quiet: true });
 import path from "node:path";
 import { defineConfig, env } from "prisma/config";
 

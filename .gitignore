@@ -53,3 +53,6 @@ next-env.d.ts
 
 # prisma generated client
 /src/generated/
+
+# local PGlite database (development only)
+/.pglite/

@@ -326,3 +326,85 @@ export function Testimonials({
     </div>
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/* Shop by price                                                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Price bands.
+ *
+ * Both reference shops lead with an "Under ₹999" rail, and for good reason: a
+ * customer arriving from WhatsApp usually has a budget before they have a
+ * category. The bands are drawn from Charubala's real ₹800–5,000 range.
+ */
+export function ShopByPrice() {
+  const bands = [
+    { label: "Under ₹999", sub: "Everyday pieces", href: "/collections/all?maxPrice=99900" },
+    { label: "₹1,000 – ₹1,999", sub: "Chains and payel", href: "/collections/all?minPrice=100000&maxPrice=199900" },
+    { label: "₹2,000 – ₹2,999", sub: "Jhumka and bracelets", href: "/collections/all?minPrice=200000&maxPrice=299900" },
+    { label: "₹3,000 and above", sub: "Gift sets and baby silver", href: "/collections/all?minPrice=300000" },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {bands.map((b) => (
+        <Link
+          key={b.label}
+          href={b.href}
+          className="group rounded-[var(--radius-card)] border border-line bg-surface p-4 transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-brand"
+        >
+          <p className="font-display text-[17px] text-ink group-hover:text-brand">{b.label}</p>
+          <p className="mt-0.5 text-[13px] text-muted">{b.sub}</p>
+          <ArrowRight
+            className="mt-3 size-4 text-muted transition-transform group-hover:translate-x-1 group-hover:text-brand"
+            aria-hidden
+          />
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Made to order / WhatsApp band                                              */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The shop's real differentiator: he makes things. A photo on WhatsApp is how
+ * about half his work starts, so it gets a band of its own rather than a line
+ * buried in the About page.
+ */
+export function MadeToOrderBand({ whatsapp }: { whatsapp?: string }) {
+  return (
+    <section className="border-y border-line bg-brand-soft">
+      <div className="container-page grid items-center gap-6 py-10 md:grid-cols-[1fr_auto]">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.16em] text-brand">Made to order</p>
+          <h2 className="mt-2 font-display text-[clamp(1.4rem,3.5vw,2rem)] text-ink">
+            Seen something you like somewhere else?
+          </h2>
+          <p className="mt-2 max-w-prose text-[15px] leading-relaxed text-ink-2">
+            Send us the photo on WhatsApp. We will tell you what it costs and how long it
+            takes, and make it to your size. Ten new designs come off the bench every month
+            — half of them started exactly this way.
+          </p>
+        </div>
+
+        {whatsapp ? (
+          <Button asChild size="lg" className="justify-self-start md:justify-self-end">
+            <a
+              href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(
+                "Hello, I would like something made to order.",
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Send a photo on WhatsApp
+            </a>
+          </Button>
+        ) : null}
+      </div>
+    </section>
+  );
+}
