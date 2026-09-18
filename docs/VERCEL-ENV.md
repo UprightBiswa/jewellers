@@ -7,6 +7,12 @@ Secrets below are freshly generated for production and are **different from the
 local ones on purpose** — a leaked development secret should never be a
 production problem.
 
+> **No secret belongs in this file.** It is committed, and this repository is
+> public. Secrets go from the service's dashboard straight into Vercel's
+> Environment Variables and nowhere else. An earlier version of this page did
+> carry real values, and they have to be treated as known — see *Rotate these*
+> at the end.
+
 > **Leave a box out rather than filling it with anything.**
 > Every optional service degrades when its variable is missing. It cannot
 > degrade when the variable holds a placeholder — a `1` or an `xxx` looks set,
@@ -25,16 +31,18 @@ NEXT_PUBLIC_SITE_NAME="Charubala Silver"
 NEXT_PUBLIC_SITE_URL="https://charubala.com"
 NEXT_PUBLIC_WHATSAPP_NUMBER="918011210884"
 
-# Sessions. Generated for production — do not reuse the local one.
-AUTH_SECRET="oIpHq4DOxg1fDUSpa3s+Vtq89CesFyt8GJH3KEAZvpA="
+# Sessions. Generate a NEW one for production and paste it straight into
+# Vercel — never back into this file:  openssl rand -base64 32
+AUTH_SECRET="<generate one, paste into Vercel only>"
 
-# Razorpay TEST keys — safe, no real money. Swap for live keys at launch.
-RAZORPAY_KEY_ID="rzp_test_TdakE5txomTt5E"
-RAZORPAY_KEY_SECRET="Z1zqBDs8o3a2E2C0Dl9gfxP7"
-NEXT_PUBLIC_RAZORPAY_KEY_ID="rzp_test_TdakE5txomTt5E"
+# Razorpay. The key id is public — the browser sees it. The secret is not:
+# copy it from Razorpay → Settings → API Keys straight into Vercel.
+RAZORPAY_KEY_ID="rzp_test_…"
+RAZORPAY_KEY_SECRET="<from the Razorpay dashboard, Vercel only>"
+NEXT_PUBLIC_RAZORPAY_KEY_ID="rzp_test_…"
 
-# Paste this same value into Razorpay → Settings → Webhooks → Secret
-RAZORPAY_WEBHOOK_SECRET="i-qNDnjJWa6e8irA3WZkB6npdu0ACHiE"
+# Razorpay → Settings → Webhooks shows this once when you create the webhook.
+RAZORPAY_WEBHOOK_SECRET="<from Razorpay, Vercel only>"
 
 EMAIL_FROM="orders@charubala.com"
 EMAIL_ADMIN_NOTIFY="charubalasilver@gmail.com"
@@ -46,13 +54,14 @@ The panel's secret URL and Rahul's password used to be four variables here. They
 are gone. The URL is derived from `AUTH_SECRET`, and the password lives in the
 database as a hash.
 
-With the `AUTH_SECRET` above, the production door is:
+The URL depends on the `AUTH_SECRET` you put in Vercel, so print it with that
+value rather than reading it off a page:
 
-```
-https://charubala.com/9de35626f26acf93
+```bash
+AUTH_SECRET="<the one in Vercel>" NEXT_PUBLIC_SITE_URL="https://charubala.com" npm run admin
 ```
 
-Visiting it once drops a cookie and forwards to `/admin/login`. Without that
+Visiting the URL it prints once drops a cookie and forwards to `/admin/login`. Without that
 visit `/admin` answers **404** — not 403, so nobody learns a panel is there.
 
 Change `AUTH_SECRET` and the door moves, which is the point: rotating the
@@ -89,7 +98,7 @@ The wrong way round shows up as a migration that hangs.
 ```bash
 CLOUDINARY_CLOUD_NAME="tpfcmu4r"
 CLOUDINARY_API_KEY="234867866922274"
-CLOUDINARY_API_SECRET="ZclzDvwOD6PO-kFrJvPp2J_YQKE"
+CLOUDINARY_API_SECRET="<from the Cloudinary dashboard, Vercel only>"
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="tpfcmu4r"
 ```
 
@@ -168,7 +177,7 @@ the site genuinely cannot start without.
 | Google Search Console | `https://charubala.com/sitemap.xml` |
 | Uptime monitor | `https://charubala.com/api/v1/health` |
 | Google OAuth redirect (if used) | `https://charubala.com/api/auth/callback/google` |
-| **Rahul's admin door** | `https://charubala.com/9de35626f26acf93` |
+| **Rahul's admin door** | printed by `npm run admin` — never write it down here |
 
 ---
 
@@ -192,7 +201,7 @@ Then, in order:
 
 1. `https://charubala.com/api/v1/health` → `"status": "ok"`, and check the
    `integrations` block shows what you expect to be live.
-2. Visit `https://charubala.com/9de35626f26acf93` once, then sign in at `/admin/login`.
+2. Visit the door URL from `npm run admin` once, then sign in at `/admin/login`.
 3. Set the password: `npm run admin -- --password "…"` (it writes to the same
    Neon database Vercel uses, so it works from your machine).
 4. Add one real product, with a photo, from a phone.
@@ -211,3 +220,25 @@ Then, in order:
 4. **Regenerate the test keys** in Razorpay. The ones above were shared in chat,
    so treat them as known.
 5. Place one real ₹1 order and refund it.
+
+---
+
+## Rotate these
+
+An earlier version of this page was committed with real values, and the
+repository is public. These four must be replaced before launch — assume they
+are known:
+
+| Value | Where | Why it matters |
+|---|---|---|
+| `AUTH_SECRET` | generate a new one, Vercel only | It signs session cookies. Anyone holding it can forge a staff session — and it is what the admin door is derived from. |
+| `RAZORPAY_KEY_SECRET` | Razorpay → Settings → API Keys → Regenerate | Signs payment verification. Test keys, so no money is at risk, but replace them anyway. |
+| `RAZORPAY_WEBHOOK_SECRET` | Razorpay → Settings → Webhooks → recreate | Anyone holding it can forge a "payment captured" and get goods for nothing. |
+| `CLOUDINARY_API_SECRET` | Cloudinary → Settings → Access Keys → Rotate | Signs upload permissions for the whole image account. |
+
+The Neon password was also shared outside the repository. Neon → Roles → Reset
+password, then update `DATABASE_URL` and `DIRECT_URL` in Vercel and in
+`.env.local`.
+
+Changing `AUTH_SECRET` signs everyone out and moves the admin door. Both are
+intended. Run `npm run admin` afterwards for the new URL.
