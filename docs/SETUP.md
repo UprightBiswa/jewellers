@@ -42,8 +42,9 @@ npm run audit          # 88 checks against the running site
 Then:
 
 - Shop — http://localhost:3000
-- Admin — http://localhost:3000/admin (sign in at `/admin/login`)
-- Owner login — whatever you set as `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`
+- Admin — run `npm run admin`; it prints the secret URL and who can sign in
+- Owner login — created by the seed, which prints the password once. Lost it?
+  `npm run admin -- --reset`, or `npm run admin -- --password "…"`
 - Demo customer — `demo.customer@example.com` / `Demo!2345`
 
 `AUTH_SECRET` is generated with `openssl rand -base64 32`.
@@ -64,9 +65,10 @@ there. `.env.example` is the committed template and holds no real values.
 | 5555 | Prisma Studio, a spreadsheet view of the database | `npm run db:studio` |
 | 3002 | React Email preview, for editing order emails | `npm run email:dev` |
 
-The admin is not a separate server, and it is not at `/admin` either: with
-`ADMIN_PATH_SECRET` set, `/admin` answers 404 until you have visited
-`/<that-secret>` once.
+The admin is not a separate server, and it is not really at `/admin` either:
+`/admin` answers 404 until you have visited the secret path once. That path is
+derived from `AUTH_SECRET` (see `src/config/admin.ts`) rather than configured, so
+there is nothing to set and nothing to leak. `npm run admin` prints it.
 
 To run on another port: `PORT=4000 npm run dev`.
 

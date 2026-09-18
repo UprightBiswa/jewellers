@@ -54,3 +54,6 @@ next-env.d.ts
 # prisma generated client
 /src/generated/
 
+
+# admin credentials printed by `npm run admin` — never commit
+ADMIN-ACCESS.local.txt

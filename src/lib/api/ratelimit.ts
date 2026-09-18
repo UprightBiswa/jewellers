@@ -12,13 +12,40 @@ import { Redis } from "@upstash/redis";
 
 type Verdict = { success: boolean; remaining: number; reset: number };
 
-const redis =
-  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-    ? new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
-      })
-    : null;
+/**
+ * Upstash, but only if the variables hold something that could actually be
+ * Upstash.
+ *
+ * Checking merely that they are set is not enough: a deploy with
+ * UPSTASH_REDIS_REST_URL="1" — an empty box filled in with a placeholder —
+ * passed that check, and the client threw on an invalid URL at module load,
+ * which failed the entire production build. An optional integration must never
+ * be able to do that. So the URL is validated, and construction is wrapped:
+ * anything wrong falls back to the in-process limiter with a warning.
+ */
+function createRedis(): Redis | null {
+  const url = process.env.UPSTASH_REDIS_REST_URL?.trim();
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
+
+  if (!url || !token) return null;
+
+  if (!url.startsWith("https://")) {
+    console.warn(
+      `[ratelimit] UPSTASH_REDIS_REST_URL is not an https URL (got "${url}") — ` +
+        "using the in-process limiter. Remove the variable or set a real Upstash URL.",
+    );
+    return null;
+  }
+
+  try {
+    return new Redis({ url, token });
+  } catch (err) {
+    console.warn("[ratelimit] could not start Upstash, using the in-process limiter", err);
+    return null;
+  }
+}
+
+const redis = createRedis();
 
 /** Buckets tuned to what each endpoint actually costs us. */
 export const LIMITS = {

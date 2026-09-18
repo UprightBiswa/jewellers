@@ -48,8 +48,6 @@ const serverSchema = z.object({
   API_CORS_ORIGINS: z.string().default(""),
   API_DOCS_ENABLED: bool,
 
-  SEED_ADMIN_EMAIL: z.string().default("owner@silverstore.test"),
-  SEED_ADMIN_PASSWORD: z.string().default("ChangeMe!123"),
 });
 
 const clientSchema = z.object({

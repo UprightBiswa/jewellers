@@ -10,7 +10,23 @@
  *   npm run audit
  */
 
+import { config as loadEnv } from "dotenv";
+loadEnv({ path: [".env.local", ".env"], quiet: true });
+
+import { createHash } from "node:crypto";
+
 const BASE = process.env.AUDIT_BASE ?? "http://localhost:3000";
+
+/** Mirrors src/config/admin.ts — the panel's secret path, derived from AUTH_SECRET. */
+function adminDoor() {
+  const authSecret = process.env.AUTH_SECRET?.trim();
+  if (!authSecret) return "";
+  return createHash("sha256")
+    .update(`charubala:admin-door:${authSecret}`)
+    .digest("hex")
+    .slice(0, 16);
+}
+
 const results = [];
 
 let pass = 0;
@@ -332,8 +348,9 @@ if (simple) {
 {
   const admin = makeJar();
 
-  // Walk through the secret door first, if one is configured.
-  const secret = process.env.ADMIN_PATH_SECRET;
+  // Walk through the secret door first. It is derived from AUTH_SECRET, the same
+  // way src/config/admin.ts derives it — see `npm run admin`.
+  const secret = adminDoor();
   if (secret) {
     const closed = await req("/admin/login");
     record("security", "/admin is a 404 without the secret door", closed.status === 404,
@@ -341,8 +358,22 @@ if (simple) {
     await req(`/${secret}`, { jar: admin });
   }
 
-  const ok = await login(admin, "owner@charubala.com", "Charubala@2018", "admin");
-  record("auth", "owner sign in", ok);
+  // Credentials are never written into this file — the panel checks only run
+  // when they are supplied:
+  //   ADMIN_EMAIL=... ADMIN_PASSWORD=... npm run audit
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const haveCredentials = Boolean(adminEmail && adminPassword);
+
+  const ok = haveCredentials
+    ? await login(admin, adminEmail, adminPassword, "admin")
+    : false;
+
+  if (!haveCredentials) {
+    console.log("  admin checks skipped — set ADMIN_EMAIL and ADMIN_PASSWORD to run them");
+  } else {
+    record("auth", "owner sign in", ok);
+  }
 
   if (ok) {
     for (const [path, needle] of [
@@ -397,10 +428,10 @@ if (simple) {
   }
 
   // The owner signing in on the SHOP side gets a shop session and nothing more.
-  {
+  if (haveCredentials) {
     const shopSide = makeJar();
     if (secret) await req(`/${secret}`, { jar: shopSide });
-    const signedIn = await login(shopSide, "owner@charubala.com", "Charubala@2018", "store");
+    const signedIn = await login(shopSide, adminEmail, adminPassword, "store");
     const panel = await req("/admin", { jar: shopSide, redirect: "manual" });
     record("security", "shop sign-in does not open the panel",
       signedIn && (panel.status === 307 || panel.status === 302),

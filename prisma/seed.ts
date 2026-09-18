@@ -6,6 +6,7 @@ loadEnv({ path: [".env.local", ".env"], quiet: true });
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/index.js";
+import { ADMIN_EMAIL, adminDoorUrl } from "../src/config/admin.js";
 import {
   CATEGORIES,
   COLLECTIONS,
@@ -103,21 +104,47 @@ async function main() {
   console.log(`  settings: ${settings.length}`);
 
   // --- users -------------------------------------------------------------
-  const adminEmail = (process.env.SEED_ADMIN_EMAIL ?? "owner@charubala.com").toLowerCase();
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe!123";
-
-  const owner = await db.user.upsert({
-    where: { email: adminEmail },
-    create: {
-      email: adminEmail,
-      name: STORE.owner,
-      phone: STORE.whatsapp.slice(-10),
-      role: "OWNER",
-      passwordHash: await bcrypt.hash(adminPassword, 12),
-      emailVerified: new Date(),
-    },
-    update: { role: "OWNER", name: STORE.owner },
+  // The owner's address lives in src/config/admin.ts, not in an environment
+  // variable. The password is generated here and printed once, because a
+  // committed default like "ChangeMe!123" is a password everybody already knows.
+  // Re-seeding never touches an existing password — use `npm run admin` to reset.
+  // If an owner already exists, keep its address — re-seeding must never create
+  // a second OWNER, and Rahul may have changed his sign-in address since.
+  const existingOwner = await db.user.findFirst({
+    where: { role: "OWNER" },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, email: true },
   });
+
+  const adminEmail = existingOwner?.email ?? ADMIN_EMAIL.toLowerCase();
+  const freshPassword = existingOwner ? null : newPassword();
+
+  // Not an upsert: `create` is evaluated even when the row already exists, and
+  // there is no password to hash on a re-seed.
+  const owner = existingOwner
+    ? await db.user.update({
+        where: { id: existingOwner.id },
+        data: { role: "OWNER", name: STORE.owner },
+      })
+    : await db.user.create({
+        data: {
+          email: adminEmail,
+          name: STORE.owner,
+          phone: STORE.whatsapp.slice(-10),
+          role: "OWNER",
+          passwordHash: await bcrypt.hash(freshPassword!, 12),
+          emailVerified: new Date(),
+        },
+      });
+
+  if (freshPassword) {
+    console.log("\n  owner account created");
+    console.log(`    email:    ${adminEmail}`);
+    console.log(`    password: ${freshPassword}`);
+    console.log("    write it down — it is not stored anywhere in plain text\n");
+  } else {
+    console.log(`  owner account: ${adminEmail} (password unchanged)`);
+  }
 
   const customer = await db.user.upsert({
     where: { email: "demo.customer@example.com" },
@@ -411,8 +438,10 @@ async function main() {
   }
 
   console.log("\nDone.");
-  console.log(`  Admin login:    ${adminEmail} / ${adminPassword}`);
+  console.log(`  Admin door:     ${await adminDoorUrl(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000")}`);
+  console.log(`  Admin login:    ${adminEmail}${freshPassword ? ` / ${freshPassword}` : " (password unchanged)"}`);
   console.log(`  Customer login: demo.customer@example.com / Demo!2345`);
+  console.log("\n  Run `npm run admin` any time to see this again.");
 }
 
 main()
@@ -423,3 +452,23 @@ main()
   .finally(async () => {
     await db.$disconnect();
   });
+
+/**
+ * A password Rahul can read off a screen and type on a phone.
+ *
+ * No 0/O or 1/l/I, and a shape he can copy without squinting: two groups of
+ * four, a separator, and one digit block. Generated, never defaulted — a seed
+ * with a hardcoded password ships an account everybody can open.
+ */
+function newPassword(): string {
+  const letters = "abcdefghjkmnpqrstuvwxyz";
+  const caps = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const digits = "23456789";
+
+  const pick = (set: string, n: number) =>
+    Array.from(crypto.getRandomValues(new Uint32Array(n)))
+      .map((r) => set[r % set.length])
+      .join("");
+
+  return `${pick(caps, 1)}${pick(letters, 4)}-${pick(letters, 4)}-${pick(digits, 3)}`;
+}

@@ -21,7 +21,9 @@
     "db:reset": "prisma migrate reset --force && npm run db:seed",
     "email:dev": "email dev --dir src/emails --port 3002",
     "audit": "node scripts/audit.mjs",
-    "check:images": "node scripts/check-images.mjs"
+    "check:images": "node scripts/check-images.mjs",
+    "admin": "node scripts/admin-access.mjs",
+    "webhook:test": "node scripts/razorpay-webhook-test.mjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -11,8 +11,18 @@ import { placeholderPhoto } from "./placeholders";
  * the server; everything that just needs a `src=` uses this file.
  */
 
-const cloudName =
-  process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? process.env.CLOUDINARY_CLOUD_NAME ?? "";
+/**
+ * The same shape check the server module makes. A placeholder value left in a
+ * hosting dashboard would otherwise build real-looking Cloudinary URLs against a
+ * cloud that does not exist, and every product image on the shop would be a
+ * broken icon. An unusable name means placeholders, which at least look like a
+ * shop.
+ */
+const rawCloudName = (
+  process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? process.env.CLOUDINARY_CLOUD_NAME ?? ""
+).trim();
+
+const cloudName = /^[a-zA-Z0-9_-]{3,}$/.test(rawCloudName) ? rawCloudName : "";
 
 const FIT_MAP: Record<NonNullable<ImageTransform["fit"]>, string> = {
   cover: "c_fill,g_auto",

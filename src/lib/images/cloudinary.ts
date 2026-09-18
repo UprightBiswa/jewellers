@@ -7,28 +7,47 @@ import {
 } from "./provider";
 import { cdnUrl } from "./url";
 
-const cloudName = process.env.CLOUDINARY_CLOUD_NAME ?? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-const apiKey = process.env.CLOUDINARY_API_KEY;
-const apiSecret = process.env.CLOUDINARY_API_SECRET;
-const rootFolder = process.env.CLOUDINARY_UPLOAD_FOLDER ?? "silver-store";
+const cloudName = (
+  process.env.CLOUDINARY_CLOUD_NAME ?? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+)?.trim();
+const apiKey = process.env.CLOUDINARY_API_KEY?.trim();
+const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim();
+const rootFolder = process.env.CLOUDINARY_UPLOAD_FOLDER?.trim() || "silver-store";
 
-if (cloudName && apiKey && apiSecret) {
-  cloudinary.config({
-    cloud_name: cloudName,
-    api_key: apiKey,
-    api_secret: apiSecret,
-    secure: true,
-  });
+/**
+ * Shape check, not just a presence check — a placeholder left in a hosting
+ * dashboard must degrade to Unsplash placeholders, never break a build or sign
+ * an upload that Cloudinary will reject. A cloud name is a bare slug, the API
+ * key is numeric, the secret is a long token.
+ */
+const configured =
+  Boolean(cloudName && /^[a-zA-Z0-9_-]{3,}$/.test(cloudName)) &&
+  Boolean(apiKey && /^\d{6,}$/.test(apiKey)) &&
+  Boolean(apiSecret && apiSecret.length > 12);
+
+if (configured) {
+  try {
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret,
+      secure: true,
+    });
+  } catch (err) {
+    console.warn("[images] Cloudinary rejected its credentials — using placeholders", err);
+  }
+} else if (cloudName || apiKey || apiSecret) {
+  console.warn("[images] CLOUDINARY_* is set but does not look valid — using placeholders");
 }
 
 export const cloudinaryProvider: ImageProvider = {
   name: "cloudinary",
-  configured: Boolean(cloudName && apiKey && apiSecret),
+  configured,
 
   url: cdnUrl,
 
   async signUpload(folder): Promise<SignedUpload> {
-    if (!cloudName || !apiKey || !apiSecret) {
+    if (!configured || !cloudName || !apiKey || !apiSecret) {
       throw new Error("Cloudinary is not configured — set CLOUDINARY_* in .env.local");
     }
 

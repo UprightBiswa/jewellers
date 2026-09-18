@@ -75,9 +75,12 @@ DIRECT_URL            the direct Neon string
 AUTH_SECRET           openssl rand -base64 32   (a NEW one, not your local one)
 NEXT_PUBLIC_SITE_URL  https://charubala.com
 NEXT_PUBLIC_SITE_NAME Charubala Silver
-SEED_ADMIN_EMAIL      Rahul's email
-SEED_ADMIN_PASSWORD   a new password, not the local one
 ```
+
+There is deliberately no admin variable. The panel's secret URL is derived from
+`AUTH_SECRET`, and the owner's password lives in the database as a hash — run
+`npm run admin` to see the URL, `npm run admin -- --password "…"` to set one.
+Both read the same Neon database Vercel uses, so they work from your machine.
 
 ### What Vercel handles for you
 
@@ -283,9 +286,10 @@ Then check, in this order:
 
 1. `https://charubala.com/api/v1/health` returns `"status": "ok"` and shows which
    integrations are live.
-2. Sign in at `/admin/login` with `SEED_ADMIN_EMAIL`, and **change the password**.
+2. `npm run admin` — it prints the door URL. Visit it once, then sign in at
+   `/admin/login`.
 3. Add one real product with a real photo, from a phone.
 4. Place one test order end to end.
-5. `AUDIT_BASE=https://charubala.com npm run audit` — 85 checks against the live
-   site.
+5. `ADMIN_EMAIL=… ADMIN_PASSWORD=… AUDIT_BASE=https://charubala.com npm run audit`
+   — 103 checks against the live site.
 6. Submit `https://charubala.com/sitemap.xml` in Google Search Console.

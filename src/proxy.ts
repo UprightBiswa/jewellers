@@ -1,6 +1,12 @@
 import NextAuth from "next-auth";
 import { NextResponse, type NextRequest } from "next/server";
 import { authConfig, canOpenPanel } from "@/auth.config";
+import {
+  ADMIN_GATE_COOKIE,
+  ADMIN_IP_ALLOWLIST,
+  ADMIN_LOGIN_PATH,
+  adminDoorSecret,
+} from "@/config/admin";
 import { preflight, withCors } from "@/lib/api/cors";
 
 const { auth } = NextAuth(authConfig);
@@ -15,39 +21,34 @@ const { auth } = NextAuth(authConfig);
  */
 const CUSTOMER_PROTECTED = ["/account"];
 
-const ADMIN_LOGIN = "/admin/login";
+const ADMIN_LOGIN = ADMIN_LOGIN_PATH;
 
 /**
  * A secret door to the panel.
  *
- * With `ADMIN_PATH_SECRET` set, `/admin` answers 404 to anyone who has not first
- * visited `/<secret>`; that visit drops a cookie and forwards them to the panel.
- * Nobody typing `/admin` finds anything, and the panel is not linked from the
- * shop at all.
+ * `/admin` answers 404 to anyone who has not first visited `/<secret>`; that
+ * visit drops a cookie and forwards them to the panel. Nobody typing `/admin`
+ * finds anything, and the panel is not linked from the shop at all.
  *
- * This is obscurity, not the lock — the password and the staff-scoped session
- * are the lock. It exists so the panel is not a target in the first place.
- * Leave the variable unset in development and `/admin` behaves normally.
+ * The secret is derived from AUTH_SECRET in `src/config/admin.ts` — it is not an
+ * environment variable any more, and `npm run admin` prints the URL.
+ *
+ * This is obscurity, not the lock: the password and the staff-scoped session are
+ * the lock. It exists so the panel is not a target in the first place.
  */
-const ADMIN_SECRET = process.env.ADMIN_PATH_SECRET?.trim();
-const GATE_COOKIE = "cs_gate";
 
-/** Optional second lock: a comma-separated IP allow-list. Empty means any IP. */
+/** Optional second lock: an IP allow-list. Empty means any IP. */
 function ipAllowed(req: NextRequest): boolean {
-  const list = (process.env.ADMIN_IP_ALLOWLIST ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (list.length === 0) return true;
+  if (ADMIN_IP_ALLOWLIST.length === 0) return true;
 
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("x-real-ip") ||
     "";
-  return list.includes(ip);
+  return ADMIN_IP_ALLOWLIST.includes(ip);
 }
 
-export default auth((req) => {
+export default auth(async (req) => {
   const { pathname, search } = req.nextUrl;
   const user = req.auth?.user;
 
@@ -57,10 +58,13 @@ export default auth((req) => {
     return withCors(NextResponse.next(), req);
   }
 
+  // Derived once per server instance, then memoised — see config/admin.ts.
+  const adminSecret = await adminDoorSecret();
+
   // --- The secret door ---------------------------------------------------
-  if (ADMIN_SECRET && pathname === `/${ADMIN_SECRET}`) {
+  if (adminSecret && pathname === `/${adminSecret}`) {
     const to = NextResponse.redirect(new URL(ADMIN_LOGIN, req.nextUrl));
-    to.cookies.set(GATE_COOKIE, ADMIN_SECRET, {
+    to.cookies.set(ADMIN_GATE_COOKIE, adminSecret, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
@@ -74,7 +78,7 @@ export default auth((req) => {
   if (pathname.startsWith("/admin")) {
     // A 404, never a 403: an attacker learns nothing about whether a panel
     // lives here at all.
-    if (ADMIN_SECRET && req.cookies.get(GATE_COOKIE)?.value !== ADMIN_SECRET) {
+    if (adminSecret && req.cookies.get(ADMIN_GATE_COOKIE)?.value !== adminSecret) {
       return new NextResponse(null, { status: 404 });
     }
     if (!ipAllowed(req)) {

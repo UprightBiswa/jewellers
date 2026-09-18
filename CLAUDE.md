@@ -40,7 +40,8 @@ Auth.js v5 · Cloudinary · Razorpay · Resend · Upstash · Zod 4
 
 Reasoning in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · setup in
 [docs/SETUP.md](docs/SETUP.md) · API in [docs/API.md](docs/API.md) · status in
-[docs/PROGRESS.md](docs/PROGRESS.md).
+[docs/PROGRESS.md](docs/PROGRESS.md) · payments in
+[docs/RAZORPAY-TEST.md](docs/RAZORPAY-TEST.md).
 
 ### Version traps
 
@@ -72,6 +73,7 @@ src/lib/queries/         read models            src/lib/orders/          totals,
 src/lib/cart/            cart: client + server  src/lib/payments/        Razorpay
 src/lib/images/          url.ts (client-safe), cloudinary.ts (server-only), placeholders.ts
 src/lib/demo/            catalogue.ts (seed + preview data), fallback.ts (preview mode)
+src/config/admin.ts      admin email, secret door derivation, IP allow-list
 src/components/storefront/  src/components/admin/  src/components/ui/  src/components/brand/
 prisma/schema.prisma     prisma/seed.ts         docs/
 ```
@@ -158,6 +160,13 @@ holding it. `releaseOrder` puts it back.
 `src/proxy.ts` redirects a non-staff request, and `src/app/admin/(panel)/layout.tsx`
 checks the role again. Keep both — a missed matcher pattern should not leak a page.
 Checkout is deliberately **not** gated: guest checkout is allowed.
+
+In front of both sits a secret path: `/admin` answers **404** until the visitor
+has been to `/<secret>` once. The secret is *derived* from `AUTH_SECRET` in
+`src/config/admin.ts` — never an environment variable and never a literal in a
+committed file, because this repo is public. `npm run admin` prints the URL and
+the staff accounts; `npm run admin -- --password "…"` sets the owner's password
+straight into Neon. No credential belongs in a tracked file.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

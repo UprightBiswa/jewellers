@@ -14,15 +14,33 @@ import Razorpay from "razorpay";
  * gone end to end.
  */
 
-const keyId = process.env.RAZORPAY_KEY_ID;
-const keySecret = process.env.RAZORPAY_KEY_SECRET;
-const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+const keyId = process.env.RAZORPAY_KEY_ID?.trim();
+const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
+const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET?.trim();
 
-export const isConfigured = Boolean(keyId && keySecret);
+/**
+ * "Set" is not the same as "usable".
+ *
+ * A hosting dashboard full of half-filled boxes will hand us a "1" or an "xxx",
+ * and an optional integration that trusts a non-empty string can throw while the
+ * module is still evaluating — which fails the build, not the request. So the
+ * shape is checked: every Razorpay key id begins with rzp_test_ or rzp_live_.
+ */
+export const isConfigured = Boolean(
+  keyId?.startsWith("rzp_") && keySecret && keySecret.length > 8,
+);
 
-const client = isConfigured
-  ? new Razorpay({ key_id: keyId!, key_secret: keySecret! })
-  : null;
+function createClient(): Razorpay | null {
+  if (!isConfigured) return null;
+  try {
+    return new Razorpay({ key_id: keyId!, key_secret: keySecret! });
+  } catch (err) {
+    console.warn("[razorpay] keys rejected — checkout stays on cash on delivery", err);
+    return null;
+  }
+}
+
+const client = createClient();
 
 export type RazorpayOrder = {
   id: string;

@@ -11,8 +11,30 @@ import type { ReactElement } from "react";
  * local development works with no account.
  */
 
-const apiKey = process.env.RESEND_API_KEY;
-const resend = apiKey ? new Resend(apiKey) : null;
+const apiKey = process.env.RESEND_API_KEY?.trim();
+
+/**
+ * A Resend key is always `re_…`. Anything else — an empty box filled with a
+ * placeholder on a hosting dashboard — is treated as absent rather than passed
+ * to the client, which can throw while this module is still evaluating and take
+ * the whole build down with it.
+ */
+function createResend(): Resend | null {
+  if (!apiKey?.startsWith("re_")) {
+    if (apiKey) {
+      console.warn("[email] RESEND_API_KEY does not look like a Resend key — logging mail instead");
+    }
+    return null;
+  }
+  try {
+    return new Resend(apiKey);
+  } catch (err) {
+    console.warn("[email] could not start Resend — logging mail instead", err);
+    return null;
+  }
+}
+
+const resend = createResend();
 
 const FROM = process.env.EMAIL_FROM ?? "orders@example.com";
 const ADMIN = process.env.EMAIL_ADMIN_NOTIFY;
