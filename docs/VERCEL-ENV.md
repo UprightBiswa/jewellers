@@ -28,8 +28,11 @@ production problem.
 
 ```bash
 NEXT_PUBLIC_SITE_NAME="Charubala Silver"
-NEXT_PUBLIC_SITE_URL="https://charubala.com"
 NEXT_PUBLIC_WHATSAPP_NUMBER="918011210884"
+
+# NEXT_PUBLIC_SITE_URL is deliberately NOT here. Leave it out for the first
+# deploy and the site uses its own *.vercel.app address. Add it only when
+# charubala.com actually points at Vercel. See "The site's own address" below.
 
 # Sessions. Generate a NEW one for production and paste it straight into
 # Vercel — never back into this file:  openssl rand -base64 32
@@ -58,7 +61,7 @@ The URL depends on the `AUTH_SECRET` you put in Vercel, so print it with that
 value rather than reading it off a page:
 
 ```bash
-AUTH_SECRET="<the one in Vercel>" NEXT_PUBLIC_SITE_URL="https://charubala.com" npm run admin
+AUTH_SECRET="<the one in Vercel>" NEXT_PUBLIC_SITE_URL="https://<your-app>.vercel.app" npm run admin
 ```
 
 Visiting the URL it prints once drops a cookie and forwards to `/admin/login`. Without that
@@ -172,21 +175,36 @@ the site genuinely cannot start without.
 
 | Where | URL |
 |---|---|
-| Razorpay → Settings → Webhooks | `https://charubala.com/api/webhooks/razorpay` |
+| Razorpay → Settings → Webhooks | `https://<your-app>.vercel.app/api/webhooks/razorpay` — re-point it at charubala.com when DNS moves |
 | Razorpay events | `payment.captured`, `payment.failed`, `order.paid` — those three only |
-| Google Search Console | `https://charubala.com/sitemap.xml` |
-| Uptime monitor | `https://charubala.com/api/v1/health` |
+| Google Search Console | `https://charubala.com/sitemap.xml` — only once the domain is live |
+| Uptime monitor | `https://<your-app>.vercel.app/api/v1/health` |
 | Google OAuth redirect (if used) | `https://charubala.com/api/auth/callback/google` |
 | **Rahul's admin door** | printed by `npm run admin` — never write it down here |
 
 ---
 
-## Before the domain is pointed
+## The site's own address
 
-Vercel gives you something like `jewellers-xyz.vercel.app` immediately. To test
-on that first, set `NEXT_PUBLIC_SITE_URL` to it, then change it to
-`https://charubala.com` once DNS is done and redeploy. Order emails, canonical
-URLs, the sitemap and the OAuth callback all read that one variable.
+You do not have to tell it. `src/lib/site-url.ts` works it out, in this order:
+
+1. `NEXT_PUBLIC_SITE_URL`, if you set it
+2. Vercel's production domain — the stable `jewellers-xyz.vercel.app`
+3. Vercel's per-deployment URL — what a preview build gets
+4. `http://localhost:3000`
+
+So for the **first deploy, set nothing.** The sitemap, `robots.txt`, canonical
+tags, OpenGraph images and every link in an order email will already point at
+your `.vercel.app` address rather than at `localhost:3000`, which is what used
+to happen when the variable was forgotten.
+
+Add `NEXT_PUBLIC_SITE_URL="https://charubala.com"` only on the day DNS actually
+points at Vercel, and redeploy. Until then, leaving it unset is correct — and a
+preview deployment then describes itself by its own preview URL, which is what
+you want when testing.
+
+This needs Vercel's *Automatically expose System Environment Variables* setting,
+which is on by default (Project → Settings → Environment Variables).
 
 ---
 
@@ -199,14 +217,14 @@ npm run db:seed               # categories, products, policies, Rahul's account
 
 Then, in order:
 
-1. `https://charubala.com/api/v1/health` → `"status": "ok"`, and check the
-   `integrations` block shows what you expect to be live.
+1. `https://<your-app>.vercel.app/api/v1/health` → `"status": "ok"`, and check
+   the `integrations` block shows what you expect to be live.
 2. Visit the door URL from `npm run admin` once, then sign in at `/admin/login`.
 3. Set the password: `npm run admin -- --password "…"` (it writes to the same
    Neon database Vercel uses, so it works from your machine).
 4. Add one real product, with a photo, from a phone.
 5. Place one test order end to end.
-6. `ADMIN_EMAIL=… ADMIN_PASSWORD=… AUDIT_BASE=https://charubala.com npm run audit`
+6. `ADMIN_EMAIL=… ADMIN_PASSWORD=… AUDIT_BASE=https://<your-app>.vercel.app npm run audit`
    — 103 checks against production.
 
 ---

@@ -1,6 +1,7 @@
 import "server-only";
 import { Resend } from "resend";
 import type { ReactElement } from "react";
+import { SITE_URL } from "@/lib/site-url";
 
 /**
  * Email delivery.
@@ -70,7 +71,7 @@ export async function sendMail({
       react,
       replyTo,
       headers: marketing
-        ? { "List-Unsubscribe": `<${process.env.NEXT_PUBLIC_SITE_URL}/unsubscribe>` }
+        ? { "List-Unsubscribe": `<${SITE_URL}/unsubscribe>` }
         : undefined,
     });
 

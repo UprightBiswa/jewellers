@@ -116,7 +116,7 @@ export function LoginForm({ googleEnabled }: { googleEnabled: boolean }) {
         </>
       ) : null}
 
-      <form action={formAction} method="post" className="grid gap-4">
+      <form action={formAction} className="grid gap-4">
         <input type="hidden" name="next" value={next} />
 
         <Field label="Email" htmlFor="email" required>
@@ -172,7 +172,7 @@ export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
         </>
       ) : null}
 
-      <form action={formAction} method="post" className="grid gap-4">
+      <form action={formAction} className="grid gap-4">
         <Field label="Your name" htmlFor="name" required error={fieldErrors.name}>
           <Input id="name" name="name" autoComplete="name" required autoFocus />
         </Field>
@@ -248,7 +248,7 @@ export function ForgotPasswordForm() {
         </p>
       </div>
 
-      <form action={formAction} method="post" className="grid gap-4">
+      <form action={formAction} className="grid gap-4">
         <Field label="Email" htmlFor="email" required>
           <Input id="email" name="email" type="email" autoComplete="email" required autoFocus />
         </Field>
@@ -310,7 +310,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         </p>
       </div>
 
-      <form action={formAction} method="post" className="grid gap-4">
+      <form action={formAction} className="grid gap-4">
         <input type="hidden" name="token" value={token} />
 
         <Field

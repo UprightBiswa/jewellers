@@ -19,7 +19,8 @@ import type { ReactNode } from "react";
  */
 
 const STORE = process.env.NEXT_PUBLIC_SITE_NAME ?? "Silver Store";
-const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+import { SITE_URL } from "@/lib/site-url";
+const SITE = SITE_URL;
 
 export const styles = {
   body: {

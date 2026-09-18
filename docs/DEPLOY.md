@@ -73,9 +73,12 @@ Vercel detects Next.js. Do not change the build settings.
 DATABASE_URL          the pooled Neon string
 DIRECT_URL            the direct Neon string
 AUTH_SECRET           openssl rand -base64 32   (a NEW one, not your local one)
-NEXT_PUBLIC_SITE_URL  https://charubala.com
 NEXT_PUBLIC_SITE_NAME Charubala Silver
 ```
+
+`NEXT_PUBLIC_SITE_URL` is **not** on that list on purpose. Leave it out and the
+site uses its own `*.vercel.app` address — see `src/lib/site-url.ts`. Set it
+only once charubala.com points at Vercel.
 
 There is deliberately no admin variable. The panel's secret URL is derived from
 `AUTH_SECRET`, and the owner's password lives in the database as a hash — run
@@ -239,8 +242,10 @@ to another developer, the domain has to be his or it becomes an argument.
 Vercel → Project → Settings → Domains → add `charubala.com`. Vercel shows the
 two DNS records to paste at the registrar. It issues the certificate itself.
 
-Then set `NEXT_PUBLIC_SITE_URL=https://charubala.com` and redeploy — order
-emails, canonical URLs, the sitemap and the Google callback all read it.
+Then — and only then — set `NEXT_PUBLIC_SITE_URL=https://charubala.com` and
+redeploy. Order emails, canonical URLs, the sitemap and the Google callback all
+read it. Before that day, leaving it unset is correct: the site describes itself
+by its Vercel address rather than by a domain that does not resolve yet.
 
 ---
 

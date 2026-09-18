@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { SITE_URL } from "@/lib/site-url";
 
 /**
  * CORS for /api/v1.
@@ -20,8 +21,7 @@ function allowList(): string[] {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL;
-  if (site) fromEnv.push(site.replace(/\/$/, ""));
+  fromEnv.push(SITE_URL);
 
   if (process.env.NODE_ENV === "development") {
     fromEnv.push("http://localhost:3000", "http://localhost:3001");

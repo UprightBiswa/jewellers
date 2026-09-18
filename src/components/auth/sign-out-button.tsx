@@ -54,7 +54,7 @@ export function SignOutButton({
   redirectTo?: string;
 }) {
   return (
-    <form action={signOutAction} method="post">
+    <form action={signOutAction}>
       <input type="hidden" name="redirectTo" value={redirectTo} />
       <Inner compact={compact} />
     </form>

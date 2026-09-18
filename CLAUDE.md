@@ -74,6 +74,7 @@ src/lib/cart/            cart: client + server  src/lib/payments/        Razorpa
 src/lib/images/          url.ts (client-safe), cloudinary.ts (server-only), placeholders.ts
 src/lib/demo/            catalogue.ts (seed + preview data), fallback.ts (preview mode)
 src/config/admin.ts      admin email, secret door derivation, IP allow-list
+src/lib/site-url.ts      the site's own origin — never read NEXT_PUBLIC_SITE_URL directly
 src/components/storefront/  src/components/admin/  src/components/ui/  src/components/brand/
 prisma/schema.prisma     prisma/seed.ts         docs/
 ```
@@ -89,6 +90,7 @@ prisma/schema.prisma     prisma/seed.ts         docs/
 | Email | `RESEND_API_KEY` | `src/lib/email/send.ts`, `src/emails/` | Logged to console |
 | Rate limits | `UPSTASH_*` | `src/lib/api/ratelimit.ts` | In-process memory |
 | Shop settings | The admin UI | `src/lib/settings.ts` (DB-backed) | Typed defaults |
+| Site address | `NEXT_PUBLIC_SITE_URL` (optional) | `src/lib/site-url.ts` | Vercel's own URL, then localhost |
 
 Every integration is checked at runtime and degrades. Nothing but the database blocks a
 first run, and even that only blocks the admin.
@@ -112,11 +114,14 @@ first run, and even that only blocks the admin.
 
 ### Forms and security
 
-- **Every form either uses a server action (`action={...}`) or sets `method="post"`.**
-  A form with only an `onSubmit` handler and no method falls back to a NATIVE GET when
-  submitted before React hydrates — that is how an email and password once ended up in
-  the URL, the browser history and the access logs. Auth forms use server actions so they
-  also work with JavaScript off.
+- **Every form either uses a server action (`action={...}`) or sets `method="post"` —
+  exactly one, never both.** A form with only an `onSubmit` handler and no method falls
+  back to a NATIVE GET when submitted before React hydrates — that is how an email and
+  password once ended up in the URL, the browser history and the access logs. Auth forms
+  use server actions so they also work with JavaScript off. But a server-action form must
+  *not* also carry `method="post"`: React renders `method="POST"` for it server-side and
+  normalises to lowercase on the client, so the two disagree and hydration fails with
+  "some attributes of the server rendered HTML didn't match".
 - State-changing `/api/v1` routes call `isCrossSiteRequest` (`src/lib/api/csrf.ts`).
   Server actions carry Next's own origin check already.
 - Login failures return one message for every cause. Registration is the deliberate

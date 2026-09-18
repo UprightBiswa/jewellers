@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { SITE_URL } from "./site-url";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -61,8 +62,7 @@ export function truncate(text: string, max = 160): string {
 }
 
 export function absoluteUrl(path = "/"): string {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  return new URL(path, base).toString();
+  return new URL(path, SITE_URL).toString();
 }
 
 /** Stable sort helper that does not mutate its input. */

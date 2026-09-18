@@ -41,7 +41,7 @@ export function ProfileForm({
   const fieldErrors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
 
   return (
-    <form action={formAction} method="post" className="grid gap-5">
+    <form action={formAction} className="grid gap-5">
       <Field label="Your name" htmlFor="name" required error={fieldErrors.name}>
         <Input id="name" name="name" defaultValue={initial.name} autoComplete="name" required />
       </Field>

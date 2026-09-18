@@ -187,7 +187,6 @@ export function AddressManager({ addresses }: { addresses: Address[] }) {
       ) : (
         <form
           action={formAction}
-          method="post"
           className="grid gap-5 rounded-[var(--radius-card)] border border-line bg-surface p-5"
         >
           <h3 className="font-display text-lg text-ink">

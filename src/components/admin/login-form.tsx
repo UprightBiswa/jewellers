@@ -55,7 +55,7 @@ export function AdminLoginForm() {
         </div>
       </div>
 
-      <form action={formAction} method="post" className="grid gap-4">
+      <form action={formAction} className="grid gap-4">
         <input type="hidden" name="scope" value="admin" />
         <input type="hidden" name="next" value={next} />
 

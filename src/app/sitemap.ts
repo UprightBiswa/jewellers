@@ -4,8 +4,9 @@ import { devFallback } from "@/lib/demo/fallback";
 import { CATEGORIES, COLLECTIONS, PAGES, PRODUCTS } from "@/lib/demo/catalogue";
 
 export const revalidate = 3600;
+import { SITE_URL } from "@/lib/site-url";
 
-const base = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+const base = SITE_URL;
 
 /**
  * The sitemap Google reads.

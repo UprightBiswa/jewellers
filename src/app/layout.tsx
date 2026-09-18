@@ -3,6 +3,7 @@ import { Marcellus, Manrope, Noto_Sans_Bengali } from "next/font/google";
 import { Toaster } from "sonner";
 
 import { getSettings } from "@/lib/settings";
+import { SITE_URL } from "@/lib/site-url";
 
 import "./globals.css";
 
@@ -26,7 +27,7 @@ const notoBengali = Noto_Sans_Bengali({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = SITE_URL;
 
 /**
  * Titles and descriptions come from Settings, so the owner renaming his shop in
