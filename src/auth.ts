@@ -74,6 +74,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           image: user.image,
           role: user.role,
           phone: user.phone,
+          // Which door they came through. The panel requires "admin", so a staff
+          // member who signs in on the shop gets a shop session and nothing more.
+          scope,
         };
       },
     }),

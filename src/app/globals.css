@@ -3,10 +3,11 @@
 /* ---------------------------------------------------------------------------
    Design tokens
 
-   Every colour is declared once in :root, then re-declared for the two dark
-   states (system dark, and an explicit data-theme="dark"). Components only ever
-   use the semantic Tailwind utilities (bg-surface, text-ink, border-line), so
-   the whole site flips theme without a single dark: variant.
+   Light only, by the owner's decision: a jewellery shop is photographs on white,
+   and a dark mode that inverts them fights the product. Every colour is declared
+   once here, and components use the semantic utilities (bg-surface, text-ink,
+   border-line) rather than literals — so a dark set could be reinstated by
+   adding one block, without touching a single component.
 --------------------------------------------------------------------------- */
 
 :root {
@@ -44,70 +45,6 @@
   --c-danger-soft: #fbeaea;
 
   --c-shadow: 14 17 20;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --c-bg: #0e1013;
-    --c-surface: #16191e;
-    --c-surface-2: #1d2128;
-    --c-overlay: rgb(0 0 0 / 0.7);
-
-    --c-ink: #e9ecef;
-    --c-ink-2: #bfc5cd;
-    --c-muted: #929aa4;
-
-    --c-line: #232830;
-    --c-line-strong: #343b45;
-
-    --c-brand: #d4737f;
-    --c-brand-hover: #e08b95;
-    --c-brand-soft: #2a171b;
-    --c-on-brand: #1a0d10;
-
-    --c-gold: #c9a46b;
-    --c-gold-soft: #241d12;
-
-    --c-success: #5fb98d;
-    --c-success-soft: #13251d;
-    --c-warn: #d9a04e;
-    --c-warn-soft: #251c0f;
-    --c-danger: #e07a7a;
-    --c-danger-soft: #2a1414;
-
-    --c-shadow: 0 0 0;
-  }
-}
-
-:root[data-theme="dark"] {
-  --c-bg: #0e1013;
-  --c-surface: #16191e;
-  --c-surface-2: #1d2128;
-  --c-overlay: rgb(0 0 0 / 0.7);
-
-  --c-ink: #e9ecef;
-  --c-ink-2: #bfc5cd;
-  --c-muted: #929aa4;
-
-  --c-line: #232830;
-  --c-line-strong: #343b45;
-
-  --c-brand: #d4737f;
-  --c-brand-hover: #e08b95;
-  --c-brand-soft: #2a171b;
-  --c-on-brand: #1a0d10;
-
-  --c-gold: #c9a46b;
-  --c-gold-soft: #241d12;
-
-  --c-success: #5fb98d;
-  --c-success-soft: #13251d;
-  --c-warn: #d9a04e;
-  --c-warn-soft: #251c0f;
-  --c-danger: #e07a7a;
-  --c-danger-soft: #2a1414;
-
-  --c-shadow: 0 0 0;
 }
 
 @theme inline {
@@ -186,7 +123,7 @@
   }
 
   html {
-    color-scheme: light dark;
+    color-scheme: light;
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
   }

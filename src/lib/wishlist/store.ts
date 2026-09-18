@@ -16,7 +16,18 @@ type State = {
   loaded: boolean;
 };
 
-let state: State = { ids: new Set(), signedIn: false, loaded: false };
+/**
+ * One frozen empty state, shared by the initial value and the server snapshot.
+ *
+ * `getServerSnapshot` MUST return the same reference every call. Returning a
+ * fresh object made React throw "The result of getServerSnapshot should be
+ * cached to avoid an infinite loop" — and because this hook runs on every
+ * product card, that one error took down hydration for the whole page: no
+ * buttons, no cart, no animations anywhere.
+ */
+const EMPTY: State = { ids: new Set(), signedIn: false, loaded: false };
+
+let state: State = EMPTY;
 const listeners = new Set<() => void>();
 let loading: Promise<void> | null = null;
 
@@ -30,7 +41,7 @@ function subscribe(listener: () => void) {
   return () => listeners.delete(listener);
 }
 
-const serverSnapshot = (): State => ({ ids: new Set(), signedIn: false, loaded: false });
+const serverSnapshot = (): State => EMPTY;
 
 async function load() {
   if (loading) return loading;
@@ -77,8 +88,7 @@ export const wishlist = {
       const json = await res.json();
 
       if (!res.ok || !json?.ok) {
-        emit({ ...state, ids: new Set(state.ids).add(productId) });
-        // Put it back the way it was before throwing.
+        // Put it back exactly as it was before the optimistic change.
         const reverted = new Set(state.ids);
         if (was) reverted.add(productId);
         else reverted.delete(productId);

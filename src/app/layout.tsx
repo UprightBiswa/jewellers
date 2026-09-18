@@ -73,37 +73,16 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5f6f8" },
-    { media: "(prefers-color-scheme: dark)", color: "#0e1013" },
-  ],
+  // Light only — see globals.css.
+  themeColor: "#f5f6f8",
 };
-
-/**
- * Applies the saved theme before first paint so a dark-mode visitor never sees
- * a white flash. Inline by necessity — a deferred script is already too late.
- */
-const themeScript = `
-(function(){
-  try {
-    var t = localStorage.getItem("theme");
-    if (t === "dark" || t === "light") {
-      document.documentElement.setAttribute("data-theme", t);
-    }
-  } catch (e) {}
-})();
-`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
-      suppressHydrationWarning
       className={`${marcellus.variable} ${manrope.variable} ${notoBengali.variable}`}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
       <body className="min-h-dvh bg-bg text-ink antialiased">
         {children}
         <Toaster

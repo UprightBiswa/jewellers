@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { auth, isAdminRole } from "@/auth";
+import { auth } from "@/auth";
+import { canOpenPanel } from "@/auth.config";
 import { getSettings } from "@/lib/settings";
 import { databaseReachable } from "@/lib/demo/fallback";
 import { AdminShell } from "@/components/admin/shell";
@@ -21,7 +22,8 @@ export default async function AdminPanelLayout({ children }: { children: React.R
 
   const session = await auth();
 
-  if (!session?.user || !isAdminRole(session.user.role)) {
+  // Staff role AND a session created through the staff door — see canOpenPanel.
+  if (!session?.user || !canOpenPanel(session.user)) {
     redirect("/admin/login");
   }
 

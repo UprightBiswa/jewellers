@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, X, ChevronRight } from "lucide-react";
-import { ThemeToggle } from "./theme-toggle";
 
 type NavCategory = { slug: string; name: string; nameBn: string | null; count: number };
 
@@ -147,7 +146,6 @@ export function MobileNav({
               </nav>
 
               <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-3">
-                <ThemeToggle />
                 {whatsapp ? (
                   <a
                     href={`https://wa.me/${whatsapp}`}

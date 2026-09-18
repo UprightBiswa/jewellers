@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { db } from "@/lib/db";
-import { auth, isAdminRole } from "@/auth";
+import { auth } from "@/auth";
+import { canOpenPanel } from "@/auth.config";
 import { rupeesToPaise } from "@/lib/money";
 import { makeSku, slugify } from "@/lib/utils";
 import { saveSettingsGroup, settingsSchema, type SettingsGroup } from "@/lib/settings";
@@ -16,7 +17,9 @@ export type ActionResult<T = undefined> =
 
 async function requireStaff() {
   const session = await auth();
-  if (!session?.user || !isAdminRole(session.user.role)) {
+  // Every admin write goes through here, so the staff-door rule is enforced on
+  // the server too — not only by the proxy that guards the page.
+  if (!session?.user || !canOpenPanel(session.user)) {
     throw new Error("FORBIDDEN");
   }
   return session.user;

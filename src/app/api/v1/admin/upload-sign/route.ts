@@ -1,7 +1,8 @@
 import { z } from "zod";
 import type { NextRequest } from "next/server";
 
-import { auth, isAdminRole } from "@/auth";
+import { auth } from "@/auth";
+import { canOpenPanel } from "@/auth.config";
 import { fail, forbidden, handleError, ok } from "@/lib/api/response";
 import { isCrossSiteRequest } from "@/lib/api/csrf";
 import { callerKey, rateLimit } from "@/lib/api/ratelimit";
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     const session = await auth();
-    if (!session?.user || !isAdminRole(session.user.role)) throw forbidden();
+    if (!session?.user || !canOpenPanel(session.user)) throw forbidden();
 
     const limit = await rateLimit("upload", callerKey(req, session.user.id));
     if (!limit.success) {

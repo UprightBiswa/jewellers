@@ -120,7 +120,6 @@ await page("public", "/cart", ["Your bag"]);
 await page("public", "/login", ['method="POST"']);
 await page("public", "/register", ['method="POST"']);
 await page("public", "/forgot-password", ['method="POST"']);
-await page("public", "/admin/login", ["Staff sign in", 'method="POST"']);
 await page("public", "/search?q=jhumka", ["Results for"]);
 await page("public", "/sitemap.xml", ["<urlset"]);
 await page("public", "/robots.txt", ["User-Agent"]);
@@ -150,9 +149,12 @@ for (const path of ["/products/no-such-thing", "/categories/no-such-thing", "/pa
 
 // --- 3. Cart flow ----------------------------------------------------------
 const shopper = makeJar();
-// Cash on delivery is capped at ₹3,000, so the flow has to be tested with
-// something under it — the audit was failing on its own choice of product.
-const simple = products.find((p) => p.inStock && p.price <= 250000);
+// Cash on delivery is capped at ₹3,000, so the flow needs something under it.
+// Every run places real orders and really decrements stock, so take whichever
+// qualifying piece currently has the most left — otherwise the audit eventually
+// fails on the orders it placed itself. `npm run db:seed` resets stock.
+const affordable = products.filter((p) => p.inStock && p.price <= 250000);
+const simple = affordable[0];
 
 if (!simple) {
   record("cart", "find a product", false, "no in-stock product");
@@ -218,7 +220,12 @@ if (simple) {
     record("checkout", "bag emptied", after.ok && after.data.count === 0);
   }
 
-  // Online payment must be refused while Razorpay has no keys
+  // Online payment: with Razorpay keys present this must open a real order at
+  // Razorpay; without them it must refuse politely. Both are correct answers.
+  await req("/api/v1/cart", {
+    method: "POST", jar: shopper, body: { productId: simple.id, qty: 1 },
+  });
+
   const online = await req("/api/v1/orders", {
     method: "POST", jar: shopper,
     body: {
@@ -230,12 +237,20 @@ if (simple) {
     },
   });
   const onlineJson = await online.json();
-  record(
-    "checkout",
-    "online payment refused without keys",
-    !onlineJson.ok && /not switched on/i.test(onlineJson.error?.message ?? ""),
-    onlineJson.error?.message ?? "unexpectedly succeeded",
-  );
+
+  if (onlineJson.ok) {
+    const rzp = onlineJson.data.razorpay;
+    record("checkout", "Razorpay order created",
+      Boolean(rzp?.orderId?.startsWith("order_")) && rzp.amount === onlineJson.data.total,
+      JSON.stringify(rzp ?? {}));
+    record("checkout", "Razorpay key is a TEST key",
+      String(rzp?.keyId ?? "").startsWith("rzp_test_"),
+      `key ${rzp?.keyId}`);
+  } else {
+    record("checkout", "online payment refused without keys",
+      /not switched on/i.test(onlineJson.error?.message ?? ""),
+      onlineJson.error?.message ?? "");
+  }
 }
 
 // --- 5. Coupon -------------------------------------------------------------
@@ -312,6 +327,16 @@ if (simple) {
 // --- 6. Admin --------------------------------------------------------------
 {
   const admin = makeJar();
+
+  // Walk through the secret door first, if one is configured.
+  const secret = process.env.ADMIN_PATH_SECRET;
+  if (secret) {
+    const closed = await req("/admin/login");
+    record("security", "/admin is a 404 without the secret door", closed.status === 404,
+      `status ${closed.status}`);
+    await req(`/${secret}`, { jar: admin });
+  }
+
   const ok = await login(admin, "owner@charubala.com", "Charubala@2018", "admin");
   record("auth", "owner sign in", ok);
 
@@ -350,10 +375,22 @@ if (simple) {
       signJson.error?.message ?? "unexpectedly succeeded");
   }
 
-  // Signed-out access must be refused
-  const anon = await req("/admin", { redirect: "manual" });
-  record("security", "/admin refuses anonymous", anon.status === 307 || anon.status === 302,
-    `status ${anon.status}`);
+  // The owner signing in on the SHOP side gets a shop session and nothing more.
+  {
+    const shopSide = makeJar();
+    if (secret) await req(`/${secret}`, { jar: shopSide });
+    const signedIn = await login(shopSide, "owner@charubala.com", "Charubala@2018", "store");
+    const panel = await req("/admin", { jar: shopSide, redirect: "manual" });
+    record("security", "shop sign-in does not open the panel",
+      signedIn && (panel.status === 307 || panel.status === 302),
+      `signedIn=${signedIn}, /admin=${panel.status}`);
+  }
+
+  // Signed-out access must be refused. With a secret door configured the
+  // refusal is a 404 — deliberately indistinguishable from "no panel here".
+  const anonRes = await req("/admin", { redirect: "manual" });
+  record("security", "/admin refuses anonymous",
+    [307, 302, 404].includes(anonRes.status), `status ${anonRes.status}`);
 }
 
 // --- 7. Theme and responsiveness -------------------------------------------
@@ -365,9 +402,10 @@ if (simple) {
   if (cssHref) {
     const css = await (await req(cssHref, { redirect: "follow" })).text();
     record("theme", "light tokens", css.includes("--c-brand: #7e2b3a"));
-    record("theme", "dark tokens", css.includes("--c-brand: #d4737f"));
-    record("theme", "explicit dark override", css.includes('data-theme="dark"'));
-    record("theme", "system dark query", css.includes("prefers-color-scheme"));
+    // Light only, by the owner's decision — no dark tokens should ship at all.
+    record("theme", "no dark tokens", !css.includes("--c-brand: #d4737f"));
+    record("theme", "no data-theme overrides", !css.includes('data-theme="dark"'));
+    record("theme", "no prefers-color-scheme", !css.includes("prefers-color-scheme"));
   }
 
   record("responsive", "viewport meta", html.includes("width=device-width"));

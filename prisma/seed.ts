@@ -242,7 +242,14 @@ async function main() {
             }
           : {}),
       },
-      update: { price: paise(p.price), status: "ACTIVE", titleBn: p.titleBn },
+      update: {
+        price: paise(p.price),
+        status: "ACTIVE",
+        titleBn: p.titleBn,
+        // Restore stock too — re-seeding is meant to be a clean reset, and
+        // testing orders drain it.
+        stock: p.sizes ? 0 : (p.stock ?? 4),
+      },
     });
 
     for (const slug of p.collections) {

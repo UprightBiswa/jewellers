@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import { NextResponse, type NextRequest } from "next/server";
-import { authConfig, ADMIN_ROLES } from "@/auth.config";
+import { authConfig, canOpenPanel } from "@/auth.config";
 import { preflight, withCors } from "@/lib/api/cors";
 
 const { auth } = NextAuth(authConfig);
@@ -10,18 +10,29 @@ const { auth } = NextAuth(authConfig);
  *
  * Checkout is deliberately NOT in this list. Someone in Tufanganj buying a pair
  * of toe rings should not have to create an account first — guest checkout takes
- * an email and an address. Signing in only buys you the first-order discount and
- * a list of past orders, and the checkout page says so.
+ * an email and an address. Signing in only buys the first-order discount and a
+ * list of past orders, and the checkout page says so.
  */
 const CUSTOMER_PROTECTED = ["/account"];
 
-/** The only /admin path a signed-out visitor may load. */
 const ADMIN_LOGIN = "/admin/login";
 
 /**
- * Optional second lock on the admin panel: a comma-separated IP allow-list.
- * Empty (the default) means "any IP, password still required".
+ * A secret door to the panel.
+ *
+ * With `ADMIN_PATH_SECRET` set, `/admin` answers 404 to anyone who has not first
+ * visited `/<secret>`; that visit drops a cookie and forwards them to the panel.
+ * Nobody typing `/admin` finds anything, and the panel is not linked from the
+ * shop at all.
+ *
+ * This is obscurity, not the lock — the password and the staff-scoped session
+ * are the lock. It exists so the panel is not a target in the first place.
+ * Leave the variable unset in development and `/admin` behaves normally.
  */
+const ADMIN_SECRET = process.env.ADMIN_PATH_SECRET?.trim();
+const GATE_COOKIE = "cs_gate";
+
+/** Optional second lock: a comma-separated IP allow-list. Empty means any IP. */
 function ipAllowed(req: NextRequest): boolean {
   const list = (process.env.ADMIN_IP_ALLOWLIST ?? "")
     .split(",")
@@ -39,7 +50,6 @@ function ipAllowed(req: NextRequest): boolean {
 export default auth((req) => {
   const { pathname, search } = req.nextUrl;
   const user = req.auth?.user;
-  const isAdmin = ADMIN_ROLES.includes(user?.role as "OWNER" | "STAFF");
 
   // --- API ---------------------------------------------------------------
   if (pathname.startsWith("/api/v1")) {
@@ -47,21 +57,41 @@ export default auth((req) => {
     return withCors(NextResponse.next(), req);
   }
 
+  // --- The secret door ---------------------------------------------------
+  if (ADMIN_SECRET && pathname === `/${ADMIN_SECRET}`) {
+    const to = NextResponse.redirect(new URL(ADMIN_LOGIN, req.nextUrl));
+    to.cookies.set(GATE_COOKIE, ADMIN_SECRET, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+    return to;
+  }
+
   // --- Admin panel -------------------------------------------------------
   if (pathname.startsWith("/admin")) {
+    // A 404, never a 403: an attacker learns nothing about whether a panel
+    // lives here at all.
+    if (ADMIN_SECRET && req.cookies.get(GATE_COOKIE)?.value !== ADMIN_SECRET) {
+      return new NextResponse(null, { status: 404 });
+    }
     if (!ipAllowed(req)) {
-      // Deliberately a 404, not a 403: an attacker learns nothing about
-      // whether an admin panel lives here at all.
       return new NextResponse(null, { status: 404 });
     }
 
+    // canOpenPanel needs the staff door, not just a staff role — an owner who
+    // signed in on the shop has an ordinary customer session here.
+    const mayEnter = canOpenPanel(user);
+
     if (pathname === ADMIN_LOGIN) {
-      return isAdmin
+      return mayEnter
         ? NextResponse.redirect(new URL("/admin", req.nextUrl))
         : NextResponse.next();
     }
 
-    if (!isAdmin) {
+    if (!mayEnter) {
       const to = new URL(ADMIN_LOGIN, req.nextUrl);
       to.searchParams.set("next", pathname + search);
       return NextResponse.redirect(to);
@@ -91,7 +121,7 @@ export const config = {
   matcher: [
     /*
      * Everything except Next internals and static files. Keeping images and
-     * fonts out of middleware matters: it runs on every matched request.
+     * fonts out of the proxy matters: it runs on every matched request.
      */
     "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:png|jpg|jpeg|gif|webp|avif|svg|ico|woff2?)$).*)",
   ],

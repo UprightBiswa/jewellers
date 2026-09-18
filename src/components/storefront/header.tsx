@@ -9,7 +9,6 @@ import { AnnouncementBar } from "./announcement-bar";
 import { CartButton } from "./cart-button";
 import { MobileNav } from "./mobile-nav";
 import { SearchBox } from "./search-box";
-import { ThemeToggle } from "./theme-toggle";
 
 export async function Header() {
   const [settings, categories, collections] = await Promise.all([
@@ -50,7 +49,6 @@ export async function Header() {
           </Suspense>
 
           <div className="ml-auto flex items-center gap-1">
-            <ThemeToggle className="hidden sm:inline-flex" />
             <Link
               href="/account"
               aria-label="My account"

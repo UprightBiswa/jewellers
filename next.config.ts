@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
 
   images: {
+    // Images are served straight from Cloudinary's edge — Vercel does no image
+    // work at all. See src/lib/images/loader.ts for why that matters to the bill.
+    loader: "custom",
+    loaderFile: "./src/lib/images/loader.ts",
+
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
       { protocol: "https", hostname: "ik.imagekit.io", pathname: "/**" },

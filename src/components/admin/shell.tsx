@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/components/storefront/theme-toggle";
 import { Mark } from "@/components/brand/logo";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 
@@ -114,7 +113,6 @@ export function AdminShell({
             </p>
           </div>
           <div className="mt-2 flex items-center justify-between gap-2 px-1">
-            <ThemeToggle />
             <SignOutButton redirectTo={"/admin/login"} />
           </div>
         </div>
@@ -128,7 +126,6 @@ export function AdminShell({
             {storeName}
           </p>
           <div className="flex items-center gap-1">
-            <ThemeToggle />
             <SignOutButton compact redirectTo={"/admin/login"} />
           </div>
         </header>
