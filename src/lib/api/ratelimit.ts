@@ -1,5 +1,6 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { isUpstashUrl } from "@/lib/integrations";
 
 /**
  * Rate limiting.
@@ -29,7 +30,7 @@ function createRedis(): Redis | null {
 
   if (!url || !token) return null;
 
-  if (!url.startsWith("https://")) {
+  if (!isUpstashUrl(url)) {
     console.warn(
       `[ratelimit] UPSTASH_REDIS_REST_URL is not an https URL (got "${url}") — ` +
         "using the in-process limiter. Remove the variable or set a real Upstash URL.",

@@ -1,5 +1,6 @@
 import { IMAGE_PRESETS, type ImageTransform } from "./provider";
 import { placeholderPhoto } from "./placeholders";
+import { isCloudinaryCloudName } from "@/lib/integrations";
 
 /**
  * Pure URL building — safe in a client component.
@@ -22,7 +23,7 @@ const rawCloudName = (
   process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? process.env.CLOUDINARY_CLOUD_NAME ?? ""
 ).trim();
 
-const cloudName = /^[a-zA-Z0-9_-]{3,}$/.test(rawCloudName) ? rawCloudName : "";
+const cloudName = isCloudinaryCloudName(rawCloudName) ? rawCloudName : "";
 
 const FIT_MAP: Record<NonNullable<ImageTransform["fit"]>, string> = {
   cover: "c_fill,g_auto",

@@ -1,5 +1,6 @@
 import "server-only";
 import { Resend } from "resend";
+import { isResendKey } from "@/lib/integrations";
 import type { ReactElement } from "react";
 import { SITE_URL } from "@/lib/site-url";
 
@@ -21,7 +22,7 @@ const apiKey = process.env.RESEND_API_KEY?.trim();
  * the whole build down with it.
  */
 function createResend(): Resend | null {
-  if (!apiKey?.startsWith("re_")) {
+  if (!isResendKey(apiKey)) {
     if (apiKey) {
       console.warn("[email] RESEND_API_KEY does not look like a Resend key — logging mail instead");
     }

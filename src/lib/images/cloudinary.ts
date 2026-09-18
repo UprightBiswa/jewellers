@@ -6,6 +6,7 @@ import {
   type UploadResult,
 } from "./provider";
 import { cdnUrl } from "./url";
+import { isCloudinaryConfigured } from "@/lib/integrations";
 
 const cloudName = (
   process.env.CLOUDINARY_CLOUD_NAME ?? process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
@@ -20,10 +21,7 @@ const rootFolder = process.env.CLOUDINARY_UPLOAD_FOLDER?.trim() || "silver-store
  * an upload that Cloudinary will reject. A cloud name is a bare slug, the API
  * key is numeric, the secret is a long token.
  */
-const configured =
-  Boolean(cloudName && /^[a-zA-Z0-9_-]{3,}$/.test(cloudName)) &&
-  Boolean(apiKey && /^\d{6,}$/.test(apiKey)) &&
-  Boolean(apiSecret && apiSecret.length > 12);
+const configured = isCloudinaryConfigured(cloudName, apiKey, apiSecret);
 
 if (configured) {
   try {

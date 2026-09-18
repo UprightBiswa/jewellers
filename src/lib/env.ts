@@ -1,4 +1,11 @@
 import { z } from "zod";
+import {
+  isCloudinaryConfigured,
+  isGoogleAuthConfigured,
+  isRazorpayConfigured,
+  isResendKey,
+  isUpstashConfigured,
+} from "./integrations";
 
 /**
  * Environment contract.
@@ -96,14 +103,23 @@ export const publicEnv = clientSchema.parse({
 });
 
 /** Feature flags derived from which keys are actually present. */
+/**
+ * What is actually live — the same judgement the integrations themselves make.
+ *
+ * These are reported by /api/v1/health, so "present but unusable" must read as
+ * false. Reporting a service as live while its client has fallen back is how a
+ * status page becomes a liability.
+ */
 export const features = {
-  googleAuth: Boolean(env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET),
-  cloudinary: Boolean(
-    env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY && env.CLOUDINARY_API_SECRET,
+  googleAuth: isGoogleAuthConfigured(env.AUTH_GOOGLE_ID, env.AUTH_GOOGLE_SECRET),
+  cloudinary: isCloudinaryConfigured(
+    env.CLOUDINARY_CLOUD_NAME,
+    env.CLOUDINARY_API_KEY,
+    env.CLOUDINARY_API_SECRET,
   ),
-  razorpay: Boolean(env.RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET),
-  email: Boolean(env.RESEND_API_KEY),
-  redis: Boolean(env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN),
+  razorpay: isRazorpayConfigured(env.RAZORPAY_KEY_ID, env.RAZORPAY_KEY_SECRET),
+  email: isResendKey(env.RESEND_API_KEY),
+  redis: isUpstashConfigured(env.UPSTASH_REDIS_REST_URL, env.UPSTASH_REDIS_REST_TOKEN),
 } as const;
 
 export const corsOrigins = env.API_CORS_ORIGINS.split(",")

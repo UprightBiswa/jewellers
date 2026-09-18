@@ -1,6 +1,7 @@
 import "server-only";
 import crypto from "node:crypto";
 import Razorpay from "razorpay";
+import { isRazorpayConfigured } from "@/lib/integrations";
 
 /**
  * Razorpay.
@@ -26,9 +27,7 @@ const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET?.trim();
  * module is still evaluating — which fails the build, not the request. So the
  * shape is checked: every Razorpay key id begins with rzp_test_ or rzp_live_.
  */
-export const isConfigured = Boolean(
-  keyId?.startsWith("rzp_") && keySecret && keySecret.length > 8,
-);
+export const isConfigured = isRazorpayConfigured(keyId, keySecret);
 
 function createClient(): Razorpay | null {
   if (!isConfigured) return null;
