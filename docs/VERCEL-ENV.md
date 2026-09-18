@@ -54,16 +54,22 @@ DIRECT_URL="postgresql://...@ep-xxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=
 The difference is **`-pooler`**. `DATABASE_URL` has it, `DIRECT_URL` does not.
 The wrong way round shows up as a migration that hangs.
 
-### Cloudinary (product photos)
+### Cloudinary — done, paste as-is
 
 ```bash
-CLOUDINARY_CLOUD_NAME=""
-CLOUDINARY_API_KEY=""
-CLOUDINARY_API_SECRET=""
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=""
+CLOUDINARY_CLOUD_NAME="tpfcmu4r"
+CLOUDINARY_API_KEY="234867866922274"
+CLOUDINARY_API_SECRET="ZclzDvwOD6PO-kFrJvPp2J_YQKE"
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME="tpfcmu4r"
 ```
 
-The cloud name appears twice on purpose — the browser needs its own copy.
+The cloud name appears twice on purpose — the browser needs its own copy to
+build image URLs, and that is safe: the cloud name is in every image address.
+The **secret is not**, and never reaches the browser; it only signs upload
+permissions on the server.
+
+Ignore the `CLOUDINARY_URL=cloudinary://...` line Cloudinary shows. It packs all
+three values into one string, and this app reads them separately.
 
 ### Resend (order emails)
 

@@ -44,6 +44,13 @@ function placeholderUrl(publicId: string, transform?: ImageTransform): string {
 export function cdnUrl(publicId: string, transform?: ImageTransform): string {
   // Absolute URLs (seed data, Google avatars) pass straight through.
   if (/^https?:\/\//.test(publicId)) return publicId;
+
+  // Seeded rows carry ids like "demo/products/chhoto-jhumka-1", which exist in
+  // no Cloudinary account. Without this, the day the keys are added every
+  // product image turns into a 404 — the demo catalogue keeps its stand-in
+  // photographs until Rahul uploads his own.
+  if (publicId.startsWith("demo/")) return placeholderUrl(publicId, transform);
+
   if (!cloudName) return placeholderUrl(publicId, transform);
 
   return `https://res.cloudinary.com/${cloudName}/image/upload/${buildTransform(transform)}/${publicId}`;

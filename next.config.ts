@@ -39,8 +39,11 @@ const nextConfig: NextConfig = {
         : []),
     ],
     formats: ["image/avif", "image/webp"],
-    deviceSizes: [360, 414, 640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [64, 96, 128, 256, 384],
+    // Deliberately few. Every distinct width is a separate derived image that
+    // Cloudinary stores and counts, and eight breakpoints for a phone-first
+    // shop buys nothing a customer can see.
+    deviceSizes: [420, 640, 828, 1200, 1920],
+    imageSizes: [64, 128, 256],
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
 

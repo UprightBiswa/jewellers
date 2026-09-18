@@ -365,14 +365,30 @@ if (simple) {
       record("admin", "edit product loads", res.status === 200 && html.includes(first.title));
     }
 
-    // Upload signing should explain itself, not 500, while Cloudinary is unset
+    // With Cloudinary configured this must hand back a real signed permission;
+    // without it, a message that says what is missing. Both are correct.
     const sign = await req("/api/v1/admin/upload-sign", {
       method: "POST", jar: admin, body: { folder: "products" },
     });
     const signJson = await sign.json();
-    record("admin", "upload-sign explains missing Cloudinary",
-      !signJson.ok && /cloudinary/i.test(signJson.error?.message ?? ""),
-      signJson.error?.message ?? "unexpectedly succeeded");
+
+    if (signJson.ok) {
+      const d = signJson.data;
+      // The signature travels in `fields`, alongside the other values the
+      // browser must post back verbatim.
+      record("admin", "upload signature issued",
+        Boolean(d?.fields?.signature) &&
+          String(d?.uploadUrl ?? "").startsWith("https://api.cloudinary.com/") &&
+          String(d?.folder ?? "").startsWith("silver-store/"),
+        JSON.stringify({ folder: d?.folder, hasSignature: Boolean(d?.fields?.signature) }));
+
+      // The secret signs the request on the server and must never be handed out.
+      const leaked = JSON.stringify(signJson).includes(process.env.CLOUDINARY_API_SECRET ?? " ");
+      record("security", "upload signature leaks no API secret", !leaked);
+    } else {
+      record("admin", "upload-sign explains missing Cloudinary",
+        /cloudinary/i.test(signJson.error?.message ?? ""), signJson.error?.message ?? "");
+    }
   }
 
   // The owner signing in on the SHOP side gets a shop session and nothing more.
