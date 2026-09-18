@@ -18,33 +18,25 @@ emails are printed to the console.
 
 ---
 
-## Looking at the UI before you have a database
-
-```bash
-npm install
-npm run dev
-```
-
-The storefront runs on **preview data** — the same catalogue the seed writes,
-served from memory — with an amber "Preview data" banner across the top so it can
-never be mistaken for the real shop. Good for reviewing the design and for
-showing a client before any account exists.
-
-What does not work in preview mode, by design: the bag, checkout, and the whole
-admin panel. Those are database state, and faking them would only mislead.
-`/admin` shows a short note explaining what to connect.
-
-Preview mode is **development only**. In production an unreachable database
-fails loudly, as it should.
-
 ## First run
 
 ```bash
 npm install
 cp .env.example .env.local     # fill in DATABASE_URL, DIRECT_URL, AUTH_SECRET
-npx prisma migrate dev --name init
+npx prisma migrate deploy      # apply the migrations already in the repo
 npm run db:seed
 npm run dev
+```
+
+There is no local database to start. Development runs against the same Neon
+database as production, which is the point: a bug that only appears on real
+Postgres appears here too.
+
+Two checks worth running:
+
+```bash
+npm run check:images   # uploads, delivers and deletes a file on Cloudinary
+npm run audit          # 88 checks against the running site
 ```
 
 Then:
@@ -56,11 +48,11 @@ Then:
 
 `AUTH_SECRET` is generated with `openssl rand -base64 32`.
 
-### A note on `.env` vs `.env.local`
+### One env file
 
-`.env` holds placeholders so `prisma generate` and `next build` run before any
-real service exists. `.env.local` overrides it and holds the real values. Both
-are git-ignored; neither should ever be committed.
+`.env.local` is the only local environment file, and it is git-ignored. Vercel
+supplies production values from its own dashboard — nothing is read from a file
+there. `.env.example` is the committed template and holds no real values.
 
 ---
 
@@ -72,8 +64,9 @@ are git-ignored; neither should ever be committed.
 | 5555 | Prisma Studio, a spreadsheet view of the database | `npm run db:studio` |
 | 3002 | React Email preview, for editing order emails | `npm run email:dev` |
 
-The admin is not a separate server. It is `/admin` in the same app, gated by
-`src/proxy.ts` and again by the panel layout.
+The admin is not a separate server, and it is not at `/admin` either: with
+`ADMIN_PATH_SECRET` set, `/admin` answers 404 until you have visited
+`/<that-secret>` once.
 
 To run on another port: `PORT=4000 npm run dev`.
 

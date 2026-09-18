@@ -131,7 +131,11 @@ for (const slug of collectionSlugs) {
   await page("collections", `/collections/${slug}`, ["Sort"]);
 }
 for (const p of products.slice(0, 20)) {
-  await page("products", `/products/${p.slug}`, [p.title, "Add to bag", "Check delivery"]);
+  const html = await page("products", `/products/${p.slug}`, [p.title, "Check delivery"]);
+  // A sold-out piece shows the WhatsApp ask instead of a buy button, and that
+  // is correct — this audit's own test orders drain stock. Assert one or other.
+  const buyable = html.includes("Add to bag") || html.includes("Sold out for now");
+  record("products", `${p.slug} offers a next step`, buyable);
 }
 
 // --- 2. 404 handling -------------------------------------------------------
@@ -383,7 +387,8 @@ if (simple) {
         JSON.stringify({ folder: d?.folder, hasSignature: Boolean(d?.fields?.signature) }));
 
       // The secret signs the request on the server and must never be handed out.
-      const leaked = JSON.stringify(signJson).includes(process.env.CLOUDINARY_API_SECRET ?? " ");
+      const secret = process.env.CLOUDINARY_API_SECRET;
+      const leaked = Boolean(secret) && JSON.stringify(signJson).includes(secret);
       record("security", "upload signature leaks no API secret", !leaked);
     } else {
       record("admin", "upload-sign explains missing Cloudinary",

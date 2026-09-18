@@ -23,22 +23,12 @@ const createClient = () => {
     });
   }
 
-  // The local development database (scripts/dev-db.mjs) is PGlite behind a
-  // socket. It serialises queries and hangs up on spare connections, so a pool
-  // larger than one produces "Server has closed the connection" at random.
-  //
-  // Detected from the connection string alone, deliberately not from NODE_ENV:
-  // `next build` runs as production while still pointing at the local database,
-  // and that mismatch made every local build fail on a closed connection.
-  const isLocalPostgres = /^postgresql:\/\/[^@]*@(127\.0\.0\.1|localhost)[:/]/.test(
-    connectionString,
-  );
-
   const adapter = new PrismaPg({
     connectionString,
     // Serverless functions are short-lived; a large pool just exhausts Postgres.
-    max: isLocalPostgres ? 1 : 5,
-    idleTimeoutMillis: isLocalPostgres ? 0 : 30_000,
+    // Neon's pooler does the real multiplexing, so five per instance is plenty.
+    max: 5,
+    idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 10_000,
   });
 
