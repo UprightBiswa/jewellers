@@ -38,6 +38,9 @@ const SHEET = [
   `TEST-A,Test Chain A,Test Chains,1200,1600,3,active,TEST-A-1.jpg,,Test Collection,new,"chain,test",925`,
   `TEST-B,Test Ring B,Test Rings,1600,,6,draft,,"925 Sterling|0|5,999 Fine|+400|1",,,"ring,test",925`,
   `TEST-C,Test Bad C,Test Chains,,2,draft,,,,,,`,
+  // No photo in the folder: the image column carries a URL instead, which is how
+  // a shop whose pictures are already online loads a catalogue from one sheet.
+  `TEST-D,Test Url D,Test Chains,900,,2,active,"https://images.example.com/d-1.jpg,https://images.example.com/d-2.jpg",,,,,925`,
 ].join("\n");
 
 const IMAGES = {
@@ -79,7 +82,7 @@ try {
   ok("plan succeeds", plan.ok, plan.ok ? "" : plan.message);
 
   if (plan.ok) {
-    ok("two rows would be created", plan.data.totals.create === 2, `${plan.data.totals.create}`);
+    ok("three rows would be created", plan.data.totals.create === 3, `${plan.data.totals.create}`);
     ok("the bad row is rejected", plan.data.totals.reject === 1, `${plan.data.totals.reject}`);
     ok("nothing would be updated yet", plan.data.totals.update === 0);
     ok(
@@ -101,7 +104,7 @@ try {
   ok("import succeeds", first.ok, first.ok ? "" : first.message);
 
   if (first.ok) {
-    ok("two created", first.data.created === 2, `${first.data.created}`);
+    ok("three created", first.data.created === 3, `${first.data.created}`);
     ok("one failed", first.data.failed.length === 1, `${first.data.failed.length}`);
     ok(
       "the failure names its line",
@@ -152,7 +155,7 @@ try {
   ok("re-import succeeds", second.ok);
   if (second.ok) {
     ok("nothing duplicated", second.data.created === 0, `${second.data.created} created`);
-    ok("two updated", second.data.updated === 2, `${second.data.updated}`);
+    ok("three updated", second.data.updated === 3, `${second.data.updated}`);
   }
 
   const after = await db.product.findUnique({
@@ -162,7 +165,26 @@ try {
   ok("the new price took", after?.price === 135000, `${after?.price}`);
 
   const total = await db.product.count({ where: { sku: { startsWith: "CS-TEST" } } });
-  ok("still only two test products", total === 2, `${total}`);
+  ok("still only three test products", total === 3, `${total}`);
+
+  // --- images given as URLs ----------------------------------------------
+  const byUrl = await db.product.findUnique({
+    where: { sku: "CS-TESTD" },
+    select: {
+      status: true,
+      images: { orderBy: { sortOrder: "asc" }, select: { publicId: true, isPrimary: true } },
+    },
+  });
+  ok("a product whose photos are URLs imports", Boolean(byUrl), byUrl?.status);
+  ok("...with both URLs attached", byUrl?.images.length === 2, `${byUrl?.images.length}`);
+  ok("...the first marked primary", byUrl?.images[0]?.isPrimary === true);
+  ok("...and it went on sale with no upload at all", byUrl?.status === "ACTIVE", byUrl?.status);
+
+  const { cdnUrl } = await import("../src/lib/images/url.ts");
+  const src = cdnUrl(byUrl.images[0].publicId);
+  ok("...and the shop serves that URL unchanged",
+    src === "https://images.example.com/d-1.jpg", src);
+
 
   // --- export round trip --------------------------------------------------
   const exported = await exportProducts();

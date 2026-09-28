@@ -77,18 +77,26 @@ export function ProductList({ products }: { products: ProductRow[] }) {
   return (
     <>
       {products.length > 0 && (
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
             <input
               type="checkbox"
               checked={allOnPage}
+              ref={(el) => {
+                // Some but not all selected reads as neither on nor off, which is
+                // what the owner has actually done.
+                if (el) el.indeterminate = selected.size > 0 && !allOnPage;
+              }}
               onChange={toggleAll}
               className="size-4 rounded border-line-strong accent-[var(--brand)]"
             />
-            Select all on this page
+            {allOnPage ? "Clear the selection" : "Select all on this page"}
           </label>
+
           {selected.size > 0 && (
-            <span className="text-sm text-muted">{selected.size} selected</span>
+            <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-sm font-medium text-ink">
+              {selected.size} selected
+            </span>
           )}
         </div>
       )}
@@ -157,10 +165,13 @@ export function ProductList({ products }: { products: ProductRow[] }) {
         })}
       </ul>
 
-      {/* The action bar. Fixed to the bottom so it is reachable on a phone
-          without scrolling back up past forty rows. */}
+      {/* The action bar sits at the bottom, where a thumb already is, rather than
+          at the top where forty rows would hide it.
+          bottom-16 on a phone: the admin shell has its own fixed navigation at
+          the bottom edge (z-30), and a bar flush with bottom-0 lands on top of
+          it — both visible, neither usable. */}
       {selected.size > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-surface/80">
+        <div className="fixed inset-x-0 bottom-16 z-40 border-y border-line bg-surface/95 p-3 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-surface/80 lg:bottom-0 lg:border-b-0">
           <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-2">
             <button
               type="button"
@@ -241,7 +252,7 @@ export function ProductList({ products }: { products: ProductRow[] }) {
       )}
 
       {/* Keeps the last rows clear of the fixed bar. */}
-      {selected.size > 0 && <div className="h-16" aria-hidden />}
+      {selected.size > 0 && <div className="h-36 lg:h-20" aria-hidden />}
     </>
   );
 }

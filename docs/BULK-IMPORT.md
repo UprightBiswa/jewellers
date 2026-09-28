@@ -86,33 +86,58 @@ third part, so a round trip never loses a count.
 
 ## 3. Photographs
 
-The sheet cannot hold images, so they are matched by **filename**.
+A CSV cannot contain a picture — it is a text file. So there are two ways to get
+photographs onto products, and you can mix them in one sheet.
 
-Name each photo `<serial>-<n>.<ext>`:
+### Route A — files named after the serial (no hosting needed)
+
+Name each photo `<serial>-<n>.<ext>` and keep them all in one folder:
 
 ```
-001-1.jpg     first photo of product 001  (this becomes the main image)
+001-1.jpg     first photo of product 001  →  becomes the main image
 001-2.jpg     second
 001-3.jpg
 004-1.jpg
-004-2.jpg
 ```
 
-Put them all in one folder. Then either:
+Then on the import page choose the folder alongside the sheet. Either:
 
-- **leave `images` blank** and the importer takes every file starting with that
-  serial, in order; or
-- **list them** in the `images` column to control the order.
+- **leave `images` blank** and every file starting with that serial is taken, in
+  order; or
+- **list them** in `images` to control which and in what order.
 
-Phone photographs are large — 4 MB each is normal. They are uploaded to
-Cloudinary, squared, compressed and converted to WebP on the way in. Rahul never
-crops anything. 300 products at 3 photos each is roughly 900 uploads; expect it
-to take a while and to run it once.
+Phone photographs are 3–5 MB each. They are shrunk in the browser, uploaded to
+Cloudinary, squared and converted on the way in. Rahul never crops anything. 300
+products at 3 photos each is about 900 uploads — expect minutes, not seconds, and
+plan to run it once.
 
-An `images` cell may also hold a full `https://…` URL, if the photos are already
-hosted somewhere.
+### Route B — links in the sheet (one file, nothing to upload)
 
----
+If the pictures are already on the web, put their addresses straight in the
+`images` column, comma-separated:
+
+```
+images = https://example.com/chain-1.jpg,https://example.com/chain-2.jpg
+```
+
+Nothing to select, no folder, no upload step. The shop serves those addresses
+exactly as given. This is the fastest route by far when the photos already live
+in Drive, Cloudinary, or an old site — and it is the answer to "can I do it all
+from one spreadsheet?": yes, this way.
+
+Two cautions. The link has to be public and permanent: a Google Drive *share*
+link is a web page, not an image, and will not display — use a direct file URL
+that ends in `.jpg` or `.png`. And because the file is not in your Cloudinary
+account, it is not resized or optimised, so a 6 MB original stays 6 MB for every
+visitor.
+
+### How many, and which is the main one
+
+As many as you like per product. **The first one in the list is the main
+image** — the one on the card, in search results and on WhatsApp. The rest
+become the gallery on the product page, in the order given.
+
+Row 006 of the example sheet uses Route B, so you can see both side by side.
 
 ## 4. Running it
 
