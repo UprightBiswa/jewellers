@@ -10,6 +10,7 @@ import { rupeesToPaise } from "@/lib/money";
 import { makeSku, slugify } from "@/lib/utils";
 import { saveSettingsGroup, settingsSchema, type SettingsGroup } from "@/lib/settings";
 import { getImageProvider } from "@/lib/images/cloudinary";
+import { bulkDelete, bulkSetStatus } from "@/lib/products/bulk";
 
 export type ActionResult<T = undefined> =
   | { ok: true; data?: T; message?: string }
@@ -495,4 +496,33 @@ export async function toggleCoupon(id: string, isActive: boolean): Promise<Actio
   await db.coupon.update({ where: { id }, data: { isActive } });
   revalidatePath("/admin/coupons");
   return { ok: true, message: isActive ? "Offer is live." : "Offer paused." };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Products in bulk                                                           */
+/* -------------------------------------------------------------------------- */
+
+/** Publish, unpublish or archive several products at once. */
+export async function bulkSetProductStatus(
+  ids: string[],
+  status: "DRAFT" | "ACTIVE" | "ARCHIVED",
+): Promise<ActionResult<{ changed: number; blocked: string[] }>> {
+  const user = await requireStaff();
+  const result = await bulkSetStatus(ids, status, user.id);
+
+  revalidatePath("/admin/products");
+  revalidatePath("/");
+  return result;
+}
+
+/** Delete several products; anything ever ordered is archived instead. */
+export async function bulkDeleteProducts(
+  ids: string[],
+): Promise<ActionResult<{ deleted: number; archived: number }>> {
+  const user = await requireStaff();
+  const result = await bulkDelete(ids, user.id);
+
+  revalidatePath("/admin/products");
+  revalidatePath("/");
+  return result;
 }

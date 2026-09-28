@@ -1,19 +1,16 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { Plus, Upload } from "lucide-react";
 
 import { db } from "@/lib/db";
-import { imageUrl } from "@/lib/images/url";
-import { formatPaise } from "@/lib/money";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ProductList, type ProductRow } from "@/components/admin/product-list";
 import type { Prisma } from "@/generated/prisma";
 
 export const metadata: Metadata = { title: "Products" };
 export const dynamic = "force-dynamic";
 
-type Search = Promise<{ status?: string; q?: string; cursor?: string }>;
+type Search = Promise<{ status?: string; q?: string; cursor?: string; category?: string }>;
 
 const STATUS_TABS = [
   { value: "", label: "All" },
@@ -25,10 +22,11 @@ const STATUS_TABS = [
 const PAGE_SIZE = 25;
 
 export default async function AdminProductsPage({ searchParams }: { searchParams: Search }) {
-  const { status, q, cursor } = await searchParams;
+  const { status, q, cursor, category } = await searchParams;
 
   const where: Prisma.ProductWhereInput = {
     ...(status === "ACTIVE" || status === "DRAFT" || status === "ARCHIVED" ? { status } : {}),
+    ...(category ? { category: { slug: category } } : {}),
     ...(q
       ? {
           OR: [
@@ -52,6 +50,14 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
     orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
     take: PAGE_SIZE + 1,
     ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+  });
+
+  // For the category filter. Only those that actually hold something, so the
+  // list does not fill with empty names after an import creates a few.
+  const categories = await db.category.findMany({
+    where: { products: { some: {} } },
+    select: { slug: true, name: true, _count: { select: { products: true } } },
+    orderBy: { name: "asc" },
   });
 
   const hasMore = rows.length > PAGE_SIZE;
@@ -83,6 +89,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
 
       <form className="flex gap-2" action="/admin/products">
         {status ? <input type="hidden" name="status" value={status} /> : null}
+        {category ? <input type="hidden" name="category" value={category} /> : null}
         <input
           name="q"
           defaultValue={q ?? ""}
@@ -96,7 +103,11 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
       <nav className="flex gap-1.5 overflow-x-auto no-scrollbar" aria-label="Filter by status">
         {STATUS_TABS.map((tab) => {
           const active = (status ?? "") === tab.value;
-          const href = tab.value ? `/admin/products?status=${tab.value}` : "/admin/products";
+          const href = `/admin/products?${new URLSearchParams({
+            ...(tab.value ? { status: tab.value } : {}),
+            ...(category ? { category } : {}),
+            ...(q ? { q } : {}),
+          })}`;
           return (
             <Link
               key={tab.label}
@@ -113,6 +124,38 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           );
         })}
       </nav>
+
+      {categories.length > 1 ? (
+        <nav className="flex gap-1.5 overflow-x-auto no-scrollbar" aria-label="Filter by category">
+          {[{ slug: "", name: "Every category", count: 0 }, ...categories.map((c) => ({
+            slug: c.slug,
+            name: c.name,
+            count: c._count.products,
+          }))].map((c) => {
+            const active = (category ?? "") === c.slug;
+            const href = `/admin/products?${new URLSearchParams({
+              ...(status ? { status } : {}),
+              ...(c.slug ? { category: c.slug } : {}),
+              ...(q ? { q } : {}),
+            })}`;
+            return (
+              <Link
+                key={c.slug || "all"}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={
+                  active
+                    ? "shrink-0 rounded-full bg-surface-2 px-3 py-1 text-[13px] font-medium text-ink ring-1 ring-line-strong"
+                    : "shrink-0 rounded-full px-3 py-1 text-[13px] text-muted hover:text-ink"
+                }
+              >
+                {c.name}
+                {c.count ? <span className="ms-1 tnum text-muted">{c.count}</span> : null}
+              </Link>
+            );
+          })}
+        </nav>
+      ) : null}
 
       {products.length === 0 ? (
         <div className="rounded-[var(--radius-card)] border border-dashed border-line py-16 text-center">
@@ -131,62 +174,24 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           ) : null}
         </div>
       ) : (
-        <ul className="divide-y divide-line rounded-[var(--radius-card)] border border-line bg-surface">
-          {products.map((p) => {
-            const stock =
-              p.variants.length > 0
-                ? p.variants.reduce((sum, v) => sum + v.stock, 0)
-                : p.stock;
-
-            return (
-              <li key={p.id}>
-                <Link
-                  href={`/admin/products/${p.id}`}
-                  className="flex items-center gap-3 p-3 transition-colors hover:bg-surface-2"
-                >
-                  <div className="relative size-14 shrink-0 overflow-hidden rounded-lg bg-surface-2">
-                    <Image
-                      src={imageUrl(p.images[0]?.publicId, "thumb")}
-                      alt=""
-                      fill
-                      sizes="56px"
-                      className="object-cover"
-                    />
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[15px] font-medium text-ink">{p.title}</p>
-                    <p className="truncate text-[12.5px] text-muted tnum">
-                      {p.sku} · {p.category.name}
-                    </p>
-                  </div>
-
-                  <div className="shrink-0 text-right">
-                    <p className="text-[15px] font-semibold text-ink tnum">
-                      {formatPaise(p.price)}
-                      {p.priceMode === "WEIGHT" ? (
-                        <span className="ml-1 text-[11px] font-normal text-muted">by weight</span>
-                      ) : null}
-                    </p>
-                    <div className="mt-1 flex items-center justify-end gap-1.5">
-                      {p.status !== "ACTIVE" ? (
-                        <Badge tone={p.status === "DRAFT" ? "warn" : "neutral"} size="xs">
-                          {p.status === "DRAFT" ? "Draft" : "Archived"}
-                        </Badge>
-                      ) : null}
-                      <Badge
-                        tone={stock === 0 ? "danger" : stock <= 3 ? "warn" : "neutral"}
-                        size="xs"
-                      >
-                        {stock === 0 ? "Out of stock" : `${stock} in stock`}
-                      </Badge>
-                    </div>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <ProductList
+          products={products.map(
+            (p): ProductRow => ({
+              id: p.id,
+              title: p.title,
+              sku: p.sku,
+              price: p.price,
+              status: p.status,
+              priceMode: p.priceMode,
+              stock:
+                p.variants.length > 0
+                  ? p.variants.reduce((sum, v) => sum + v.stock, 0)
+                  : p.stock,
+              categoryName: p.category.name,
+              imagePublicId: p.images[0]?.publicId,
+            }),
+          )}
+        />
       )}
 
       {nextCursor ? (
@@ -195,6 +200,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
             <Link
               href={`/admin/products?${new URLSearchParams({
                 ...(status ? { status } : {}),
+                ...(category ? { category } : {}),
                 ...(q ? { q } : {}),
                 cursor: nextCursor,
               })}`}

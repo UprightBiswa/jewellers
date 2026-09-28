@@ -22,10 +22,11 @@ much.
 | 1 | **Bulk import from a spreadsheet** — upload a CSV, preview what will change, then commit | **done** |
 | 2 | **Bulk image upload** — a folder named by serial number, matched to rows | **done** |
 | 3 | **Export to CSV** — edit in Sheets, re-import to update | **done** |
-| 4 | Bulk actions on the product list — publish, unpublish, delete, change category | **next** |
+| 4 | Bulk actions on the product list — select many, publish, draft, archive, delete | **done** |
 
-Live at `/admin/products/import`. 36 parsing tests (`npm run test:import`) and 36
-against Neon (`npm run test:import:db`).
+Live at `/admin/products/import`. 36 parsing tests (`npm run test:import`), 36
+against Neon (`npm run test:import:db`), and 20 for the bulk actions
+(`npm run test:bulk:db`). The product list also filters by category now.
 
 See [BULK-IMPORT.md](BULK-IMPORT.md) for the column spec and the sheet template.
 
@@ -64,7 +65,7 @@ Every row here already has its database table. This is UI work, not schema work.
 | # | Feature | Status |
 |---|---|---|
 | 12 | **Homepage manager** — hero slides, banners, section order, all editable | **next** |
-| 13 | **Size chart** — per category, shown on the product page | later |
+| 13 | **Size chart** — per category, editable in the admin, shown on the product page only where the category has one | **doing** |
 
 > The homepage is the worst offender for "no hardcoded data". `buildSlides()` in
 > `src/app/(shop)/page.tsx:66` returns four hand-written slides, and
