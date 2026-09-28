@@ -43,6 +43,11 @@ Reasoning in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · setup in
 [docs/PROGRESS.md](docs/PROGRESS.md) · payments in
 [docs/RAZORPAY-TEST.md](docs/RAZORPAY-TEST.md).
 
+**The work queue is [docs/TASKS.md](docs/TASKS.md)** — done / doing / next / later,
+verified against the code rather than remembered. Read it before picking up work,
+and move a row when you finish one. Catalogue loading is
+[docs/BULK-IMPORT.md](docs/BULK-IMPORT.md).
+
 ### Version traps
 
 Most tutorials online are a major behind. These are the ones that bite:
