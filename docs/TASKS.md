@@ -19,10 +19,13 @@ much.
 
 | # | Task | Status |
 |---|---|---|
-| 1 | **Bulk import from a spreadsheet** — upload a CSV, preview what will change, then commit | **next** |
-| 2 | **Bulk image upload** — a folder named by serial number, matched to rows | **next** |
-| 3 | **Export to CSV** — edit in Sheets, re-import to update | **next** |
+| 1 | **Bulk import from a spreadsheet** — upload a CSV, preview what will change, then commit | **done** |
+| 2 | **Bulk image upload** — a folder named by serial number, matched to rows | **done** |
+| 3 | **Export to CSV** — edit in Sheets, re-import to update | **done** |
 | 4 | Bulk actions on the product list — publish, unpublish, delete, change category | **next** |
+
+Live at `/admin/products/import`. 36 parsing tests (`npm run test:import`) and 36
+against Neon (`npm run test:import:db`).
 
 See [BULK-IMPORT.md](BULK-IMPORT.md) for the column spec and the sheet template.
 
@@ -52,7 +55,7 @@ Every row here already has its database table. This is UI work, not schema work.
 | 6 | **Collections** — same, plus which products belong | `Collection` | **next** |
 | 7 | **Reviews** — approve, hide, delete, reply | `Review` (`ReviewStatus` enum unused) | **next** |
 | 8 | **Customers** — list, detail, their orders, their addresses | `User` | **next** |
-| 9 | **Policy pages** — edit Returns, Shipping, About, Privacy in the admin | `Page` | **next** |
+| 9 | **Page content** — every page's text editable in the admin, not only the policies. Footer columns, About, FAQ, contact details, the lot | `Page` | **next** |
 | 10 | **Activity log** — who changed what, errors only | `AuditLog` (written, never read) | later |
 | 11 | **Staff accounts** — add a second user, set role, disable | `User.role` | later |
 
@@ -73,7 +76,9 @@ Every row here already has its database table. This is UI work, not schema work.
 | # | Task | Status |
 |---|---|---|
 | 14 | **Mobile drawer navigation** — the sidebar does not collapse on a phone | **next** |
-| 15 | Invoice PDF for an order | later |
+| 15 | **Invoice** — view, download, and send to the customer | **next** |
+| 15b | **Order detail actions** — send an order email by hand, send a review request link | **next** |
+| 15c | **Tracking** — courier updates with dates, visible to the customer | **next** |
 | 16 | Image-by-URL input, as an alternative to uploading | later |
 
 ---
@@ -151,6 +156,7 @@ Nothing here blocks launch. Every one degrades cleanly — see the service map i
 |---|---|---|
 | 44 | `notFound()` returns HTTP 200 on Next 16.3.5 | open — framework bug, mitigated with `noindex` |
 | 45 | ESLint cannot run — `typescript-eslint` has no TypeScript 7 support | open — `tsc` still type-checks |
+| 46 | **`npm run audit` eats its own stock.** It places a real COD order each run, which decrements inventory for good. After 24 runs several products sat at zero, Toe Rings had no active product left, and five checks failed for reasons that had nothing to do with the code. `npm run db:seed` restores it. The audit should place its order against a product it creates and then removes | open |
 
 ---
 

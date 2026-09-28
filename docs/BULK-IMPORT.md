@@ -4,7 +4,7 @@ Rahul has the pieces photographed and a price on each tag. Entering them one at
 a time through the admin is about three minutes each — fifteen hours for 300.
 This is the route that takes an afternoon instead.
 
-The template is [`templates/products-template.csv`](../templates/products-template.csv).
+The template is [`public/templates/products-template.csv`](../public/templates/products-template.csv).
 Open it in Excel or Google Sheets, fill it, save as CSV, upload.
 
 ---
@@ -70,6 +70,17 @@ creating two products — which is what you asked for, and it means one page, on
 set of photographs, and one review thread.
 
 A minus works too: `Small|-100`.
+
+**Its own stock per option** — add a third part:
+
+```
+sizes = Small|0|5,Large|+200|1
+```
+
+Five small, one large. Without it, the `stock` column is divided evenly across
+the options, which is the right guess when you are typing the sheet by hand and
+the wrong one when you are re-importing an export. The export always writes this
+third part, so a round trip never loses a count.
 
 ---
 

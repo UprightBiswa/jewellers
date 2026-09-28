@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { imageUrl } from "@/lib/images/url";
@@ -65,12 +65,20 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           <h1 className="font-display text-2xl text-ink">Products</h1>
           <p className="text-sm text-muted">Everything you sell, and everything you are still writing.</p>
         </div>
-        <Button asChild>
-          <Link href="/admin/products/new">
-            <Plus className="size-4" aria-hidden />
-            Add a product
-          </Link>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="secondary">
+            <Link href="/admin/products/import">
+              <Upload className="size-4" aria-hidden />
+              Import a sheet
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/admin/products/new">
+              <Plus className="size-4" aria-hidden />
+              Add a product
+            </Link>
+          </Button>
+        </div>
       </header>
 
       <form className="flex gap-2" action="/admin/products">
