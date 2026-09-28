@@ -41,7 +41,8 @@ Auth.js v5 · Cloudinary · Razorpay · Resend · Upstash · Zod 4
 Reasoning in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · setup in
 [docs/SETUP.md](docs/SETUP.md) · API in [docs/API.md](docs/API.md) · status in
 [docs/PROGRESS.md](docs/PROGRESS.md) · payments in
-[docs/RAZORPAY-TEST.md](docs/RAZORPAY-TEST.md).
+[docs/RAZORPAY-TEST.md](docs/RAZORPAY-TEST.md) · email and Google sign-in in
+[docs/EMAIL-AND-GOOGLE.md](docs/EMAIL-AND-GOOGLE.md).
 
 **The work queue is [docs/TASKS.md](docs/TASKS.md)** — done / doing / next / later,
 verified against the code rather than remembered. Read it before picking up work,

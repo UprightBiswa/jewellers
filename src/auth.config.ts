@@ -1,6 +1,8 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 
+import { isGoogleAuthConfigured } from "@/lib/integrations";
+
 /**
  * Edge-safe half of the auth setup.
  *
@@ -10,7 +12,16 @@ import Google from "next-auth/providers/google";
  * Prisma adapter live in src/auth.ts, which only ever runs in Node.
  */
 
-const googleEnabled = Boolean(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
+/**
+ * The same judgement /api/v1/health reports, so the button and the status page
+ * can never disagree. A client id that is merely present — a placeholder left in
+ * a hosting dashboard — would otherwise put a Google button on the login form
+ * that fails the moment anyone presses it.
+ */
+const googleEnabled = isGoogleAuthConfigured(
+  process.env.AUTH_GOOGLE_ID,
+  process.env.AUTH_GOOGLE_SECRET,
+);
 
 export const ADMIN_ROLES = ["OWNER", "STAFF"] as const;
 

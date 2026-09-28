@@ -111,8 +111,8 @@ checkout works.
 
 | # | Service | What is needed | Status |
 |---|---|---|---|
-| 24 | **Email (Resend)** | Free account, verify charubala.com, `RESEND_API_KEY` | **next** |
-| 25 | **Google sign-in** | Google Cloud OAuth client, two variables | later |
+| 24 | **Email (Resend)** | Free account, verify charubala.com, `RESEND_API_KEY` — step by step in [EMAIL-AND-GOOGLE.md](EMAIL-AND-GOOGLE.md). Blocked until the domain is pointed | **next** |
+| 25 | **Google sign-in** | Cloud project `charubalasilver` exists; needs a consent screen and an OAuth client — step by step in [EMAIL-AND-GOOGLE.md](EMAIL-AND-GOOGLE.md) | later |
 | 26 | Razorpay live keys | Only after KYC and a successful test order | later |
 | 27 | Upstash Redis | Not needed yet — in-memory limiter is fine at this volume | later |
 | 28 | Vercel Analytics | One package, one component | **next** |
