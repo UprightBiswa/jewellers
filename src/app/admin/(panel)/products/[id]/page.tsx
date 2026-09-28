@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink } from "lucide-react";
 
 import { db } from "@/lib/db";
 import { paiseToRupees } from "@/lib/money";
 import { ProductForm, type ProductFormValues } from "@/components/admin/product-form";
 import { ProductDangerZone } from "@/components/admin/product-danger-zone";
+import { Missing } from "@/components/admin/missing";
 
 export const metadata: Metadata = { title: "Edit product" };
 export const dynamic = "force-dynamic";
@@ -54,7 +54,10 @@ export default async function EditProductPage({
     }),
   ]);
 
-  if (!product) notFound();
+  // Returned, not thrown — see the note in components/admin/missing.tsx.
+  if (!product) {
+    return <Missing what="product" backHref="/admin/products" backLabel="All products" />;
+  }
 
   const initial: ProductFormValues = {
     id: product.id,

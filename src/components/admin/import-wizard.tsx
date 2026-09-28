@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import imageCompression from "browser-image-compression";
 import { AlertTriangle, CheckCircle2, Download, FileSpreadsheet, Images, Upload } from "lucide-react";
@@ -30,9 +30,6 @@ import {
 type Step = "choose" | "preview" | "uploading" | "done";
 
 export function ImportWizard() {
-  const csvRef = useRef<HTMLInputElement>(null);
-  const imagesRef = useRef<HTMLInputElement>(null);
-
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [csvText, setCsvText] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -298,11 +295,13 @@ export function ImportWizard() {
         <h2 className="font-display text-lg text-ink">1 · Choose the files</h2>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={() => csvRef.current?.click()}
+          {/* Labels, not buttons calling .click() on a ref. A label wired to a
+              file input opens the picker natively — it cannot be defeated by a
+              hydration hiccup, and it still works with the keyboard. */}
+          <label
+            htmlFor="import-csv"
             className={cn(
-              "flex flex-col items-start gap-2 rounded-[var(--radius-card)] border border-dashed p-5 text-left transition",
+              "flex cursor-pointer flex-col items-start gap-2 rounded-[var(--radius-card)] border border-dashed p-5 text-left transition focus-within:border-accent focus-within:ring-3 focus-within:ring-brand/20",
               csvFile ? "border-accent bg-accent/5" : "border-line hover:border-accent hover:bg-surface-2",
             )}
           >
@@ -311,13 +310,19 @@ export function ImportWizard() {
             <span className="text-sm text-muted">
               {csvFile ? "Tap to choose a different one" : "Saved from Excel or Sheets as CSV"}
             </span>
-          </button>
+            <input
+              id="import-csv"
+              type="file"
+              accept=".csv,text/csv"
+              className="sr-only"
+              onChange={(e) => void chooseCsv(e.target.files?.[0])}
+            />
+          </label>
 
-          <button
-            type="button"
-            onClick={() => imagesRef.current?.click()}
+          <label
+            htmlFor="import-images"
             className={cn(
-              "flex flex-col items-start gap-2 rounded-[var(--radius-card)] border border-dashed p-5 text-left transition",
+              "flex cursor-pointer flex-col items-start gap-2 rounded-[var(--radius-card)] border border-dashed p-5 text-left transition focus-within:border-accent focus-within:ring-3 focus-within:ring-brand/20",
               imageFiles.length ? "border-accent bg-accent/5" : "border-line hover:border-accent hover:bg-surface-2",
             )}
           >
@@ -328,24 +333,16 @@ export function ImportWizard() {
             <span className="text-sm text-muted">
               Named 001-1.jpg, 001-2.jpg — the number matches the serial column
             </span>
-          </button>
+            <input
+              id="import-images"
+              type="file"
+              accept="image/*"
+              multiple
+              className="sr-only"
+              onChange={(e) => setImageFiles(Array.from(e.target.files ?? []))}
+            />
+          </label>
         </div>
-
-        <input
-          ref={csvRef}
-          type="file"
-          accept=".csv,text/csv"
-          className="sr-only"
-          onChange={(e) => void chooseCsv(e.target.files?.[0])}
-        />
-        <input
-          ref={imagesRef}
-          type="file"
-          accept="image/*"
-          multiple
-          className="sr-only"
-          onChange={(e) => setImageFiles(Array.from(e.target.files ?? []))}
-        />
 
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Button onClick={() => void runPreview()} disabled={!csvFile || busy}>
@@ -356,11 +353,18 @@ export function ImportWizard() {
             <Download className="size-4" aria-hidden /> Export what is already here
           </Button>
           <a
+            href="/templates/products-blank.csv"
+            download
+            className="text-sm text-accent underline-offset-4 hover:underline"
+          >
+            Blank sheet
+          </a>
+          <a
             href="/templates/products-template.csv"
             download
             className="text-sm text-accent underline-offset-4 hover:underline"
           >
-            Download a blank sheet
+            Sheet with 5 examples
           </a>
         </div>
       </section>

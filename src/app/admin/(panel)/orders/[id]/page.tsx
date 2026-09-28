@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 
 import { db } from "@/lib/db";
@@ -16,6 +15,7 @@ import {
   PAYMENT_TONE,
 } from "@/components/ui/badge";
 import { OrderActions } from "@/components/admin/order-actions";
+import { Missing } from "@/components/admin/missing";
 
 export const metadata: Metadata = { title: "Order" };
 export const dynamic = "force-dynamic";
@@ -63,7 +63,9 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
     },
   });
 
-  if (!order) notFound();
+  if (!order) {
+    return <Missing what="order" backHref="/admin/orders" backLabel="All orders" />;
+  }
 
   const address = (order.shippingAddress ?? {}) as ShippingAddress;
   const addressText = [
