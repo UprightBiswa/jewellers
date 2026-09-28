@@ -61,6 +61,13 @@ Most tutorials online are a major behind. These are the ones that bite:
   the dev server. `lib/demo/fallback.ts` probes the TCP socket first for that reason.
 - **TypeScript 7** — `baseUrl` was removed from `tsconfig.json`.
 - **Next 16** — the file is `src/proxy.ts`, not `src/middleware.ts`.
+- **Next 16 dev origins** — `127.0.0.1` and `localhost` are different origins, and the
+  second one is blocked from loading `/_next/*`. It fails silently in the worst way:
+  the server HTML is perfect, so the page looks right, but the client bundle never
+  arrives and **nothing hydrates** — checkboxes tick by browser default with no state
+  behind them, buttons do nothing, and the only clue is a WebSocket error in the
+  console. `allowedDevOrigins` in `next.config.ts` lists both, plus the LAN address so
+  a phone can open the admin. Production is unaffected.
 - **zod 4** — for an object whose every field has a default, use `.prefault({})`;
   `.default({})` is a type error.
 - **lucide-react v1** — no brand icons. Social marks are local SVGs.

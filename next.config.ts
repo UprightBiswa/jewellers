@@ -23,6 +23,23 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  /**
+   * Hosts allowed to load dev resources.
+   *
+   * Next 16 treats 127.0.0.1 and localhost as different origins and blocks the
+   * second one from fetching /_next/*. The failure is quiet and vicious: the
+   * server HTML renders perfectly, so the page looks fine, but the client
+   * bundle never arrives and nothing hydrates. Checkboxes then tick by browser
+   * default with no React state behind them, buttons do nothing, and the only
+   * clue is a WebSocket error in the console.
+   *
+   * 127.0.0.1 is this machine. The whole network address is here so a phone on
+   * the same wifi can open the admin and prove the mobile layout on real glass,
+   * which is the only way to check the rule that matters most in this project.
+   * Development only — `next build` ignores it.
+   */
+  allowedDevOrigins: ["127.0.0.1", "localhost", "10.57.117.11", "*.local"],
+
   images: {
     // Images are served straight from Cloudinary's edge — Vercel does no image
     // work at all. See src/lib/images/loader.ts for why that matters to the bill.
