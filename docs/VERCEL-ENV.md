@@ -32,7 +32,7 @@ NEXT_PUBLIC_WHATSAPP_NUMBER="918011210884"
 
 # NEXT_PUBLIC_SITE_URL is deliberately NOT here. Leave it out for the first
 # deploy and the site uses its own *.vercel.app address. Add it only when
-# charubala.com actually points at Vercel. See "The site's own address" below.
+# charubalasilver.in actually points at Vercel. See "The site's own address" below.
 
 # Sessions. Generate a NEW one for production and paste it straight into
 # Vercel — never back into this file:  openssl rand -base64 32
@@ -47,7 +47,7 @@ NEXT_PUBLIC_RAZORPAY_KEY_ID="rzp_test_…"
 # Razorpay → Settings → Webhooks shows this once when you create the webhook.
 RAZORPAY_WEBHOOK_SECRET="<from Razorpay, Vercel only>"
 
-EMAIL_FROM="orders@charubala.com"
+EMAIL_FROM="orders@charubalasilver.in"
 EMAIL_ADMIN_NOTIFY="charubalasilver@gmail.com"
 ```
 
@@ -120,7 +120,7 @@ Vercel logs instead of sent, and the order itself completes normally. Rahul
 still learns about the order from the admin panel and the WhatsApp button.
 
 Add it when you want customers to get an emailed confirmation:
-resend.com → free tier → API Keys → a key starting `re_…`. `charubala.com` must
+resend.com → free tier → API Keys → a key starting `re_…`. `charubalasilver.in` must
 also be verified under Resend → Domains, or `EMAIL_FROM` is rejected.
 
 The key must begin with `re_`. Anything else is ignored with a warning in the
@@ -147,7 +147,7 @@ appear, and email-and-password sign-in is unaffected. Customers can also check
 out with no account at all.
 
 If you add it later, the redirect URI is
-`https://charubala.com/api/auth/callback/google`.
+`https://charubalasilver.in/api/auth/callback/google`.
 
 ---
 
@@ -175,11 +175,11 @@ the site genuinely cannot start without.
 
 | Where | URL |
 |---|---|
-| Razorpay → Settings → Webhooks | `https://<your-app>.vercel.app/api/webhooks/razorpay` — re-point it at charubala.com when DNS moves |
+| Razorpay → Settings → Webhooks | `https://<your-app>.vercel.app/api/webhooks/razorpay` — re-point it at charubalasilver.in when DNS moves |
 | Razorpay events | `payment.captured`, `payment.failed`, `order.paid` — those three only |
-| Google Search Console | `https://charubala.com/sitemap.xml` — only once the domain is live |
+| Google Search Console | `https://charubalasilver.in/sitemap.xml` — only once the domain is live |
 | Uptime monitor | `https://<your-app>.vercel.app/api/v1/health` |
-| Google OAuth redirect (if used) | `https://charubala.com/api/auth/callback/google` |
+| Google OAuth redirect (if used) | `https://charubalasilver.in/api/auth/callback/google` |
 | **Rahul's admin door** | printed by `npm run admin` — never write it down here |
 
 ---
@@ -198,7 +198,7 @@ tags, OpenGraph images and every link in an order email will already point at
 your `.vercel.app` address rather than at `localhost:3000`, which is what used
 to happen when the variable was forgotten.
 
-Add `NEXT_PUBLIC_SITE_URL="https://charubala.com"` only on the day DNS actually
+Add `NEXT_PUBLIC_SITE_URL="https://charubalasilver.in"` only on the day DNS actually
 points at Vercel, and redeploy. Until then, leaving it unset is correct — and a
 preview deployment then describes itself by its own preview URL, which is what
 you want when testing.

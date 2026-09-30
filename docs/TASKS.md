@@ -111,8 +111,8 @@ checkout works.
 
 | # | Service | What is needed | Status |
 |---|---|---|---|
-| 24 | **Email (Resend)** | Free account, verify charubala.com, `RESEND_API_KEY` — step by step in [EMAIL-AND-GOOGLE.md](EMAIL-AND-GOOGLE.md). Blocked until the domain is pointed | **next** |
-| 25 | **Google sign-in** | Cloud project `charubalasilver` exists; needs a consent screen and an OAuth client — step by step in [EMAIL-AND-GOOGLE.md](EMAIL-AND-GOOGLE.md) | later |
+| 24 | **Email (Resend)** | Key working locally, `npm run check:email` delivers. Still to do: verify charubalasilver.in in Resend, switch `EMAIL_FROM` off resend.dev, copy the key into Vercel | **doing** |
+| 25 | **Google sign-in** | Client created, button live locally, admin correctly excluded. Still to do: verify the domain in Search Console so branding passes, and copy both values into Vercel | **doing** |
 | 26 | Razorpay live keys | Only after KYC and a successful test order | later |
 | 27 | Upstash Redis | Not needed yet — in-memory limiter is fine at this volume | later |
 | 28 | Vercel Analytics | One package, one component | **next** |
@@ -144,7 +144,7 @@ Nothing here blocks launch. Every one degrades cleanly — see the service map i
 |---|---|---|
 | 38 | Sitemap, robots, canonical, OpenGraph | **done** |
 | 39 | Product JSON-LD structured data | **done** |
-| 40 | **Google Search Console** — verify domain, submit sitemap | **next** |
+| 40 | **Google Search Console** — verify `charubalasilver.in`, submit sitemap. Also unblocks the Google consent-screen branding | **next** |
 | 41 | **Per-product SEO fields** — title, description, editable in admin | **next** |
 | 42 | Footer related-search links | **next** (same as #22) |
 | 43 | Blog / content pages | later |

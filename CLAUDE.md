@@ -5,7 +5,7 @@ Jhaljhali, Tufanganj, Coochbehar, West Bengal 736159. Trading since 2018.
 
 Sells online: earrings, rings, women's chains, bracelets, payel, toe rings, baby sets.
 Fixed prices, ₹800–5,000. Both ready stock and made to order. Not registered for GST.
-Languages: English and Bengali. Domain: charubala.com (a previous site is closed).
+Languages: English and Bengali. Domain: charubalasilver.in (a previous site is closed).
 
 ## Who uses this
 

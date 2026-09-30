@@ -25,7 +25,7 @@ export const STORE = {
   state: "West Bengal",
   pincode: "736159",
   sinceYear: "2018",
-  domain: "charubala.com",
+  domain: "charubalasilver.in",
   languages: ["English", "Bengali"],
 } as const;
 

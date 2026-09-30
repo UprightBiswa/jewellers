@@ -25,7 +25,7 @@
  * line does not move a live account. To change a live one:
  *   npm run admin -- --email rahul@example.com
  */
-export const ADMIN_EMAIL = "owner@charubala.com";
+export const ADMIN_EMAIL = "charubalasilver@gmail.com";
 
 /** Where the staff sign-in form lives. */
 export const ADMIN_LOGIN_PATH = "/admin/login";
@@ -72,7 +72,7 @@ export async function adminDoorSecret(): Promise<string> {
   return (cachedDoor = hex.slice(0, DOOR_HEX_LENGTH));
 }
 
-/** The full URL to hand to Rahul, e.g. https://charubala.com/3efee305ebe18656 */
+/** The full URL to hand to Rahul, e.g. https://charubalasilver.in/3efee305ebe18656 */
 export async function adminDoorUrl(origin: string): Promise<string> {
   const door = await adminDoorSecret();
   return door ? `${origin.replace(/\/$/, "")}/${door}` : `${origin.replace(/\/$/, "")}/admin/login`;

@@ -58,7 +58,7 @@ Other things it can do:
 npm run webhook:test -- --event payment.failed    # stock goes back on the shelf
 npm run webhook:test -- --event order.paid
 npm run webhook:test -- --order order_Tdc2w3MV3Dk # a specific Razorpay order
-npm run webhook:test -- --base https://charubala.com
+npm run webhook:test -- --base https://charubalasilver.in
 ```
 
 It picks the most recent order with a Razorpay id. If there is none, place one

@@ -37,7 +37,7 @@ the same address as the admin, so there is one login to remember.
 
 ### 2. Add the domain
 
-**Domains → Add Domain →** `charubala.com`
+**Domains → Add Domain →** `charubalasilver.in`
 
 Resend gives three DNS records. Add them where the domain is registered — the
 same place the Vercel records go:
@@ -51,7 +51,7 @@ same place the Vercel records go:
 Verification takes minutes to a few hours. Until it says **Verified**, mail to
 customers will not go out.
 
-> **You cannot do this yet.** `charubala.com` is not pointed at anything — the
+> **You cannot do this yet.** `charubalasilver.in` is not pointed at anything — the
 > site is on `jewellers-one.vercel.app`. Point the domain first (docs/DEPLOY.md),
 > then come back. Until then Resend will only let you send to your own account
 > address, which is enough to test but not to trade.
@@ -62,7 +62,7 @@ customers will not go out.
 
 - Name: `charubala-production`
 - Permission: **Sending access** only, not Full access
-- Domain: `charubala.com`
+- Domain: `charubalasilver.in`
 
 It is shown **once**. Copy it — it starts `re_`.
 
@@ -72,7 +72,7 @@ It is shown **once**. Copy it — it starts `re_`.
 
 ```
 RESEND_API_KEY        re_xxxxxxxxxxxxxxxxxxxx
-EMAIL_FROM            orders@charubala.com
+EMAIL_FROM            orders@charubalasilver.in
 EMAIL_ADMIN_NOTIFY    charubalasilver@gmail.com
 ```
 
@@ -80,7 +80,7 @@ Never in a file. `.env.local` is for your machine only, and this repository is
 public.
 
 `EMAIL_FROM` must be **on the verified domain**. `orders@gmail.com` is rejected;
-`orders@charubala.com` is accepted once the domain verifies. The inbox does not
+`orders@charubalasilver.in` is accepted once the domain verifies. The inbox does not
 have to exist — nobody replies to it — but the domain must.
 
 Redeploy after adding them. Environment variables are read at build time.
@@ -133,10 +133,10 @@ Google will not issue credentials until this exists.
 | App name | `Charubala Silver` |
 | User support email | `charubalasilver@gmail.com` |
 | App logo | optional, skip for now |
-| Application home page | `https://jewellers-one.vercel.app` |
-| Privacy policy link | `https://jewellers-one.vercel.app/pages/privacy-policy` |
-| Terms of service link | `https://jewellers-one.vercel.app/pages/terms` |
-| Authorised domain | `vercel.app` now, `charubala.com` once it is pointed |
+| Application home page | `https://charubalasilver.in/` |
+| Privacy policy link | `https://charubalasilver.in/pages/privacy-policy` |
+| Terms of service link | `https://charubalasilver.in/pages/terms` |
+| Authorised domain | `charubalasilver.in` |
 | Developer contact | `charubalasilver@gmail.com` |
 
 **Scopes:** add only `userinfo.email` and `userinfo.profile`. Nothing else.
@@ -147,6 +147,44 @@ needs none of it.
 your own address under **Test users**. In Testing only those addresses can sign
 in. Press **Publish app** when you are ready for customers — with only those two
 scopes it goes live immediately, with no review.
+
+### 1b. Prove the domain is yours — this is the step that fails
+
+Google will refuse the branding with:
+
+> The website of your home page URL "https://charubalasilver.in/" is not
+> registered to you. Verify ownership of your home page.
+
+This is not about the site being live. `charubalasilver.in` already answers 200
+and serves the privacy and terms pages. Google is saying something narrower: the
+Google account filling in the consent screen has never proved it controls that
+domain. Until it has, **no amount of editing the consent screen will pass.**
+
+Fix it in Search Console, not in the Cloud Console:
+
+1. [search.google.com/search-console](https://search.google.com/search-console) —
+   sign in as `charubalasilver@gmail.com`, **the same account that owns the Cloud
+   project**. A different Google account verifying the domain does not count.
+2. **Add property → Domain** (the left-hand box, not URL prefix). Enter
+   `charubalasilver.in` with no `https://` and no `www`.
+3. Google gives one TXT record:
+
+   | Type | Name | Value |
+   |---|---|---|
+   | TXT | `@` | `google-site-verification=…` |
+
+4. Add it where the domain is registered — the same DNS panel holding the Vercel
+   records. Leave the existing records alone; a TXT record does not disturb them.
+5. Back in Search Console, press **Verify**. DNS usually takes minutes; it can
+   take a few hours.
+6. Then Google Auth Platform → Branding → **I have fixed the issues → Request
+   re-verification**.
+
+A *Domain* property covers `charubalasilver.in` and every subdomain at once,
+which is why it is worth the DNS record over the quicker HTML-file method.
+
+You will want Search Console anyway — it is where the sitemap is submitted and
+where you find out what people searched for to reach the shop. That is task #40.
 
 ### 2. The credentials
 
@@ -168,7 +206,6 @@ character:
 
 ```
 http://localhost:3000/api/auth/callback/google
-http://127.0.0.1:3000/api/auth/callback/google
 https://jewellers-one.vercel.app/api/auth/callback/google
 ```
 
@@ -176,7 +213,7 @@ Both `localhost` and `127.0.0.1` are there because they are different origins to
 a browser, and this project has already been bitten by that once — see the Next
 16 dev-origins note in `CLAUDE.md`.
 
-Add `https://charubala.com/...` to both lists the day the domain is pointed. You
+Add `https://charubalasilver.in/...` to both lists the day the domain is pointed. You
 can edit these later; changes take a few minutes to take effect.
 
 **Create.** Google shows a **Client ID** ending `.apps.googleusercontent.com`

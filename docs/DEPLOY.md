@@ -78,7 +78,7 @@ NEXT_PUBLIC_SITE_NAME Charubala Silver
 
 `NEXT_PUBLIC_SITE_URL` is **not** on that list on purpose. Leave it out and the
 site uses its own `*.vercel.app` address — see `src/lib/site-url.ts`. Set it
-only once charubala.com points at Vercel.
+only once charubalasilver.in points at Vercel.
 
 There is deliberately no admin variable. The panel's secret URL is derived from
 `AUTH_SECRET`, and the owner's password lives in the database as a hash — run
@@ -153,11 +153,11 @@ points of presence inside India. Swapping is one file
 
 ```
 RESEND_API_KEY
-EMAIL_FROM            orders@charubala.com
+EMAIL_FROM            orders@charubalasilver.in
 EMAIL_ADMIN_NOTIFY    Rahul's email
 ```
 
-`EMAIL_FROM` must be on a domain verified in Resend — add `charubala.com` under
+`EMAIL_FROM` must be on a domain verified in Resend — add `charubalasilver.in` under
 Domains and put the DNS records at your registrar. Until then, email is written
 to the server log instead of sent, and nothing breaks.
 
@@ -205,7 +205,7 @@ NEXT_PUBLIC_RAZORPAY_KEY_ID   (the key id again — the browser needs it)
 
 Razorpay Dashboard → Settings → Webhooks → Add:
 
-- URL: `https://charubala.com/api/webhooks/razorpay`
+- URL: `https://charubalasilver.in/api/webhooks/razorpay`
 - Events: `payment.captured`, `payment.failed`, `order.paid`
 - Copy the signing secret into `RAZORPAY_WEBHOOK_SECRET`
 
@@ -222,7 +222,7 @@ WhatsApp for UPI. Nothing is broken; the option simply is not offered.
 [console.cloud.google.com](https://console.cloud.google.com) → APIs & Services →
 Credentials → OAuth client ID → Web application.
 
-Authorised redirect URI: `https://charubala.com/api/auth/callback/google`
+Authorised redirect URI: `https://charubalasilver.in/api/auth/callback/google`
 
 ```
 AUTH_GOOGLE_ID
@@ -235,14 +235,14 @@ Leave them blank and the Google button simply does not appear.
 
 ## The domain
 
-Buy **charubala.com** in **Rahul's own registrar account** — GoDaddy, Namecheap,
+Buy **charubalasilver.in** in **Rahul's own registrar account** — GoDaddy, Namecheap,
 Hostinger, any of them, about ₹900/year. Not in yours. The day he wants to move
 to another developer, the domain has to be his or it becomes an argument.
 
-Vercel → Project → Settings → Domains → add `charubala.com`. Vercel shows the
+Vercel → Project → Settings → Domains → add `charubalasilver.in`. Vercel shows the
 two DNS records to paste at the registrar. It issues the certificate itself.
 
-Then — and only then — set `NEXT_PUBLIC_SITE_URL=https://charubala.com` and
+Then — and only then — set `NEXT_PUBLIC_SITE_URL=https://charubalasilver.in` and
 redeploy. Order emails, canonical URLs, the sitemap and the Google callback all
 read it. Before that day, leaving it unset is correct: the site describes itself
 by its Vercel address rather than by a domain that does not resolve yet.
@@ -289,12 +289,12 @@ npm run db:seed                # categories, products, policies, his admin accou
 
 Then check, in this order:
 
-1. `https://charubala.com/api/v1/health` returns `"status": "ok"` and shows which
+1. `https://charubalasilver.in/api/v1/health` returns `"status": "ok"` and shows which
    integrations are live.
 2. `npm run admin` — it prints the door URL. Visit it once, then sign in at
    `/admin/login`.
 3. Add one real product with a real photo, from a phone.
 4. Place one test order end to end.
-5. `ADMIN_EMAIL=… ADMIN_PASSWORD=… AUDIT_BASE=https://charubala.com npm run audit`
+5. `ADMIN_EMAIL=… ADMIN_PASSWORD=… AUDIT_BASE=https://charubalasilver.in npm run audit`
    — 103 checks against the live site.
-6. Submit `https://charubala.com/sitemap.xml` in Google Search Console.
+6. Submit `https://charubalasilver.in/sitemap.xml` in Google Search Console.

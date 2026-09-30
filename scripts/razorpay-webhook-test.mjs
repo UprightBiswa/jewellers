@@ -9,7 +9,7 @@
  *   npm run webhook:test                       # the newest pending order
  *   npm run webhook:test -- --event payment.failed
  *   npm run webhook:test -- --order order_XXXX
- *   npm run webhook:test -- --base https://charubala.com
+ *   npm run webhook:test -- --base https://charubalasilver.in
  *
  * A bad signature must be rejected, so it also sends one deliberately wrong
  * payload and checks that the route answers 401.
