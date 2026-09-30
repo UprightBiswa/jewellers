@@ -3,12 +3,19 @@ import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { devFallback } from "@/lib/demo/fallback";
 import { getSettings } from "@/lib/settings";
-import { getShelf, listCategories, listCollections } from "@/lib/queries/catalog";
+import {
+  getCategoryShelves,
+  getShelf,
+  listCategories,
+  listCollections,
+} from "@/lib/queries/catalog";
 import {
   CategoryRail,
   CollectionBanners,
   MadeToOrderBand,
   ProductRail,
+  CategoryShelves,
+  PromiseBand,
   SectionHeading,
   ShopByPrice,
   StoryStrip,
@@ -104,7 +111,7 @@ async function getHeroSlides(): Promise<HeroSlide[]> {
 }
 
 export default async function HomePage() {
-  const [settings, categories, collections, trending, featured, fresh, testimonials, slides] =
+  const [settings, categories, collections, trending, featured, fresh, testimonials, slides, shelves] =
     await Promise.all([
       getSettings(),
       listCategories(),
@@ -114,7 +121,29 @@ export default async function HomePage() {
       getShelf("new", 8),
       getTestimonials(),
       getHeroSlides(),
+      getCategoryShelves(4, 8),
     ]);
+
+  // Every claim here is a setting, so the band cannot quietly go stale when the
+  // owner changes the free-delivery threshold or switches COD off.
+  const rupees = (paise: number) => `₹${Math.round(paise / 100).toLocaleString("en-IN")}`;
+  const promise = [
+    { label: "925 Sterling", detail: "Every piece, hallmarked where it is marked" },
+    { label: "Made by hand", detail: `On our own bench in ${settings.store.city || "Tufanganj"}` },
+    settings.shipping.freeAbove
+      ? {
+          label: "Free delivery",
+          detail: `On orders above ${rupees(settings.shipping.freeAbove)}`,
+        }
+      : { label: "All India delivery", detail: settings.shipping.deliveryDays },
+    {
+      label: `${settings.returns.windowDays}-day exchange`,
+      detail: settings.returns.buyback || "Exchange at the shop",
+    },
+    settings.payments.codEnabled
+      ? { label: "Cash on delivery", detail: "Pay when the parcel reaches you" }
+      : { label: "UPI and cards", detail: "Paid securely before dispatch" },
+  ];
 
   // Named explicitly rather than "the first four": these are the ones with a
   // banner image, in the order they should read.
@@ -162,6 +191,8 @@ export default async function HomePage() {
         </section>
       ) : null}
 
+      <PromiseBand facts={promise} />
+
       <section className="container-page py-12">
         <SectionHeading eyebrow="Whatever you have in mind" title="Shop by price" />
         <Reveal className="mt-6">
@@ -175,6 +206,8 @@ export default async function HomePage() {
           <CollectionBanners collections={banners} />
         </section>
       ) : null}
+
+      <CategoryShelves shelves={shelves} />
 
       {featured.length > 0 ? (
         <section className="container-page py-8">

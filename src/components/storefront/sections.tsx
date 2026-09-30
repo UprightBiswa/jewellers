@@ -408,3 +408,77 @@ export function MadeToOrderBand({ whatsapp }: { whatsapp?: string }) {
     </section>
   );
 }
+
+/**
+ * The promise band.
+ *
+ * Five facts, and every one is read from settings rather than written here — the
+ * free-delivery threshold moves during a festival, the exchange window is the
+ * owner's to set, and COD may be switched off the day online payment is
+ * switched on. A band of claims that quietly goes stale is worse than no band.
+ *
+ * It sits directly under the first product rail because that is where a
+ * first-time visitor decides whether a shop they have never heard of can be
+ * trusted with a UPI payment.
+ */
+export function PromiseBand({
+  facts,
+}: {
+  facts: { label: string; detail: string }[];
+}) {
+  if (facts.length === 0) return null;
+
+  return (
+    <section className="border-y border-line bg-surface-2/50 py-10" aria-label="Why buy here">
+      <div className="container-page">
+        <ul className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-5">
+          {facts.map((f) => (
+            <li key={f.label} className="text-center">
+              <p className="font-display text-[17px] leading-tight text-ink">{f.label}</p>
+              <p className="mt-1 text-[13px] leading-snug text-muted">{f.detail}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * A shelf per category — "Anklets", "Rings" — each with its own row of pieces.
+ *
+ * The reference shops all do this, and the reason is arithmetic: a visitor who
+ * scrolls the front page sees six products from one rail, or thirty across five
+ * shelves. For a catalogue of three hundred handmade pieces where no two are
+ * quite alike, showing more of it is the whole job.
+ */
+export function CategoryShelves({
+  shelves,
+}: {
+  shelves: { slug: string; name: string; nameBn?: string | null; products: Card[] }[];
+}) {
+  if (shelves.length === 0) return null;
+
+  return (
+    <>
+      {shelves.map((shelf, i) => (
+        <section
+          key={shelf.slug}
+          className={i % 2 === 1 ? "bg-surface-2/40 py-12" : "py-12"}
+        >
+          <div className="container-page">
+            <SectionHeading
+              eyebrow={shelf.nameBn ?? "From the bench"}
+              title={shelf.name}
+              href={`/categories/${shelf.slug}`}
+              hrefLabel="See all"
+            />
+            <div className="mt-6">
+              <ProductRail products={shelf.products} />
+            </div>
+          </div>
+        </section>
+      ))}
+    </>
+  );
+}

@@ -472,3 +472,60 @@ export async function countProducts(where: Prisma.ProductWhereInput, fallback: n
     () => fallback,
   );
 }
+
+/**
+ * A row of pieces for each of the busiest categories.
+ *
+ * One query, not one per category: with seven categories the obvious loop is
+ * seven round trips to Neon on every homepage render, and Neon is in Singapore.
+ * This fetches a slice of the active catalogue once and groups it here.
+ */
+export async function getCategoryShelves(
+  categoryLimit = 4,
+  perCategory = 8,
+): Promise<{ slug: string; name: string; nameBn: string | null; products: ProductCard[] }[]> {
+  return devFallback(
+    async () => {
+      const busiest = await db.category.findMany({
+        where: { isActive: true, products: { some: { status: "ACTIVE" } } },
+        select: {
+          slug: true,
+          name: true,
+          nameBn: true,
+          _count: { select: { products: true } },
+        },
+        orderBy: { sortOrder: "asc" },
+        take: categoryLimit,
+      });
+
+      if (busiest.length === 0) return [];
+
+      const [rows, rate] = await Promise.all([
+        db.product.findMany({
+          where: { status: "ACTIVE", category: { slug: { in: busiest.map((c) => c.slug) } } },
+          // cardSelect already carries the category's name and slug.
+          select: cardSelect,
+          orderBy: { createdAt: "desc" },
+          // Enough to fill every shelf even when the newest pieces cluster in
+          // one category, without pulling the whole catalogue.
+          take: categoryLimit * perCategory * 3,
+        }),
+        getMetalRate(),
+      ]);
+
+      return busiest
+        .map((c) => ({
+          slug: c.slug,
+          name: c.name,
+          nameBn: c.nameBn,
+          products: rows
+            .filter((p) => p.category.slug === c.slug)
+            .slice(0, perCategory)
+            .map((p) => toCard(p, rate)),
+        }))
+        // A shelf of one looks like a mistake; two is a row.
+        .filter((s) => s.products.length >= 2);
+    },
+    () => [],
+  );
+}
