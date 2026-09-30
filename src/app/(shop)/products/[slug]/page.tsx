@@ -16,6 +16,8 @@ import { PincodeCheck } from "@/components/storefront/pincode-check";
 import { ProductGallery } from "@/components/storefront/product-gallery";
 import { WishlistButton } from "@/components/storefront/wishlist-button";
 import { ProductGrid, SectionHeading } from "@/components/storefront/sections";
+import { ReviewForm } from "@/components/storefront/review-form";
+import { reviewEligibility } from "@/app/(shop)/review-actions";
 
 type Params = Promise<{ slug: string }>;
 
@@ -60,9 +62,10 @@ export default async function ProductPage({ params }: { params: Params }) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const [settings, related] = await Promise.all([
+  const [settings, related, eligibility] = await Promise.all([
     getSettings(),
     getRelated(product.id, product.category.id, 4),
+    reviewEligibility(product.id),
   ]);
 
   const off = discountPercent(product.price, product.compareAtPrice);
@@ -261,10 +264,16 @@ export default async function ProductPage({ params }: { params: Params }) {
           </div>
         </div>
 
-        {product.reviews.length > 0 ? (
-          <section className="mt-16">
-            <SectionHeading eyebrow="Verified buyers" title="Reviews" />
-            <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="mt-16">
+          <SectionHeading
+            eyebrow="Verified buyers"
+            title={product.reviews.length > 0 ? "Reviews" : "Be the first to review this"}
+          />
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
+            <div>
+              {product.reviews.length > 0 ? (
+            <ul className="grid gap-4 sm:grid-cols-2">
               {product.reviews.map((r) => (
                 <li key={r.id} className="rounded-[var(--radius-card)] border border-line bg-surface p-5">
                   <div className="text-gold" aria-label={`${r.rating} out of 5`}>
@@ -279,8 +288,22 @@ export default async function ProductPage({ params }: { params: Params }) {
                 </li>
               ))}
             </ul>
-          </section>
-        ) : null}
+              ) : (
+                <p className="text-[15px] text-muted">
+                  Nobody has written about this piece yet.
+                </p>
+              )}
+            </div>
+
+            <ReviewForm
+              productId={product.id}
+              productSlug={product.slug}
+              signedIn={eligibility.signedIn}
+              bought={eligibility.bought}
+              existing={eligibility.existing}
+            />
+          </div>
+        </section>
 
         {related.length > 0 ? (
           <section className="mt-16">

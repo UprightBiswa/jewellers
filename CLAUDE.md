@@ -61,6 +61,10 @@ Most tutorials online are a major behind. These are the ones that bite:
   No `try/catch` around the `await` sees it; it arrives as an uncaughtException and kills
   the dev server. `lib/demo/fallback.ts` probes the TCP socket first for that reason.
 - **TypeScript 7** — `baseUrl` was removed from `tsconfig.json`.
+- **Neon URLs** — use `sslmode=verify-full`, not `sslmode=require`. `pg` already treats
+  the two the same but warns on every connection, and Next 16's dev overlay renders that
+  warning as a **Console Error** on any admin page that reads the database. Nothing is
+  broken; the page just looks it.
 - **Next 16** — the file is `src/proxy.ts`, not `src/middleware.ts`.
 - **Next 16 dev origins** — `127.0.0.1` and `localhost` are different origins, and the
   second one is blocked from loading `/_next/*`. It fails silently in the worst way:
