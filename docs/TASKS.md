@@ -46,17 +46,17 @@ See [BULK-IMPORT.md](BULK-IMPORT.md) for the column spec and the sheet template.
 | Metal rate | Set ₹/gram for weight-based pricing |
 | Settings | Store details, payments, shipping, tax, social |
 
-### Missing — the model exists, the screen does not
+### Recently built — the model existed, the screen did not
 
 Every row here already has its database table. This is UI work, not schema work.
 
 | # | Screen | Model | Status |
 |---|---|---|---|
-| 5 | **Categories** — create, rename, Bengali name, image, reorder, delete | `Category` | **next** |
-| 6 | **Collections** — same, plus which products belong | `Collection` | **next** |
-| 7 | **Reviews** — approve, hide, delete, reply | `Review` (`ReviewStatus` enum unused) | **next** |
-| 8 | **Customers** — list, detail, their orders, their addresses | `User` | **next** |
-| 9 | **Page content** — every page's text editable in the admin, not only the policies. Footer columns, About, FAQ, contact details, the lot | `Page` | **next** |
+| 5 | **Categories** — create, rename, Bengali name, image, reorder, hide/delete | `Category` | **done** |
+| 6 | **Collections** — create, rename, subtitle, banner, reorder, delete | `Collection` | **done** |
+| 7 | **Reviews** — approve, hide, put back, delete | `Review` | **done** — `ReviewStatus` is finally set by something |
+| 8 | **Customers** — search, expand for detail, spend, orders, disable sign-in | `User` | **done** |
+| 9 | **Page content** — add, edit, hide, delete any page of words, in Markdown | `Page` | **done** — footer columns still come from settings |
 | 10 | **Activity log** — who changed what, errors only | `AuditLog` (written, never read) | later |
 | 11 | **Staff accounts** — add a second user, set role, disable | `User.role` | later |
 
@@ -76,7 +76,7 @@ Every row here already has its database table. This is UI work, not schema work.
 
 | # | Task | Status |
 |---|---|---|
-| 14 | **Mobile drawer navigation** — the sidebar does not collapse on a phone | **next** |
+| 14 | **Mobile drawer navigation** — the phone still gets five bottom tabs, not the full twelve-item menu | **next** |
 | 15 | **Invoice** — view, download, and send to the customer | **next** |
 | 15b | **Order detail actions** — send an order email by hand, send a review request link | **next** |
 | 15c | **Tracking** — courier updates with dates, visible to the customer | **next** |

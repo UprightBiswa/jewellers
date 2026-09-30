@@ -79,9 +79,26 @@ EMAIL_ADMIN_NOTIFY    charubalasilver@gmail.com
 Never in a file. `.env.local` is for your machine only, and this repository is
 public.
 
-`EMAIL_FROM` must be **on the verified domain**. `orders@gmail.com` is rejected;
-`orders@charubalasilver.in` is accepted once the domain verifies. The inbox does not
-have to exist — nobody replies to it — but the domain must.
+### The two addresses, and why they differ
+
+| Variable | Example | Needs a real mailbox? |
+|---|---|---|
+| `EMAIL_FROM` | `orders@charubalasilver.in` | **No** |
+| `EMAIL_ADMIN_NOTIFY` | `charubalasilver@gmail.com` | Yes |
+
+`EMAIL_FROM` must be **on a domain verified with Resend**. A Gmail address is
+rejected, and rightly so — sending as `gmail.com` would be claiming a domain you
+do not own. But **it does not need to exist as a mailbox.** Nothing is ever
+delivered to `orders@charubalasilver.in`; it is a label on the envelope.
+
+Customers do reply to order emails, though — to ask where a parcel is, or to
+change a size. Every message is sent reply-to `EMAIL_ADMIN_NOTIFY`, so those
+answers land in Rahul's ordinary Gmail. One address, no new mailbox: the
+from-line is a name, and everything real arrives where he already reads mail.
+
+Until `charubalasilver.in` is verified in Resend, keep
+`EMAIL_FROM="onboarding@resend.dev"`. It works today, but only delivers to the
+address that owns the Resend account — enough to test, not to trade.
 
 Redeploy after adding them. Environment variables are read at build time.
 

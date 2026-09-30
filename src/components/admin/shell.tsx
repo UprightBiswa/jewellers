@@ -11,6 +11,11 @@ import {
   Settings,
   Coins,
   Store,
+  FolderTree,
+  Layers,
+  Star,
+  Users,
+  FileText,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -18,6 +23,8 @@ import { Mark } from "@/components/brand/logo";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 
 type NavItem = {
+  /** Heading this sits under in the sidebar. Empty means no heading. */
+  group?: string;
   href: string;
   label: string;
   Icon: typeof LayoutDashboard;
@@ -25,14 +32,27 @@ type NavItem = {
   exact?: boolean;
 };
 
+/**
+ * Grouped, because a flat list of twelve is a list nobody reads. The headings
+ * match how Rahul thinks about the shop rather than how the database is built:
+ * the things he sells, the people who buy them, and the words around both.
+ */
 const NAV: NavItem[] = [
-  { href: "/admin", label: "Home", Icon: LayoutDashboard, exact: true },
-  { href: "/admin/products", label: "Products", Icon: Package },
-  { href: "/admin/orders", label: "Orders", Icon: ReceiptText },
-  { href: "/admin/coupons", label: "Offers", Icon: Tag },
-  { href: "/admin/messages", label: "Messages", Icon: MessageSquare },
-  { href: "/admin/rate", label: "Silver rate", Icon: Coins },
-  { href: "/admin/settings", label: "Settings", Icon: Settings },
+  { href: "/admin", label: "Home", Icon: LayoutDashboard, exact: true, group: "" },
+
+  { href: "/admin/products", label: "Products", Icon: Package, group: "The shop" },
+  { href: "/admin/categories", label: "Categories", Icon: FolderTree, group: "The shop" },
+  { href: "/admin/collections", label: "Collections", Icon: Layers, group: "The shop" },
+  { href: "/admin/rate", label: "Silver rate", Icon: Coins, group: "The shop" },
+
+  { href: "/admin/orders", label: "Orders", Icon: ReceiptText, group: "People" },
+  { href: "/admin/customers", label: "Customers", Icon: Users, group: "People" },
+  { href: "/admin/reviews", label: "Reviews", Icon: Star, group: "People" },
+  { href: "/admin/messages", label: "Messages", Icon: MessageSquare, group: "People" },
+
+  { href: "/admin/pages", label: "Pages", Icon: FileText, group: "Words and rules" },
+  { href: "/admin/coupons", label: "Offers", Icon: Tag, group: "Words and rules" },
+  { href: "/admin/settings", label: "Settings", Icon: Settings, group: "Words and rules" },
 ];
 
 /** The five that fit across the bottom of a phone. */
@@ -71,10 +91,17 @@ export function AdminShell({
 
         <nav className="flex-1 overflow-y-auto p-3">
           <ul className="grid gap-0.5">
-            {NAV.map(({ href, label, Icon, exact }) => {
+            {NAV.map(({ href, label, Icon, exact, group }, i) => {
               const active = isActive(pathname, href, exact);
+              // A heading appears once, above the first item that carries it.
+              const newGroup = group && group !== NAV[i - 1]?.group;
               return (
                 <li key={href}>
+                  {newGroup && (
+                    <p className="px-3 pt-4 pb-1.5 text-[11px] font-medium uppercase tracking-[0.12em] text-muted">
+                      {group}
+                    </p>
+                  )}
                   <Link
                     href={href}
                     aria-current={active ? "page" : undefined}

@@ -38,7 +38,18 @@ function createResend(): Resend | null {
 
 const resend = createResend();
 
-const FROM = process.env.EMAIL_FROM ?? "orders@example.com";
+/**
+ * The address mail is sent *from*. It has to be on a domain verified with
+ * Resend — a Gmail address is rejected, because sending as gmail.com would be
+ * spoofing someone else's domain. It does **not** need a real mailbox: nothing
+ * is ever delivered to it.
+ *
+ * Replies are a different matter. Customers do answer order emails — to ask
+ * where a parcel is, or to change a size — so every message is sent reply-to
+ * EMAIL_ADMIN_NOTIFY, which is Rahul's own Gmail. No second address, and no new
+ * mailbox to run the shop.
+ */
+const FROM = process.env.EMAIL_FROM ?? "onboarding@resend.dev";
 const ADMIN = process.env.EMAIL_ADMIN_NOTIFY;
 
 export type SendResult = { sent: boolean; id?: string; error?: string };
@@ -70,7 +81,9 @@ export async function sendMail({
       to: Array.isArray(to) ? to : [to],
       subject,
       react,
-      replyTo,
+      // A caller may override it; otherwise a reply reaches the owner rather
+      // than a from-address with no mailbox behind it.
+      replyTo: replyTo ?? ADMIN,
       headers: marketing
         ? { "List-Unsubscribe": `<${SITE_URL}/unsubscribe>` }
         : undefined,

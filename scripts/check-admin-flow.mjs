@@ -169,10 +169,38 @@ try {
     ["/admin/messages", "Messages"],
     ["/admin/settings", "Settings"],
     ["/admin/rate", "rate"],
+    ["/admin/categories", "Add a category"],
+    ["/admin/collections", "Add a collection"],
+    ["/admin/reviews", "Reviews"],
+    ["/admin/customers", "Customers"],
+    ["/admin/pages", "Add a page"],
   ]) {
     const r = await get(path);
     ok(`${path} opens`, r.status === 200 && r.body.includes(needle), `status ${r.status}`);
   }
+
+  // The five new screens have to be reachable, not merely to exist.
+  const nav = await get("/admin");
+  for (const href of [
+    "/admin/categories", "/admin/collections", "/admin/reviews",
+    "/admin/customers", "/admin/pages",
+  ]) {
+    ok(`${href} is in the sidebar`, nav.body.includes(`href="${href}"`));
+  }
+
+  // Real data, not an empty shell.
+  const cats = await get("/admin/categories");
+  // Interpolated values land in separate text nodes with React's comment
+  // markers between them, so the rendered line is never one contiguous string.
+  ok("categories list real rows",
+    cats.body.includes("Earrings") && /pieces?<!--/.test(cats.body),
+    cats.body.includes("Earrings") ? "" : "no category names found");
+
+  const pagesScreen = await get("/admin/pages");
+  ok("pages list the real policy pages", /\/pages\/(privacy-policy|terms|returns)/.test(pagesScreen.body));
+
+  const customers = await get("/admin/customers");
+  ok("customers list real accounts", /@/.test(customers.body));
 
   // --- the upload signature the pickers depend on --------------------------
   const sign = await fetch(`${BASE}/api/v1/admin/upload-sign`, {
