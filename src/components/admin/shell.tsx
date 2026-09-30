@@ -16,6 +16,7 @@ import {
   Star,
   Users,
   FileText,
+  Images,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -50,6 +51,7 @@ const NAV: NavItem[] = [
   { href: "/admin/reviews", label: "Reviews", Icon: Star, group: "People" },
   { href: "/admin/messages", label: "Messages", Icon: MessageSquare, group: "People" },
 
+  { href: "/admin/homepage", label: "Front page", Icon: Images, group: "Words and rules" },
   { href: "/admin/pages", label: "Pages", Icon: FileText, group: "Words and rules" },
   { href: "/admin/coupons", label: "Offers", Icon: Tag, group: "Words and rules" },
   { href: "/admin/settings", label: "Settings", Icon: Settings, group: "Words and rules" },

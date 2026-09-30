@@ -584,6 +584,31 @@ model Page {
   updatedAt       DateTime @updatedAt
 }
 
+/// A slide in the homepage carousel.
+///
+/// This existed as a hardcoded buildSlides() function in the page component,
+/// which meant the owner could not change a word of his own front page without
+/// a deploy. The field names are deliberately the ones the carousel already
+/// used, so the move was a change to where the data comes from and nothing else.
+model HeroSlide {
+  id            String   @id @default(cuid())
+  eyebrow       String?
+  title         String
+  titleAccent   String?
+  body          String?  @db.Text
+  ctaLabel      String
+  ctaHref       String
+  secondaryLabel String?
+  secondaryHref  String?
+  imagePublicId String
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
 model Setting {
   key       String   @id
   value     Json

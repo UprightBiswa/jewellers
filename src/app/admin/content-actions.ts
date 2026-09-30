@@ -335,3 +335,98 @@ export async function setCustomerActive(id: string, isActive: boolean): Promise<
     message: isActive ? `${target.email} can sign in again.` : `${target.email} can no longer sign in.`,
   };
 }
+
+/* -------------------------------------------------------------------------- */
+/* Homepage — hero slides                                                     */
+/* -------------------------------------------------------------------------- */
+
+const slideSchema = z.object({
+  id: z.string().optional(),
+  eyebrow: z.string().max(60).optional(),
+  title: z.string().min(2, "The slide needs a headline.").max(80),
+  titleAccent: z.string().max(80).optional(),
+  body: z.string().max(400).optional(),
+  ctaLabel: z.string().min(1, "The button needs words on it.").max(40),
+  ctaHref: z.string().min(1, "Where should the button go?").max(200),
+  secondaryLabel: z.string().max(40).optional(),
+  secondaryHref: z.string().max(200).optional(),
+  imagePublicId: z.string().min(1, "A slide needs a photo."),
+  sortOrder: z.number().int().min(0).default(0),
+  isActive: z.boolean().default(true),
+});
+
+export type SlideInput = z.input<typeof slideSchema>;
+
+export async function saveHeroSlide(input: SlideInput): Promise<ActionResult<{ id: string }>> {
+  const user = await requireStaff();
+
+  const parsed = slideSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, message: "Please check the highlighted fields.", fieldErrors: fieldErrors(parsed.error) };
+  }
+
+  const v = parsed.data;
+  const data = {
+    eyebrow: v.eyebrow?.trim() || null,
+    title: v.title.trim(),
+    titleAccent: v.titleAccent?.trim() || null,
+    body: v.body?.trim() || null,
+    ctaLabel: v.ctaLabel.trim(),
+    ctaHref: v.ctaHref.trim(),
+    secondaryLabel: v.secondaryLabel?.trim() || null,
+    secondaryHref: v.secondaryHref?.trim() || null,
+    imagePublicId: v.imagePublicId.trim(),
+    sortOrder: v.sortOrder,
+    isActive: v.isActive,
+  };
+
+  const saved = v.id
+    ? await db.heroSlide.update({ where: { id: v.id }, data, select: { id: true } })
+    : await db.heroSlide.create({ data, select: { id: true } });
+
+  await audit(user.id, v.id ? "hero.update" : "hero.create", "HeroSlide", saved.id, {
+    title: data.title,
+  });
+
+  revalidatePath("/admin/homepage");
+  revalidatePath("/");
+  return { ok: true, data: { id: saved.id }, message: "Saved. The front page has it now." };
+}
+
+export async function deleteHeroSlide(id: string): Promise<ActionResult> {
+  const user = await requireStaff();
+
+  await db.heroSlide.delete({ where: { id } });
+  await audit(user.id, "hero.delete", "HeroSlide", id);
+
+  revalidatePath("/admin/homepage");
+  revalidatePath("/");
+  return { ok: true, message: "Slide removed." };
+}
+
+/** Moves a slide one place up or down, by swapping its order with its neighbour. */
+export async function moveHeroSlide(id: string, direction: "up" | "down"): Promise<ActionResult> {
+  await requireStaff();
+
+  const all = await db.heroSlide.findMany({
+    orderBy: { sortOrder: "asc" },
+    select: { id: true, sortOrder: true },
+  });
+
+  const i = all.findIndex((s) => s.id === id);
+  const j = direction === "up" ? i - 1 : i + 1;
+  if (i === -1 || j < 0 || j >= all.length) {
+    return { ok: false, message: "It is already at the end." };
+  }
+
+  // Written as a pair so a half-applied swap cannot leave two slides fighting
+  // over the same position.
+  await db.$transaction([
+    db.heroSlide.update({ where: { id: all[i].id }, data: { sortOrder: all[j].sortOrder } }),
+    db.heroSlide.update({ where: { id: all[j].id }, data: { sortOrder: all[i].sortOrder } }),
+  ]);
+
+  revalidatePath("/admin/homepage");
+  revalidatePath("/");
+  return { ok: true, message: "Moved." };
+}

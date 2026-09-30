@@ -174,6 +174,7 @@ try {
     ["/admin/reviews", "Reviews"],
     ["/admin/customers", "Customers"],
     ["/admin/pages", "Add a page"],
+    ["/admin/homepage", "Add a slide"],
   ]) {
     const r = await get(path);
     ok(`${path} opens`, r.status === 200 && r.body.includes(needle), `status ${r.status}`);
@@ -183,7 +184,7 @@ try {
   const nav = await get("/admin");
   for (const href of [
     "/admin/categories", "/admin/collections", "/admin/reviews",
-    "/admin/customers", "/admin/pages",
+    "/admin/customers", "/admin/pages", "/admin/homepage",
   ]) {
     ok(`${href} is in the sidebar`, nav.body.includes(`href="${href}"`));
   }
@@ -201,6 +202,22 @@ try {
 
   const customers = await get("/admin/customers");
   ok("customers list real accounts", /@/.test(customers.body));
+
+  // The front page must be editable, and the shop must be reading those rows
+  // rather than the hardcoded function that used to be in the page component.
+  const home = await get("/admin/homepage");
+  ok("the front page slides are listed", home.body.includes("Silver made by hand"),
+    home.body.includes("No slides") ? "none in the database" : "");
+
+  const shop = await get("/");
+  ok("the shop renders the slides from the database",
+    shop.body.includes("Silver made by hand") && shop.body.includes("not by a catalogue"));
+  ok("...and the storefront nav has a Home link", shop.body.includes(">Home<"));
+  // The actual script only loads when the app is running on Vercel, so locally
+  // all that proves mounting is the components being in the tree.
+  ok("...and analytics is mounted",
+    shop.body.includes("Analytics") && shop.body.includes("Insights"),
+    "the script itself only loads on Vercel");
 
   // --- the upload signature the pickers depend on --------------------------
   const sign = await fetch(`${BASE}/api/v1/admin/upload-sign`, {

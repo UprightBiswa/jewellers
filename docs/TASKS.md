@@ -64,7 +64,7 @@ Every row here already has its database table. This is UI work, not schema work.
 
 | # | Feature | Status |
 |---|---|---|
-| 12 | **Homepage manager** — hero slides, banners, section order, all editable | **next** |
+| 12 | **Homepage manager** — hero slides: picture, words, buttons, order, hide. At `/admin/homepage` | **done** — banners row still uses `BANNER_SLUGS` |
 | 13 | **Size chart** — per category, editable in the admin, shown on the product page only where the category has one | **doing** |
 
 > The homepage is the worst offender for "no hardcoded data". `buildSlides()` in
@@ -101,7 +101,7 @@ checkout works.
 | 18 | **Write a review** — only a customer who bought it, pending approval | **next** |
 | 19 | **Two silver qualities per product** — same design, two prices, customer picks | **next** — no schema change needed; `ProductVariant.priceDelta` already does it |
 | 20 | Share / deep link button on a product | later |
-| 21 | "Home" link in the top navigation | **next** |
+| 21 | "Home" link in the top navigation | **done** |
 | 22 | Footer: related-search block for SEO, like the reference site | **next** |
 | 23 | Size guide on the product page | later |
 
@@ -115,7 +115,7 @@ checkout works.
 | 25 | **Google sign-in** | Client created, button live locally, admin correctly excluded. Still to do: verify the domain in Search Console so branding passes, and copy both values into Vercel | **doing** |
 | 26 | Razorpay live keys | Only after KYC and a successful test order | later |
 | 27 | Upstash Redis | Not needed yet — in-memory limiter is fine at this volume | later |
-| 28 | Vercel Analytics | One package, one component | **next** |
+| 28 | Vercel Analytics | **done** — both packages were installed and never mounted, so the dashboard had nothing to show |
 
 Nothing here blocks launch. Every one degrades cleanly — see the service map in
 `CLAUDE.md`.
@@ -157,6 +157,7 @@ Nothing here blocks launch. Every one degrades cleanly — see the service map i
 |---|---|---|
 | 44 | `notFound()` is broken on Next 16.3.5 — it returns 200 **and** never reaches a not-found boundary, leaving the stream on an unresolved Suspense placeholder. In the admin that showed the owner a skeleton for ever on a URL that had answered in under a second | worked around — admin detail pages `return <Missing/>` instead of throwing. Storefront still uses `noindex` |
 | 45 | ESLint cannot run — `typescript-eslint` has no TypeScript 7 support | open — `tsc` still type-checks |
+| 47 | **`prisma migrate` cannot reach Neon** — P1001 every time, while `pg` connects to the same URL in 2 seconds. The database is PostgreSQL 18.6, newer than Prisma 7.10's Rust engine. `db push` fails the same way, so it is the engine, not the URL. Workaround: write the migration SQL by hand, apply it with `pg`, and insert the row into `_prisma_migrations` so history stays in step — that is how `20261001000000_hero_slides` was applied | open |
 | 46 | **`npm run audit` eats its own stock.** It places a real COD order each run, which decrements inventory for good. After 24 runs several products sat at zero, Toe Rings had no active product left, and five checks failed for reasons that had nothing to do with the code. `npm run db:seed` restores it. The audit should place its order against a product it creates and then removes | open |
 
 ---

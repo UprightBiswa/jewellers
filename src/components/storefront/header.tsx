@@ -62,6 +62,14 @@ export async function Header() {
 
         <nav aria-label="Product categories" className="hidden border-t border-line lg:block">
           <div className="container-page flex h-11 items-center gap-1 overflow-x-auto no-scrollbar">
+            {/* The logo already goes home, but not everyone knows that — the
+                reference sites all carry an explicit Home, and it costs nothing. */}
+            <Link
+              href="/"
+              className="shrink-0 rounded-full px-3 py-1.5 text-[13.5px] text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
+            >
+              Home
+            </Link>
             <Link
               href="/collections/all"
               className="shrink-0 rounded-full px-3 py-1.5 text-[13.5px] text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"

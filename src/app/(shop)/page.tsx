@@ -57,71 +57,54 @@ async function getTestimonials() {
 }
 
 /**
- * Hero slides.
+ * Hero slides, from the database.
  *
- * Hardcoded for now, but every field is the shape a `HomeSection` row will take
- * when the owner edits these himself — so moving to database-driven slides is a
- * change to this function, not to the carousel.
+ * These were a hardcoded buildSlides() function here, which meant Rahul could
+ * not change a word of his own front page without a deploy. They are rows now,
+ * editable at /admin/homepage.
+ *
+ * An empty table hides the carousel rather than showing a blank one — the rest
+ * of the page stands on its own, and a half-drawn hero looks broken in a way
+ * that no hero does not.
  */
-function buildSlides(since: string): HeroSlide[] {
-  return [
-    {
-      id: "handmade",
-      eyebrow: "925 Silver · Handmade",
-      title: "Silver made by hand,",
-      titleAccent: "not by a catalogue.",
-      body:
-        "Every piece on this site is cut, filed and polished on our own bench in Tufanganj" +
-        `${since ? `, as it has been since ${since}` : ""}. Ten new designs every month.`,
-      ctaLabel: "Shop all jewellery",
-      ctaHref: "/collections/all",
-      secondaryLabel: "Under ₹999",
-      secondaryHref: "/collections/under-999",
-      image: "demo/hero/bench",
-    },
-    {
-      id: "lightweight",
-      eyebrow: "Light enough to forget",
-      title: "Wear it from morning",
-      titleAccent: "to the last bus home.",
-      body:
-        "Studs, fine chains and plain payel made deliberately light — the pieces you put on " +
-        "without thinking and never take off.",
-      ctaLabel: "See lightweight pieces",
-      ctaHref: "/collections/lightweight",
-      image: "demo/hero/lightweight",
-    },
-    {
-      id: "festive",
-      eyebrow: "Durga Puja · Lakshmi Puja",
-      title: "Jhumka, chandbali,",
-      titleAccent: "ghungur payel.",
-      body:
-        "The traditional shapes, made the traditional way, in time for the season. " +
-        "Made to order takes about a week, so start early.",
-      ctaLabel: "Festive edit",
-      ctaHref: "/collections/festive",
-      secondaryLabel: "Traditional",
-      secondaryHref: "/collections/traditional",
-      image: "demo/hero/festive",
-    },
-    {
-      id: "baby",
-      eyebrow: "The first gift",
-      title: "Baby silver,",
-      titleAccent: "every edge rounded.",
-      body:
-        "Kara, payel and feeding spoons in 925 silver, finished so there is nothing to catch. " +
-        "Boxed together and ready to give.",
-      ctaLabel: "Baby sets",
-      ctaHref: "/categories/baby-sets",
-      image: "demo/hero/baby",
-    },
-  ];
+async function getHeroSlides(): Promise<HeroSlide[]> {
+  const rows = await devFallback(
+    () =>
+      db.heroSlide.findMany({
+        where: { isActive: true },
+        orderBy: { sortOrder: "asc" },
+        select: {
+          id: true,
+          eyebrow: true,
+          title: true,
+          titleAccent: true,
+          body: true,
+          ctaLabel: true,
+          ctaHref: true,
+          secondaryLabel: true,
+          secondaryHref: true,
+          imagePublicId: true,
+        },
+      }),
+    () => [],
+  );
+
+  return rows.map((r) => ({
+    id: r.id,
+    eyebrow: r.eyebrow ?? "",
+    title: r.title,
+    titleAccent: r.titleAccent ?? undefined,
+    body: r.body ?? "",
+    ctaLabel: r.ctaLabel,
+    ctaHref: r.ctaHref,
+    secondaryLabel: r.secondaryLabel ?? undefined,
+    secondaryHref: r.secondaryHref ?? undefined,
+    image: r.imagePublicId,
+  }));
 }
 
 export default async function HomePage() {
-  const [settings, categories, collections, trending, featured, fresh, testimonials] =
+  const [settings, categories, collections, trending, featured, fresh, testimonials, slides] =
     await Promise.all([
       getSettings(),
       listCategories(),
@@ -130,6 +113,7 @@ export default async function HomePage() {
       getShelf("featured", 8),
       getShelf("new", 8),
       getTestimonials(),
+      getHeroSlides(),
     ]);
 
   // Named explicitly rather than "the first four": these are the ones with a
@@ -143,7 +127,7 @@ export default async function HomePage() {
     <>
       <StoreSchema />
 
-      <HeroCarousel slides={buildSlides(settings.store.sinceYear)} />
+      {slides.length > 0 ? <HeroCarousel slides={slides} /> : null}
 
       <section className="container-page py-12" aria-labelledby="categories-heading">
         <SectionHeading

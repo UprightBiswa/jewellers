@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Marcellus, Manrope, Noto_Sans_Bengali } from "next/font/google";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { getSettings } from "@/lib/settings";
 import { SITE_URL } from "@/lib/site-url";
@@ -86,6 +88,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-dvh bg-bg text-ink antialiased">
         {children}
+        {/* Both packages were installed and never mounted, so the dashboard
+            had nothing to show. They send no cookies and no personal data, which
+            is why they can go in without a consent banner. */}
+        <Analytics />
+        <SpeedInsights />
         <Toaster
           position="bottom-center"
           toastOptions={{
