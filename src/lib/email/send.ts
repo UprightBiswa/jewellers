@@ -90,7 +90,22 @@ export async function sendMail({
     });
 
     if (error) {
-      console.error("[email] send failed", subject, error);
+      // One failure deserves its own words, because it is the one that will
+      // actually happen and it looks like nothing at all: with no verified
+      // domain, Resend accepts mail to the account owner and refuses everyone
+      // else. A customer's password reset is simply never sent, the form still
+      // says "a reset link is on its way" — as it must, so the form cannot be
+      // used to discover which addresses have accounts — and nobody finds out.
+      if (/only send testing emails/i.test(error.message)) {
+        console.error(
+          `[email] NOT SENT to ${to}. Resend has no verified domain, so it only ` +
+            `delivers to the account's own address. Verify charubalasilver.in at ` +
+            `resend.com/domains and set EMAIL_FROM to an address on it. ` +
+            `Until then every customer email is silently dropped.`,
+        );
+      } else {
+        console.error("[email] send failed", subject, error);
+      }
       return { sent: false, error: error.message };
     }
     return { sent: true, id: data?.id };

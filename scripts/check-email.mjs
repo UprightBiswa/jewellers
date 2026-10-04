@@ -40,7 +40,12 @@ const res = await fetch("https://api.resend.com/emails", {
     subject: "Charubala Silver — email is working",
     html:
       "<p>This is the test message from <strong>npm run check:email</strong>.</p>" +
-      "<p>If you are reading it, order confirmations and password resets will reach customers too.</p>",
+      // Deliberately not "so customers will get theirs too". Until a domain is
+      // verified this address is the ONLY one Resend will deliver to, and an
+      // email that claims otherwise is the most convincing way to be wrong.
+      "<p>It proves the API key works and that this address receives mail. " +
+      "Whether customers can be reached is a separate question — the command " +
+      "that sent this says which.</p>",
   }),
 });
 
@@ -48,6 +53,29 @@ const body = await res.json().catch(() => null);
 
 if (res.ok && body?.id) {
   console.log(`  ok    sent — id ${body.id}`);
+
+  // Sending to the owner proves the key works. It does not prove a customer can
+  // be reached, which is the thing that matters and the thing that fails in
+  // silence.
+  //
+  // Decided from EMAIL_FROM rather than by sending a second message. A probe
+  // would have to pick a real address: resend.dev is Resend's own test inbox and
+  // always succeeds, so it proves nothing, and anything else risks mailing a
+  // stranger the day the domain is verified.
+  if (from.toLowerCase().endsWith("@resend.dev")) {
+    console.log("");
+    console.log("  WARNING  customers CANNOT be reached yet.");
+    console.log("  EMAIL_FROM is " + from + ", which means no domain is verified.");
+    console.log("  Resend then delivers only to " + to + " and refuses every other");
+    console.log("  address with a 403. Order confirmations and password resets to");
+    console.log("  customers are dropped, and the shop shows no error at all.");
+    console.log("");
+    console.log("  Fix: verify charubalasilver.in at resend.com/domains, then set");
+    console.log("  EMAIL_FROM to an address on it, such as orders@charubalasilver.in.");
+  } else {
+    console.log("  ok    sending from a verified domain, so customers can be reached");
+  }
+
   console.log(`\n  Check ${to}. Look in spam as well: a message from resend.dev`);
   console.log(`  often lands there until charubalasilver.in is verified in Resend.\n`);
   process.exit(0);

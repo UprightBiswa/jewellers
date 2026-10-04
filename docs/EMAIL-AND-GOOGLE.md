@@ -102,6 +102,25 @@ address that owns the Resend account — enough to test, not to trade.
 
 Redeploy after adding them. Environment variables are read at build time.
 
+### The failure that looks like nothing
+
+Until `charubalasilver.in` is verified, Resend delivers **only** to the address
+that owns the account and refuses every other with a 403. Proven:
+
+```
+to charubalasilver@gmail.com  -> 200  sent
+to djdas000000@gmail.com      -> 403  "You can only send testing emails to your own
+                                       email address (charubalasilver@gmail.com)"
+```
+
+So a customer asking for a password reset gets nothing. The form still says *"a
+reset link is on its way"* — it has to, or it becomes a way to discover which
+addresses have accounts — and nothing in the shop looks wrong.
+
+`npm run check:email` now says so plainly, and the server log names it rather
+than printing a generic send failure. But the only real fix is to verify the
+domain.
+
 ### 5. Check it
 
 ```
