@@ -98,10 +98,10 @@
   to   { transform: translateX(0); }
 }
 
-/* The filter sheet rising from the bottom of a phone. */
-@keyframes sheet-up {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
+/* The filter drawer sliding in from the right on a phone. */
+@keyframes drawer-in-end {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
 }
 
 @keyframes fade-up {

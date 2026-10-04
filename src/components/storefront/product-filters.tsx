@@ -11,7 +11,8 @@ import { cn } from "@/lib/utils";
  * Filters, in two pieces.
  *
  * `FilterSidebar` is the desktop column; `FilterSheet` is the phone's button and
- * the panel it opens. They are separate components rather than one that hides
+ * the drawer it opens — sliding in from the side, the same way the admin menu
+ * does, so the two halves of the project behave alike. They are separate components rather than one that hides
  * half of itself, because the phone's button belongs in the toolbar beside Sort
  * — one bar, not two stacked ones — and the desktop column belongs beside the
  * grid. Nothing is shared between them: the URL is the state, so they cannot
@@ -239,11 +240,11 @@ export function FilterSheet({ total }: { total?: number }) {
           />
           <div
             className={cn(
-              "absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col rounded-t-2xl border-t border-line bg-surface",
-              "motion-safe:animate-[sheet-up_220ms_ease-out]",
+              "absolute inset-y-0 end-0 flex w-[86%] max-w-sm flex-col border-s border-line bg-surface",
+              "motion-safe:animate-[drawer-in-end_220ms_ease-out]",
             )}
           >
-            <div className="flex items-center justify-between border-b border-line px-4 py-3">
+            <div className="flex items-center justify-between border-b border-line px-4 py-3.5">
               <h2 className="font-display text-lg text-ink">Filter</h2>
               <button
                 type="button"
@@ -259,7 +260,7 @@ export function FilterSheet({ total }: { total?: number }) {
               <Controls draft={draft} onChange={setDraft} />
             </div>
 
-            {/* At the bottom, under the thumb. */}
+            {/* Last in the drawer, which is where the thumb ends up. */}
             <div className="flex gap-2 border-t border-line p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
               <Button
                 variant="ghost"
