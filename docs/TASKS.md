@@ -76,7 +76,7 @@ Every row here already has its database table. This is UI work, not schema work.
 
 | # | Task | Status |
 |---|---|---|
-| 14 | **Mobile drawer navigation** — the phone still gets five bottom tabs, not the full twelve-item menu | **next** |
+| 14 | **Mobile drawer navigation** — full twelve-item menu behind the hamburger, grouped, closes on navigate | **done** |
 | 15 | **Invoice** — view, download, and send to the customer | **next** |
 | 15b | **Order detail actions** — send an order email by hand, send a review request link | **next** |
 | 15c | **Tracking** — courier updates with dates, visible to the customer | **next** |

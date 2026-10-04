@@ -28,12 +28,16 @@ export function ProductListing({
   initialCursor,
   query,
   total,
+  toolbar,
 }: {
   initial: Card[];
   initialCursor: string | null;
   /** Passed straight through to /api/v1/products */
   query: Record<string, string | undefined>;
   total?: number;
+  /** The phone's Filter button, so it shares a bar with Sort instead of
+      stacking a second toolbar above it. */
+  toolbar?: React.ReactNode;
 }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -75,32 +79,60 @@ export function ProductListing({
     }
   }
 
+  function clearFilters() {
+    const url = new URLSearchParams(params.toString());
+    for (const k of ["minPrice", "maxPrice", "purity", "inStock", "cursor"]) url.delete(k);
+    startTransition(() => router.replace(url.toString() ? `?${url}` : "?", { scroll: false }));
+  }
+
   function changeSort(next: string) {
     const url = new URLSearchParams(params.toString());
     url.set("sort", next);
     startTransition(() => router.replace(`?${url}`, { scroll: false }));
   }
 
+  // "Try another category" is the wrong advice when the shelf is full and the
+  // filters are simply too narrow — the fix is one tap away, not elsewhere.
+  const filtered =
+    Boolean(params.get("minPrice") || params.get("maxPrice") || params.get("inStock")) ||
+    params.getAll("purity").length > 0;
+
   if (products.length === 0) {
     return (
-      <div className="rounded-[var(--radius-card)] border border-dashed border-line py-16 text-center">
-        <p className="font-display text-xl text-ink">Nothing here yet</p>
-        <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
-          Try another category, or tell us what you are looking for — we make to order.
-        </p>
-        <Button asChild variant="secondary" className="mt-5">
-          <a href="/contact">Ask us for it</a>
-        </Button>
-      </div>
+      <>
+        {toolbar ? <div className="mb-6 flex items-center gap-2 lg:hidden">{toolbar}</div> : null}
+        <div className="rounded-[var(--radius-card)] border border-dashed border-line py-16 text-center">
+          <p className="font-display text-xl text-ink">
+            {filtered ? "Nothing matches those filters" : "Nothing here yet"}
+          </p>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
+            {filtered
+              ? "Widen the price, or turn one of them off."
+              : "Try another category, or tell us what you are looking for — we make to order."}
+          </p>
+          {filtered ? (
+            <Button variant="secondary" className="mt-5" onClick={clearFilters}>
+              Clear the filters
+            </Button>
+          ) : (
+            <Button asChild variant="secondary" className="mt-5">
+              <a href="/contact">Ask us for it</a>
+            </Button>
+          )}
+        </div>
+      </>
     );
   }
 
   return (
     <>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
-        <p className="text-sm text-muted tnum">
-          {total !== undefined ? `${total} pieces` : `${products.length} shown`}
-        </p>
+        <div className="flex items-center gap-3">
+          {toolbar}
+          <p className="text-sm text-muted tnum">
+            {total !== undefined ? `${total} pieces` : `${products.length} shown`}
+          </p>
+        </div>
 
         <label className="flex items-center gap-2 text-sm">
           <span className="text-muted">Sort</span>
@@ -117,7 +149,7 @@ export function ProductListing({
         </label>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((p, i) => (
           <ProductCard key={p.id} product={p} priority={i < 4} />
         ))}

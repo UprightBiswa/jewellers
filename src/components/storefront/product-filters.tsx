@@ -8,16 +8,20 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
- * Filters — a sidebar on a desktop, a sheet from the bottom of a phone.
+ * Filters, in two pieces.
  *
- * Most of Charubala's customers are on a phone, and a filter panel that opens
- * from the top means reaching for it with the hand that is holding the device.
- * The sheet rises from the bottom, where the thumb already is, and the Apply
- * button sits at the bottom of the sheet for the same reason.
+ * `FilterSidebar` is the desktop column; `FilterSheet` is the phone's button and
+ * the panel it opens. They are separate components rather than one that hides
+ * half of itself, because the phone's button belongs in the toolbar beside Sort
+ * — one bar, not two stacked ones — and the desktop column belongs beside the
+ * grid. Nothing is shared between them: the URL is the state, so they cannot
+ * disagree.
  *
- * Everything lives in the URL. A filtered list is then shareable over WhatsApp —
- * which is how a customer actually asks "do you have this under a thousand?" —
- * and the back button undoes one choice at a time instead of leaving the page.
+ * They also behave differently on purpose. On a desktop a tick applies at once,
+ * the way every shop does it. On a phone the sheet collects the choices and
+ * applies them on one tap, because each apply reloads the grid underneath and
+ * doing that four times while someone is still deciding is both slow and
+ * disorienting.
  */
 
 const PURITIES = [
@@ -37,80 +41,59 @@ const PRICE_BANDS = [
 
 type Draft = { min: string; max: string; purity: string[]; inStock: boolean };
 
-export function ProductFilters({ total }: { total?: number }) {
-  const router = useRouter();
-  const params = useSearchParams();
-  const [open, setOpen] = useState(false);
-
-  const current: Draft = {
+function readParams(params: URLSearchParams): Draft {
+  return {
     min: params.get("minPrice") ?? "",
     max: params.get("maxPrice") ?? "",
     purity: params.getAll("purity"),
     inStock: params.get("inStock") === "1",
   };
+}
 
-  const [draft, setDraft] = useState<Draft>(current);
+function toUrl(params: URLSearchParams, next: Draft): string {
+  const url = new URLSearchParams(params.toString());
+  for (const k of ["minPrice", "maxPrice", "purity", "inStock", "cursor"]) url.delete(k);
 
-  // The URL is the source of truth: a back button or a shared link must be
-  // reflected in the panel, not overwritten by whatever was last typed.
-  useEffect(() => {
-    setDraft({
-      min: params.get("minPrice") ?? "",
-      max: params.get("maxPrice") ?? "",
-      purity: params.getAll("purity"),
-      inStock: params.get("inStock") === "1",
-    });
-  }, [params]);
+  if (next.min) url.set("minPrice", next.min);
+  if (next.max) url.set("maxPrice", next.max);
+  for (const p of next.purity) url.append("purity", p);
+  if (next.inStock) url.set("inStock", "1");
 
-  const activeCount =
-    (current.min || current.max ? 1 : 0) + current.purity.length + (current.inStock ? 1 : 0);
+  return url.toString();
+}
 
-  function apply(next: Draft) {
-    const url = new URLSearchParams(params.toString());
-    url.delete("minPrice");
-    url.delete("maxPrice");
-    url.delete("purity");
-    url.delete("inStock");
-    url.delete("cursor");
+export function countActive(params: URLSearchParams): number {
+  const d = readParams(params);
+  return (d.min || d.max ? 1 : 0) + d.purity.length + (d.inStock ? 1 : 0);
+}
 
-    if (next.min) url.set("minPrice", next.min);
-    if (next.max) url.set("maxPrice", next.max);
-    for (const p of next.purity) url.append("purity", p);
-    if (next.inStock) url.set("inStock", "1");
-
-    router.push(`?${url.toString()}`, { scroll: false });
-    setOpen(false);
-  }
-
-  function clear() {
-    const url = new URLSearchParams(params.toString());
-    for (const k of ["minPrice", "maxPrice", "purity", "inStock", "cursor"]) url.delete(k);
-    router.push(url.toString() ? `?${url.toString()}` : "?", { scroll: false });
-    setOpen(false);
-  }
-
-  const togglePurity = (v: string) =>
-    setDraft((d) => ({
-      ...d,
-      purity: d.purity.includes(v) ? d.purity.filter((x) => x !== v) : [...d.purity, v],
-    }));
-
+/** The controls themselves, used by both the sidebar and the sheet. */
+function Controls({
+  draft,
+  onChange,
+}: {
+  draft: Draft;
+  onChange: (next: Draft) => void;
+}) {
   const band = (b: (typeof PRICE_BANDS)[number]) => draft.min === b.min && draft.max === b.max;
 
-  const panel = (
+  return (
     <div className="grid gap-6">
       <fieldset>
-        <legend className="text-[13px] font-medium uppercase tracking-[0.1em] text-muted">
+        <legend className="text-[12px] font-medium uppercase tracking-[0.12em] text-muted">
           Price
         </legend>
-        <div className="mt-3 grid gap-2">
+        <div className="mt-3 grid gap-2.5">
           {PRICE_BANDS.map((b) => (
-            <label key={b.label} className="flex cursor-pointer items-center gap-2.5 text-[15px] text-ink">
+            <label
+              key={b.label}
+              className="flex cursor-pointer items-center gap-2.5 text-[15px] text-ink"
+            >
               <input
                 type="radio"
                 name="price-band"
                 checked={band(b)}
-                onChange={() => setDraft((d) => ({ ...d, min: b.min, max: b.max }))}
+                onChange={() => onChange({ ...draft, min: b.min, max: b.max })}
                 className="size-4 accent-[var(--brand)]"
               />
               {b.label}
@@ -119,7 +102,7 @@ export function ProductFilters({ total }: { total?: number }) {
           {(draft.min || draft.max) && (
             <button
               type="button"
-              onClick={() => setDraft((d) => ({ ...d, min: "", max: "" }))}
+              onClick={() => onChange({ ...draft, min: "", max: "" })}
               className="justify-self-start text-[13px] text-muted underline-offset-4 hover:text-ink hover:underline"
             >
               Any price
@@ -129,16 +112,26 @@ export function ProductFilters({ total }: { total?: number }) {
       </fieldset>
 
       <fieldset>
-        <legend className="text-[13px] font-medium uppercase tracking-[0.1em] text-muted">
+        <legend className="text-[12px] font-medium uppercase tracking-[0.12em] text-muted">
           Silver
         </legend>
-        <div className="mt-3 grid gap-2">
+        <div className="mt-3 grid gap-2.5">
           {PURITIES.map((p) => (
-            <label key={p.value} className="flex cursor-pointer items-center gap-2.5 text-[15px] text-ink">
+            <label
+              key={p.value}
+              className="flex cursor-pointer items-center gap-2.5 text-[15px] text-ink"
+            >
               <input
                 type="checkbox"
                 checked={draft.purity.includes(p.value)}
-                onChange={() => togglePurity(p.value)}
+                onChange={() =>
+                  onChange({
+                    ...draft,
+                    purity: draft.purity.includes(p.value)
+                      ? draft.purity.filter((x) => x !== p.value)
+                      : [...draft.purity, p.value],
+                  })
+                }
                 className="size-4 rounded accent-[var(--brand)]"
               />
               {p.label}
@@ -147,65 +140,97 @@ export function ProductFilters({ total }: { total?: number }) {
         </div>
       </fieldset>
 
-      <label className="flex cursor-pointer items-center gap-2.5 text-[15px] text-ink">
+      <label className="flex cursor-pointer items-center gap-2.5 border-t border-line pt-5 text-[15px] text-ink">
         <input
           type="checkbox"
           checked={draft.inStock}
-          onChange={(e) => setDraft((d) => ({ ...d, inStock: e.target.checked }))}
+          onChange={(e) => onChange({ ...draft, inStock: e.target.checked })}
           className="size-4 rounded accent-[var(--brand)]"
         />
         Ready to send today
       </label>
     </div>
   );
+}
+
+/** Desktop column. Every tick applies immediately. */
+export function FilterSidebar() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const draft = readParams(params);
+  const active = countActive(params);
+
+  const apply = (next: Draft) =>
+    router.push(`?${toUrl(params, next)}`, { scroll: false });
 
   return (
-    <>
-      {/* Phone: a button that opens the sheet */}
-      <div className="flex items-center gap-2 lg:hidden">
-        <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
-          <SlidersHorizontal className="size-4" aria-hidden />
-          Filter
-          {activeCount > 0 && (
-            <span className="ms-1 rounded-full bg-brand px-1.5 text-[11px] text-on-brand tnum">
-              {activeCount}
-            </span>
-          )}
-        </Button>
-        {activeCount > 0 && (
+    <aside className="hidden lg:block">
+      <div className="flex items-baseline justify-between">
+        <h2 className="font-display text-lg text-ink">Filter</h2>
+        {active > 0 && (
           <button
             type="button"
-            onClick={clear}
+            onClick={() => apply({ min: "", max: "", purity: [], inStock: false })}
             className="text-[13px] text-muted underline-offset-4 hover:text-ink hover:underline"
           >
-            Clear
+            Clear all
           </button>
         )}
       </div>
+      <div className="mt-5">
+        <Controls draft={draft} onChange={apply} />
+      </div>
+    </aside>
+  );
+}
 
-      {/* Desktop: always there, no button needed */}
-      <aside className="hidden lg:block">
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-lg text-ink">Filter</h2>
-          {activeCount > 0 && (
-            <button
-              type="button"
-              onClick={clear}
-              className="text-[13px] text-muted underline-offset-4 hover:text-ink hover:underline"
-            >
-              Clear all
-            </button>
-          )}
-        </div>
-        <div className="mt-5">{panel}</div>
-        <Button className="mt-6 w-full" onClick={() => apply(draft)}>
-          Show {total !== undefined ? `${total} ` : ""}pieces
-        </Button>
-      </aside>
+/** Phone: a button for the toolbar, and the sheet it opens. */
+export function FilterSheet({ total }: { total?: number }) {
+  const router = useRouter();
+  const params = useSearchParams();
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState<Draft>(() => readParams(params));
 
-      {/* Phone: the sheet itself */}
+  // The URL is the truth. A back button or a shared link must be reflected in
+  // the sheet, not overwritten by whatever was last tapped.
+  useEffect(() => setDraft(readParams(params)), [params]);
+
+  // A sheet over a page that still scrolls behind it feels broken on a phone.
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
+  const active = countActive(params);
+
+  function apply(next: Draft) {
+    router.push(`?${toUrl(params, next)}`, { scroll: false });
+    setOpen(false);
+  }
+
+  return (
+    <>
+      <Button variant="secondary" size="sm" onClick={() => setOpen(true)} className="lg:hidden">
+        <SlidersHorizontal className="size-4" aria-hidden />
+        Filter
+        {active > 0 && (
+          <span className="ms-1 rounded-full bg-brand px-1.5 text-[11px] text-on-brand tnum">
+            {active}
+          </span>
+        )}
+      </Button>
+
       {open && (
-        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Filter">
+        <div
+          className="fixed inset-0 z-50 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Filter"
+        >
           <button
             type="button"
             className="absolute inset-0 bg-ink/40"
@@ -214,11 +239,11 @@ export function ProductFilters({ total }: { total?: number }) {
           />
           <div
             className={cn(
-              "absolute inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t border-line bg-surface",
+              "absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col rounded-t-2xl border-t border-line bg-surface",
               "motion-safe:animate-[sheet-up_220ms_ease-out]",
             )}
           >
-            <div className="sticky top-0 flex items-center justify-between border-b border-line bg-surface px-4 py-3">
+            <div className="flex items-center justify-between border-b border-line px-4 py-3">
               <h2 className="font-display text-lg text-ink">Filter</h2>
               <button
                 type="button"
@@ -230,11 +255,17 @@ export function ProductFilters({ total }: { total?: number }) {
               </button>
             </div>
 
-            <div className="p-4">{panel}</div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <Controls draft={draft} onChange={setDraft} />
+            </div>
 
-            {/* Actions at the bottom, under the thumb. */}
-            <div className="sticky bottom-0 flex gap-2 border-t border-line bg-surface p-4">
-              <Button variant="ghost" onClick={clear} className="flex-1">
+            {/* At the bottom, under the thumb. */}
+            <div className="flex gap-2 border-t border-line p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <Button
+                variant="ghost"
+                onClick={() => apply({ min: "", max: "", purity: [], inStock: false })}
+                className="flex-1"
+              >
                 Clear
               </Button>
               <Button onClick={() => apply(draft)} className="flex-[2]">

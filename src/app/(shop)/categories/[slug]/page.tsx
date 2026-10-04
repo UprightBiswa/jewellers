@@ -10,7 +10,7 @@ import {
   type SortKey,
 } from "@/lib/queries/catalog";
 import { ProductListing } from "@/components/storefront/product-listing";
-import { ProductFilters } from "@/components/storefront/product-filters";
+import { FilterSheet, FilterSidebar } from "@/components/storefront/product-filters";
 import type { Purity } from "@/generated/prisma";
 
 type Params = Promise<{ slug: string }>;
@@ -107,8 +107,9 @@ export default async function CategoryPage({
       </header>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[220px_1fr] lg:items-start">
-        <ProductFilters total={total} />
+        <FilterSidebar />
         <ProductListing
+          toolbar={<FilterSheet total={total} />}
           initial={products}
           initialCursor={nextCursor}
           query={{

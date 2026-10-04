@@ -92,6 +92,12 @@
   --animate-float: float 7s ease-in-out infinite;
 }
 
+/* The admin menu sliding in from the side on a phone. */
+@keyframes drawer-in {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
 /* The filter sheet rising from the bottom of a phone. */
 @keyframes sheet-up {
   from { transform: translateY(100%); }
