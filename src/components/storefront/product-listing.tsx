@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { ProductCard, ProductCardSkeleton } from "./product-card";
+import { ActiveFilters } from "./product-filters";
 import type { ProductCard as Card, SortKey } from "@/lib/queries/catalog";
 
 const SORTS: { value: SortKey; label: string }[] = [
@@ -100,7 +101,8 @@ export function ProductListing({
   if (products.length === 0) {
     return (
       <>
-        {toolbar ? <div className="mb-6 flex items-center gap-2 lg:hidden">{toolbar}</div> : null}
+        {toolbar ? <div className="mb-5 flex items-center gap-2 lg:hidden">{toolbar}</div> : null}
+        <ActiveFilters />
         <div className="rounded-[var(--radius-card)] border border-dashed border-line py-16 text-center">
           <p className="font-display text-xl text-ink">
             {filtered ? "Nothing matches those filters" : "Nothing here yet"}
@@ -148,6 +150,8 @@ export function ProductListing({
           </select>
         </label>
       </div>
+
+      <ActiveFilters />
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((p, i) => (

@@ -165,7 +165,8 @@ export function FilterSidebar() {
     router.push(`?${toUrl(params, next)}`, { scroll: false });
 
   return (
-    <aside className="hidden lg:block">
+    <aside className="hidden lg:block lg:sticky lg:top-24">
+      <div className="rounded-[var(--radius-card)] border border-line bg-surface p-5">
       <div className="flex items-baseline justify-between">
         <h2 className="font-display text-lg text-ink">Filter</h2>
         {active > 0 && (
@@ -181,7 +182,70 @@ export function FilterSidebar() {
       <div className="mt-5">
         <Controls draft={draft} onChange={apply} />
       </div>
+      </div>
     </aside>
+  );
+}
+
+/**
+ * What is currently filtered, as removable chips above the grid.
+ *
+ * Without these, a customer who lands on a shared link sees a short list and no
+ * reason for it — on a phone the panel is closed, so the only clue is a small
+ * number on a button. Each chip says what it is and removes just itself.
+ */
+export function ActiveFilters() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const d = readParams(params);
+
+  const chips: { label: string; next: Draft }[] = [];
+
+  if (d.min || d.max) {
+    const band = PRICE_BANDS.find((b) => b.min === d.min && b.max === d.max);
+    chips.push({
+      label: band?.label ?? "Price",
+      next: { ...d, min: "", max: "" },
+    });
+  }
+  for (const value of d.purity) {
+    chips.push({
+      label: PURITIES.find((p) => p.value === value)?.label ?? value,
+      next: { ...d, purity: d.purity.filter((x) => x !== value) },
+    });
+  }
+  if (d.inStock) chips.push({ label: "Ready to send today", next: { ...d, inStock: false } });
+
+  if (chips.length === 0) return null;
+
+  return (
+    <div className="mb-5 flex flex-wrap items-center gap-2">
+      {chips.map((c) => (
+        <button
+          key={c.label}
+          type="button"
+          onClick={() => router.push(`?${toUrl(params, c.next)}`, { scroll: false })}
+          className="inline-flex items-center gap-1.5 rounded-full border border-line-strong bg-surface px-3 py-1 text-[13px] text-ink transition-colors hover:bg-surface-2"
+        >
+          {c.label}
+          <X className="size-3.5 text-muted" aria-hidden />
+          <span className="sr-only">Remove this filter</span>
+        </button>
+      ))}
+      {chips.length > 1 && (
+        <button
+          type="button"
+          onClick={() =>
+            router.push(`?${toUrl(params, { min: "", max: "", purity: [], inStock: false })}`, {
+              scroll: false,
+            })
+          }
+          className="text-[13px] text-muted underline-offset-4 hover:text-ink hover:underline"
+        >
+          Clear all
+        </button>
+      )}
+    </div>
   );
 }
 
