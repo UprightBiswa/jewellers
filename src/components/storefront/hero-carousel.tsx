@@ -104,74 +104,15 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
         touchStart.current = null;
       }}
     >
-      <div className="container-page grid items-center gap-8 py-12 md:grid-cols-2 md:py-20">
-        <div className="max-w-xl">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={slide.id}
-              initial={mounted ? "hidden" : false}
-              animate="show"
-              exit="hidden"
-            >
-              <motion.p
-                custom={0}
-                variants={lines}
-                className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-gold"
-              >
-                <span className="inline-block size-1.5 rotate-45 bg-gold" aria-hidden />
-                {slide.eyebrow}
-              </motion.p>
-
-              <motion.h1
-                custom={1}
-                variants={lines}
-                className="mt-4 font-display text-[clamp(2rem,6vw,3.4rem)] leading-[1.08] text-ink"
-              >
-                {slide.title}
-                {slide.titleAccent ? (
-                  <>
-                    <br />
-                    <span className="text-brand">{slide.titleAccent}</span>
-                  </>
-                ) : null}
-              </motion.h1>
-
-              <motion.p
-                custom={2}
-                variants={lines}
-                className="mt-5 max-w-prose text-[15px] leading-relaxed text-ink-2"
-              >
-                {slide.body}
-              </motion.p>
-
-              <motion.div custom={3} variants={lines} className="mt-7 flex flex-wrap gap-3">
-                <Button asChild size="lg">
-                  <Link href={slide.ctaHref}>{slide.ctaLabel}</Link>
-                </Button>
-                {slide.secondaryLabel && slide.secondaryHref ? (
-                  <Button asChild variant="secondary" size="lg">
-                    <Link href={slide.secondaryHref}>{slide.secondaryLabel}</Link>
-                  </Button>
-                ) : null}
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
-
-          <dl className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-line pt-6">
-            {[
-              ["2 days", "to pack"],
-              ["7 days", "to exchange"],
-              ["Made", "to order"],
-            ].map(([value, label]) => (
-              <div key={label}>
-                <dt className="font-display text-lg text-ink">{value}</dt>
-                <dd className="text-[12.5px] text-muted">{label}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-
-        <div className="relative aspect-4/5 overflow-hidden rounded-[var(--radius-card)] bg-surface-2 md:aspect-square">
+      {/* Full-bleed picture with the words over it.
+          The old layout put text beside a square image, which on a phone meant
+          a small picture above a wall of words — the jewellery, the thing being
+          sold, got the smaller half. Now the photograph fills the frame and the
+          words sit on it. The stats that used to live here are gone: the promise
+          band further down the page says the same things, and saying them twice
+          made both look like filler. */}
+      <div className="relative">
+        <div className="relative aspect-[4/5] w-full sm:aspect-[16/10] lg:aspect-[21/9]">
           <AnimatePresence initial={false}>
             <motion.div
               key={slide.id}
@@ -181,7 +122,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               exit={{ opacity: 0 }}
               transition={{
                 opacity: { duration: 0.7 },
-                scale: { duration: reduced ? 0 : 7, ease: "linear" },
+                scale: { duration: reduced ? 0 : 9, ease: "linear" },
               }}
             >
               <Image
@@ -189,11 +130,81 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 alt=""
                 fill
                 priority={index === 0}
-                sizes="(max-width: 768px) 100vw, 50vw"
+                sizes="100vw"
                 className="object-cover"
               />
             </motion.div>
           </AnimatePresence>
+
+          {/* Dark from the bottom-left, where the words are, and clear at the
+              top-right so the piece itself is never hidden behind a wash. */}
+          <div
+            className="absolute inset-0 bg-gradient-to-tr from-ink/80 via-ink/45 to-ink/5"
+            aria-hidden
+          />
+
+          <div className="absolute inset-0 flex items-end">
+            <div className="container-page w-full pb-10 sm:pb-14 lg:pb-20">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={slide.id}
+                  initial={mounted ? "hidden" : false}
+                  animate="show"
+                  exit="hidden"
+                  className="max-w-2xl"
+                >
+                  {slide.eyebrow ? (
+                    <motion.p
+                      custom={0}
+                      variants={lines}
+                      className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-gold"
+                    >
+                      <span className="inline-block size-1.5 rotate-45 bg-gold" aria-hidden />
+                      {slide.eyebrow}
+                    </motion.p>
+                  ) : null}
+
+                  <motion.h1
+                    custom={1}
+                    variants={lines}
+                    className="mt-3 font-display text-[clamp(2.1rem,7vw,4rem)] leading-[1.05] text-white drop-shadow-sm"
+                  >
+                    {slide.title}
+                    {slide.titleAccent ? (
+                      <>
+                        <br />
+                        <span className="text-gold">{slide.titleAccent}</span>
+                      </>
+                    ) : null}
+                  </motion.h1>
+
+                  {slide.body ? (
+                    <motion.p
+                      custom={2}
+                      variants={lines}
+                      className="mt-4 max-w-prose text-[15px] leading-relaxed text-white/85"
+                    >
+                      {slide.body}
+                    </motion.p>
+                  ) : null}
+
+                  <motion.div custom={3} variants={lines} className="mt-7 flex flex-wrap gap-3">
+                    <Button asChild size="lg">
+                      <Link href={slide.ctaHref}>{slide.ctaLabel}</Link>
+                    </Button>
+                    {slide.secondaryLabel && slide.secondaryHref ? (
+                      <Link
+                        href={slide.secondaryHref}
+                        className="inline-flex h-13 items-center rounded-lg border border-white/45 px-7 text-base text-white backdrop-blur-[2px] transition-colors hover:bg-white/10"
+                      >
+                        {slide.secondaryLabel}
+                      </Link>
+                    ) : null}
+                  </motion.div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
 
           {count > 1 ? (
             <>
@@ -201,17 +212,17 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 type="button"
                 onClick={() => go(index - 1)}
                 aria-label="Previous slide"
-                className="absolute left-3 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-surface/85 text-ink shadow-sm backdrop-blur transition-colors hover:bg-surface"
+                className="absolute left-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white/20 text-white backdrop-blur transition-colors hover:bg-white/35 lg:left-6"
               >
-                <ChevronLeft className="size-4" aria-hidden />
+                <ChevronLeft className="size-5" aria-hidden />
               </button>
               <button
                 type="button"
                 onClick={() => go(index + 1)}
                 aria-label="Next slide"
-                className="absolute right-3 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-surface/85 text-ink shadow-sm backdrop-blur transition-colors hover:bg-surface"
+                className="absolute right-3 top-1/2 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-white/20 text-white backdrop-blur transition-colors hover:bg-white/35 lg:right-6"
               >
-                <ChevronRight className="size-4" aria-hidden />
+                <ChevronRight className="size-5" aria-hidden />
               </button>
             </>
           ) : null}
@@ -219,7 +230,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
       </div>
 
       {count > 1 ? (
-        <div className="container-page flex justify-center gap-2 pb-6 md:absolute md:bottom-6 md:left-1/2 md:w-auto md:-translate-x-1/2 md:pb-0">
+        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2 lg:bottom-7">
           {slides.map((s, i) => (
             <button
               key={s.id}
@@ -229,7 +240,7 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               aria-current={i === index}
               className={cn(
                 "h-1.5 rounded-full transition-all duration-300",
-                i === index ? "w-7 bg-brand" : "w-1.5 bg-line-strong hover:bg-muted",
+                i === index ? "w-7 bg-white" : "w-1.5 bg-white/45 hover:bg-white/70",
               )}
             />
           ))}

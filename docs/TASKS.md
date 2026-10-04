@@ -97,7 +97,7 @@ checkout works.
 
 | # | Feature | Status |
 |---|---|---|
-| 17 | **Filters** — price, category, purity, in-stock. Sidebar on desktop, bottom sheet on mobile | **next** |
+| 17 | **Filters** — price band, purity, in stock. Sidebar on desktop, bottom sheet on a phone, all in the URL | **done** |
 | 18 | **Write a review** — only a customer who bought it, arrives as pending | **done** |
 | 19 | **Two silver qualities per product** — same design, two prices, customer picks | **next** — no schema change needed; `ProductVariant.priceDelta` already does it |
 | 20 | Share / deep link button on a product | later |

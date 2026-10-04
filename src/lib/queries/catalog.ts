@@ -165,6 +165,17 @@ export async function listProducts(args: ListProductsArgs = {}) {
         ...(args.minPrice !== undefined || args.maxPrice !== undefined
           ? { price: { gte: args.minPrice, lte: args.maxPrice } }
           : {}),
+        // In stock means either loose stock or any size still available — a ring
+        // with sizes carries none of its own, so checking `stock` alone would
+        // hide every product that has variants.
+        ...(args.inStockOnly
+          ? {
+              OR: [
+                { stock: { gt: 0 } },
+                { variants: { some: { stock: { gt: 0 }, isActive: true } } },
+              ],
+            }
+          : {}),
         ...(args.q
           ? {
               OR: [
@@ -466,6 +477,35 @@ export async function getRelated(productId: string, categoryId: string, take = 4
 }
 
 /** Product count for a listing header. */
+/**
+ * The URL's filters, as a Prisma fragment.
+ *
+ * Shared by the listing and the count. When these were written out twice the
+ * two drifted, and the filter panel offered to "Show 17 pieces" while the grid
+ * held three — a number that is confidently wrong is worse than no number.
+ */
+export function filterWhere(args: {
+  minPrice?: number;
+  maxPrice?: number;
+  purity?: Purity[];
+  inStockOnly?: boolean;
+}): Prisma.ProductWhereInput {
+  return {
+    ...(args.purity?.length ? { purity: { in: args.purity } } : {}),
+    ...(args.minPrice !== undefined || args.maxPrice !== undefined
+      ? { price: { gte: args.minPrice, lte: args.maxPrice } }
+      : {}),
+    ...(args.inStockOnly
+      ? {
+          OR: [
+            { stock: { gt: 0 } },
+            { variants: { some: { stock: { gt: 0 }, isActive: true } } },
+          ],
+        }
+      : {}),
+  };
+}
+
 export async function countProducts(where: Prisma.ProductWhereInput, fallback: number) {
   return devFallback(
     () => db.product.count({ where }),

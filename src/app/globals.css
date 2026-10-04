@@ -92,6 +92,12 @@
   --animate-float: float 7s ease-in-out infinite;
 }
 
+/* The filter sheet rising from the bottom of a phone. */
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: none; }

@@ -4,14 +4,22 @@ import Link from "next/link";
 
 import {
   countProducts,
+  filterWhere,
   getCategoryBySlug,
   listProducts,
   type SortKey,
 } from "@/lib/queries/catalog";
 import { ProductListing } from "@/components/storefront/product-listing";
+import { ProductFilters } from "@/components/storefront/product-filters";
+import type { Purity } from "@/generated/prisma";
 
 type Params = Promise<{ slug: string }>;
-type Search = Promise<{ sort?: string }>;
+type Search = Promise<{ sort?: string
+  minPrice?: string;
+  maxPrice?: string;
+  purity?: string | string[];
+  inStock?: string;
+}>;
 
 export const revalidate = 300;
 
@@ -50,18 +58,29 @@ export default async function CategoryPage({
   searchParams: Search;
 }) {
   const { slug } = await params;
-  const { sort } = await searchParams;
+  const { sort, minPrice, maxPrice, purity, inStock } = await searchParams;
+
+  // The filter panel writes these into the URL; the server does the filtering,
+  // so a shared link and a crawler both see the same list.
+  const purities = (Array.isArray(purity) ? purity : purity ? [purity] : []) as Purity[];
+  const filters = {
+    minPrice: minPrice ? Number(minPrice) : undefined,
+    maxPrice: maxPrice ? Number(maxPrice) : undefined,
+    purity: purities.length ? purities : undefined,
+    inStockOnly: inStock === "1",
+  };
 
   const category = await getCategoryBySlug(slug);
   if (!category) notFound();
 
   const { products, nextCursor } = await listProducts({
     categorySlug: slug,
+    ...filters,
     sort: (sort as SortKey) ?? "newest",
     limit: 24,
   });
   const total = await countProducts(
-    { status: "ACTIVE", category: { slug } },
+    { status: "ACTIVE", category: { slug }, ...filterWhere(filters) },
     products.length,
   );
 
@@ -87,11 +106,19 @@ export default async function CategoryPage({
         ) : null}
       </header>
 
-      <div className="mt-8">
+      <div className="mt-8 grid gap-8 lg:grid-cols-[220px_1fr] lg:items-start">
+        <ProductFilters total={total} />
         <ProductListing
           initial={products}
           initialCursor={nextCursor}
-          query={{ category: slug }}
+          query={{
+            category: slug,
+            minPrice,
+            maxPrice,
+            // The API takes one comma-separated value; the URL uses repeats.
+            purity: purities.length ? purities.join(",") : undefined,
+            inStock: inStock === "1" ? "1" : undefined,
+          }}
           total={total}
         />
       </div>
