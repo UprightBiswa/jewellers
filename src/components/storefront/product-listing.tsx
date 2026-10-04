@@ -100,7 +100,7 @@ export function ProductListing({
 
   if (products.length === 0) {
     return (
-      <>
+      <div className="min-w-0">
         {toolbar ? <div className="mb-5 flex items-center gap-2 lg:hidden">{toolbar}</div> : null}
         <ActiveFilters />
         <div className="rounded-[var(--radius-card)] border border-dashed border-line py-16 text-center">
@@ -122,12 +122,15 @@ export function ProductListing({
             </Button>
           )}
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    // min-w-0 as well: a grid column refuses to shrink below its content by
+    // default, so a long product title would push the column wider than its
+    // share and overlap the one beside it.
+    <div className="min-w-0">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
         <div className="flex items-center gap-3">
           {toolbar}
@@ -171,6 +174,6 @@ export function ProductListing({
       ) : products.length > 8 ? (
         <p className="mt-12 text-center text-sm text-muted">That is everything in this section.</p>
       ) : null}
-    </>
+    </div>
   );
 }

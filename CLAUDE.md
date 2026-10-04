@@ -77,6 +77,20 @@ Most tutorials online are a major behind. These are the ones that bite:
   `.default({})` is a type error.
 - **lucide-react v1** — no brand icons. Social marks are local SVGs.
 
+### Layout traps
+
+- **A component dropped into a grid must return ONE element.** `ProductListing`
+  returned a fragment, so its toolbar, chips, product grid and Load-more each became
+  a separate grid item and were dealt across the two columns — products crushed into
+  the 220px filter column, overlapping, while the 1fr column held one stray sentence.
+  Wrap in a single `<div className="min-w-0">`; `min-w-0` because a grid column will
+  not shrink below its content otherwise.
+- **`backdrop-filter` traps `position: fixed` children.** The storefront header has
+  `backdrop-blur-md`, which makes it a containing block, so the mobile drawer's
+  `fixed inset-y-0` resolved against the header's 64px instead of the viewport and
+  came out as a short box under the logo. Anything `fixed` rendered from inside a
+  blurred ancestor needs `createPortal(..., document.body)`.
+
 ---
 
 ## Where things are

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
@@ -18,7 +19,11 @@ export function MobileNav({
   whatsapp?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+
+  // A portal needs document.body, which only exists in the browser.
+  useEffect(() => setMounted(true), []);
 
   // A route change means the visitor got where they were going.
   useEffect(() => setOpen(false), [pathname]);
@@ -52,6 +57,15 @@ export function MobileNav({
         <Menu className="size-5" aria-hidden />
       </button>
 
+      {/* Rendered into document.body on purpose.
+          This drawer lives inside the header, and the header carries
+          backdrop-blur. A backdrop-filter creates a containing block for fixed
+          descendants, so `fixed inset-y-0` resolved against the header's 64px
+          instead of the viewport — the drawer came out as a short box pinned
+          under the logo, with its links clipped away. A portal takes it out of
+          that stacking context entirely. */}
+      {mounted
+        ? createPortal(
       <AnimatePresence>
         {open ? (
           <>
@@ -160,7 +174,10 @@ export function MobileNav({
             </motion.div>
           </>
         ) : null}
-      </AnimatePresence>
+      </AnimatePresence>,
+            document.body,
+          )
+        : null}
     </>
   );
 }
