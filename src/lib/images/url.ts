@@ -56,6 +56,11 @@ export function cdnUrl(publicId: string, transform?: ImageTransform): string {
   // Absolute URLs (seed data, Google avatars) pass straight through.
   if (/^https?:\/\//.test(publicId)) return publicId;
 
+  // So does anything served from /public — the logo, a hero photograph dropped
+  // in by hand. Without this a path like "/brand/hero-1.jpg" would be treated as
+  // a Cloudinary public id and fetched from an account that has no such file.
+  if (publicId.startsWith("/")) return publicId;
+
   // Seeded rows carry ids like "demo/products/chhoto-jhumka-1", which exist in
   // no Cloudinary account. Without this, the day the keys are added every
   // product image turns into a 404 — the demo catalogue keeps its stand-in

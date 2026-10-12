@@ -1,21 +1,18 @@
 import { cn } from "@/lib/utils";
 
+import Image from "next/image";
+
 /**
- * The Charubala Silver mark: an open kara that also reads as a C, with a single
- * stone set in the gap.
+ * The shop's own mark.
  *
- * It renders as a filled badge by default — the same garnet tile as the favicon
- * and the share card — so the brand looks identical in the tab, in the header
- * and on WhatsApp. That also fixes the contrast problem a bare outline had: a
- * thin garnet stroke on a near-black background reads as almost nothing, while
- * the badge keeps the same weight in both themes because the tile carries the
- * colour and the glyph sits in cream on top of it.
+ * This was a hand-drawn SVG kara until Rahul sent a photograph of his real
+ * logo. The original note on this component said swapping it in would be a
+ * change to this one file and nothing else, which turned out to be true.
  *
- * `variant="bare"` drops the tile for places that already have a coloured
- * surface behind them.
- *
- * Swapping in a logo the owner has drawn is a change to this one component;
- * nothing else in the app draws the brand.
+ * Served as a 128px WebP: the mark never draws larger than about 40px, so 128
+ * covers a three-times screen, and the 1254px original it came from was 282 KB
+ * on every page of the shop. `variant` is kept so existing callers do not have
+ * to change — "bare" simply drops the rounded tile.
  */
 export function Mark({
   className,
@@ -24,34 +21,20 @@ export function Mark({
   className?: string;
   variant?: "badge" | "bare";
 }) {
-  const bare = variant === "bare";
-
   return (
-    <svg
-      viewBox="0 0 32 32"
-      className={cn("size-8", className)}
+    <Image
+      src="/brand/logo.webp"
+      alt=""
+      width={128}
+      height={128}
+      priority
       aria-hidden
-      focusable="false"
-    >
-      {!bare ? <rect width="32" height="32" rx="7" className="fill-brand" /> : null}
-      <path
-        d="M23 10.2A8.6 8.6 0 1 0 23 21.8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.8"
-        strokeLinecap="round"
-        className={bare ? undefined : "text-on-brand"}
-      />
-      <rect
-        x="21.6"
-        y="13.6"
-        width="4.8"
-        height="4.8"
-        rx="0.7"
-        transform="rotate(45 24 16)"
-        className="fill-gold"
-      />
-    </svg>
+      className={cn(
+        "size-8 shrink-0 object-contain",
+        variant === "badge" && "rounded-[7px]",
+        className,
+      )}
+    />
   );
 }
 

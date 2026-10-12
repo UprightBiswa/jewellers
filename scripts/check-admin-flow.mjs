@@ -12,7 +12,8 @@
 import { config as loadEnv } from "dotenv";
 loadEnv({ path: [".env.local", ".env"], quiet: true });
 
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
+import pg from "pg";
 
 const BASE = (process.env.BASE ?? "http://127.0.0.1:3005").replace(/\/$/, "");
 const EMAIL = process.env.ADMIN_EMAIL ?? "charubalasilver@gmail.com";
@@ -35,6 +36,68 @@ function adminDoor() {
   const secret = process.env.AUTH_SECRET?.trim();
   if (!secret) return "";
   return createHash("sha256").update(`charubala:admin-door:${secret}`).digest("hex").slice(0, 16);
+}
+
+/**
+ * One product, created for the run and removed afterwards.
+ *
+ * The product checks used to lean on whatever happened to be in the catalogue,
+ * so the day the demo data was cleared eight of them failed while nothing was
+ * actually broken. A suite that needs the shop to be full is a suite that stops
+ * working exactly when the shop goes live.
+ */
+const CHECK_SKU = "CHECKFLOW-TEMP";
+
+async function withDb(fn) {
+  const url = process.env.DIRECT_URL || process.env.DATABASE_URL;
+  if (!url) return null;
+  const c = new pg.Client({ connectionString: url });
+  await c.connect();
+  try {
+    return await fn(c);
+  } finally {
+    await c.end().catch(() => {});
+  }
+}
+
+async function createTempProducts() {
+  return withDb(async (c) => {
+    // Two, in two different categories. One is enough to check a product page,
+    // but the category filter is deliberately hidden when only one category has
+    // anything in it — so a single product makes a correct app look broken.
+    const cats = await c.query('select id, slug from "Category" order by "sortOrder" limit 2');
+    if (cats.rowCount < 2) return [];
+
+    const made = [];
+    for (const [n, cat] of cats.rows.entries()) {
+      const id = randomUUID();
+      await c.query(
+        `insert into "Product" (id, slug, sku, title, "categoryId", price, stock, status, "updatedAt")
+         values ($1, $2, $3, $4, $5, 123400, 3, 'ACTIVE', now())`,
+        [id, `check-flow-${n}-${Date.now()}`, `${CHECK_SKU}-${n}`, `Check Flow Temporary ${n}`, cat.id],
+      );
+      await c.query(
+        `insert into "ProductImage" (id, "productId", "publicId", url, alt, "sortOrder", "isPrimary")
+         values ($1, $2, 'demo/products/check', '', 'check', 0, true)`,
+        [randomUUID(), id],
+      );
+      made.push({ id, categorySlug: cat.slug });
+    }
+    return made;
+  });
+}
+
+async function removeTempProduct() {
+  return withDb(async (c) => {
+    const r = await c.query(`select id from "Product" where sku like '${CHECK_SKU}%'`);
+    for (const row of r.rows) {
+      await c.query('delete from "ProductImage" where "productId" = $1', [row.id]);
+      await c.query('delete from "ProductCollection" where "productId" = $1', [row.id]);
+      await c.query('delete from "ProductVariant" where "productId" = $1', [row.id]);
+      await c.query('delete from "Product" where id = $1', [row.id]);
+    }
+    return r.rowCount;
+  });
 }
 
 const jar = new Map();
@@ -72,7 +135,18 @@ async function post(path, form) {
 
 console.log(`\n  Admin flow against ${BASE}\n`);
 
+let temp = [];
+
 try {
+  await removeTempProduct();
+  temp = await createTempProducts();
+  console.log(
+    temp.length
+      ? `  (created ${temp.length} temporary products for the catalogue checks)`
+      : '  (fewer than two categories, so the catalogue checks are skipped)',
+  );
+  console.log('');
+
   // --- the door ------------------------------------------------------------
   const door = adminDoor();
   const closed = await get("/admin/products");
@@ -104,14 +178,14 @@ try {
   ok("...with select-all for bulk actions", list.body.includes("Select all on this page"));
   ok("...with the import link", list.body.includes("Import a sheet"));
 
-  const ids = [...list.body.matchAll(/\/admin\/products\/(c[a-z0-9]{20,})/g)].map((m) => m[1]);
+  const ids = [...list.body.matchAll(/\/admin\/products\/([a-z0-9][a-z0-9-]{19,})/g)].map((m) => m[1]);
   const uniqueIds = [...new Set(ids)];
   ok("...and rows that link to a product", uniqueIds.length > 0, `${uniqueIds.length} rows`);
 
   // Filters must actually narrow the list, not merely answer 200.
   const all = await get("/admin/products");
-  const rings = await get("/admin/products?category=rings");
-  const countRows = (b) => [...new Set([...b.matchAll(/\/admin\/products\/(c[a-z0-9]{20,})/g)].map((m) => m[1]))].length;
+  const rings = await get(`/admin/products?category=${temp[0]?.categorySlug ?? "rings"}`);
+  const countRows = (b) => [...new Set([...b.matchAll(/\/admin\/products\/([a-z0-9][a-z0-9-]{19,})/g)].map((m) => m[1]))].length;
   ok("the category filter narrows the list",
     countRows(rings.body) > 0 && countRows(rings.body) < countRows(all.body),
     `${countRows(rings.body)} of ${countRows(all.body)}`);
@@ -234,6 +308,10 @@ try {
 } catch (err) {
   console.error("\n  ERROR:", err?.message ?? err);
   fail++;
+} finally {
+  const removed = await removeTempProduct();
+  if (removed) console.log(`
+  removed ${removed} temporary product`);
 }
 
 console.log(`\n  ${pass} passed, ${fail} failed\n`);

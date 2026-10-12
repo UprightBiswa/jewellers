@@ -28,7 +28,8 @@
     "test:import:db": "tsx scripts/test-import-db.mjs",
     "test:bulk:db": "tsx scripts/test-bulk-db.mjs",
     "check:admin": "node scripts/check-admin-flow.mjs",
-    "check:email": "node scripts/check-email.mjs"
+    "check:email": "node scripts/check-email.mjs",
+    "clear:demo": "node scripts/clear-demo-data.mjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
