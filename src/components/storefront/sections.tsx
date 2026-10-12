@@ -431,6 +431,7 @@ export function PromiseBand({
   return (
     <section className="border-y border-line bg-surface-2/50 py-10" aria-label="Why buy here">
       <div className="container-page">
+        <Reveal>
         <ul className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-5">
           {facts.map((f) => (
             <li key={f.label} className="text-center">
@@ -439,6 +440,7 @@ export function PromiseBand({
             </li>
           ))}
         </ul>
+        </Reveal>
       </div>
     </section>
   );
@@ -473,9 +475,9 @@ export function CategoryShelves({
               href={`/categories/${shelf.slug}`}
               hrefLabel="See all"
             />
-            <div className="mt-6">
+            <Reveal className="mt-6">
               <ProductRail products={shelf.products} />
-            </div>
+            </Reveal>
           </div>
         </section>
       ))}
