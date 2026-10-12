@@ -58,7 +58,12 @@ export function AccountNav() {
         })}
       </ul>
 
-      <div className="mt-4 hidden border-t border-line pt-4 lg:block">
+      {/* Visible on a phone too.
+          This was hidden below lg, which meant a customer on a phone — nearly
+          all of them — had no way to sign out at all. On a small screen it sits
+          under the section pills with a rule above it; on a desktop it is the
+          foot of the sidebar, as before. */}
+      <div className="mt-4 border-t border-line pt-4">
         <SignOutButton redirectTo={"/"} />
       </div>
     </nav>

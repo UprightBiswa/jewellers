@@ -59,7 +59,9 @@ export const settingsSchema = z.object({
   }).prefault({}),
 
   returns: z.object({
-    windowDays: z.number().default(7),
+    // At least one day. Clearing the box in the admin used to write 0, and the
+    // shop then advertised "0-day returns" beside a line promising seven.
+    windowDays: z.number().int().min(1, "A return window of zero days is not a policy.").default(7),
     buyback: z.string().default("Exchange available at the shop"),
     nonReturnable: z.string().default("Engraved and custom-made pieces"),
   }).prefault({}),

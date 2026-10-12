@@ -30,8 +30,9 @@ export function Mark({
       priority
       aria-hidden
       className={cn(
-        "size-8 shrink-0 object-contain",
-        variant === "badge" && "rounded-[7px]",
+        // Round, matching the favicon and the share card. A square crop of a
+        // round logo reads as a mistake beside a circular tab icon.
+        "size-8 shrink-0 rounded-full object-cover",
         className,
       )}
     />

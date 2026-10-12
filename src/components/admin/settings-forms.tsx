@@ -244,7 +244,12 @@ export function SettingsForms({ settings }: { settings: Settings }) {
               <Field label="GST rate (%)" htmlFor="gstRate" hint="3% on finished jewellery">
                 <Input id="gstRate" inputMode="decimal" className="tnum"
                   value={String(tax.ratePercent)}
-                  onChange={(e) => setTax({ ...tax, ratePercent: Number(e.target.value || 0) })} />
+                  onChange={(e) =>
+                    setTax({
+                      ...tax,
+                      ratePercent: e.target.value === "" ? ("" as unknown as number) : Number(e.target.value),
+                    })
+                  } />
               </Field>
             </div>
 
@@ -268,7 +273,14 @@ export function SettingsForms({ settings }: { settings: Settings }) {
         <Field label="Return window (days)" htmlFor="windowDays">
           <Input id="windowDays" inputMode="numeric" className="w-24 tnum"
             value={String(returns.windowDays)}
-            onChange={(e) => setReturns({ ...returns, windowDays: Number(e.target.value || 0) })} />
+            // An empty box stays empty rather than becoming 0 — someone
+            // clearing it to type "14" should not pass through a saved zero.
+            onChange={(e) =>
+              setReturns({
+                ...returns,
+                windowDays: e.target.value === "" ? ("" as unknown as number) : Number(e.target.value),
+              })
+            } />
         </Field>
 
         <Field label="Exchange or buyback" htmlFor="buyback">
