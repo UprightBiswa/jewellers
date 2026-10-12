@@ -62,8 +62,11 @@ export const IMAGE_PRESETS = {
   cardRetina: { width: 1000, height: 1000, fit: "cover" },
   detail: { width: 1200, height: 1200, fit: "contain", background: "white" },
   zoom: { width: 2000, height: 2000, fit: "contain", background: "white" },
-  banner: { width: 1920, height: 720, fit: "cover" },
-  bannerMobile: { width: 800, height: 900, fit: "cover" },
+  // Width only, deliberately. Giving a height as well made Cloudinary crop to
+  // 8:3, so a 16:9 photograph arrived with its top and bottom cut off — and the
+  // owner only ever sees the result, never the original he uploaded.
+  banner: { width: 1920 },
+  bannerMobile: { width: 900 },
   og: { width: 1200, height: 630, fit: "pad", background: "white" },
 } as const satisfies Record<string, ImageTransform>;
 

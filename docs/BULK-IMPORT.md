@@ -174,3 +174,23 @@ case, and it is where a spreadsheet earns its keep:
 
 Do the photographs first and name them as you go. The filenames are the slowest
 part of this whole process, and they cannot be fixed by dragging.
+
+---
+
+## Photograph sizes
+
+| Where | Upload | Shape |
+|---|---|---|
+| **Front-page banner** | 1920 × 1080 or larger | **16:9**, landscape |
+| Product photo | 1200 × 1200 or larger | **square** |
+| Category tile | 800 × 800 | square |
+| Logo | 512 × 512 | square — it is masked to a circle |
+
+The banner is shown at 16:9 on every screen, phone and desktop alike, and is
+never cropped — what you upload is what is seen. Keep the piece near the middle:
+on a desktop the words sit over the bottom-left of it, and on a phone they move
+underneath, where there is room to read them.
+
+Anything wider than 16:9 (a panorama) will letterbox; anything taller will be
+shown whole but small. One upload serves every screen — Cloudinary makes the
+smaller sizes, so a 420px-wide phone gets a 420 × 234 file, not the full one.

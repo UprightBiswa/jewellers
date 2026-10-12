@@ -112,7 +112,13 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           band further down the page says the same things, and saying them twice
           made both look like filler. */}
       <div className="relative">
-        <div className="relative aspect-[4/5] w-full sm:aspect-[16/10] lg:aspect-[21/9]">
+        {/* 16:9 at every width.
+            It used to be 4:5 on a phone and 21:9 on a desktop, with object-cover
+            filling each — so the same photograph was cropped three different
+            ways and never shown whole. One ratio, matching the shape people
+            actually upload, means what the owner sees in the admin is what a
+            customer sees. */}
+        <div className="relative aspect-[16/9] w-full">
           <AnimatePresence initial={false}>
             <motion.div
               key={slide.id}
@@ -137,13 +143,15 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           </AnimatePresence>
 
           {/* Dark from the bottom-left, where the words are, and clear at the
-              top-right so the piece itself is never hidden behind a wash. */}
+              top-right so the piece itself is never hidden behind a wash. Only
+              from sm up: on a phone the words are below the picture, so a scrim
+              over it would darken the jewellery for no reason. */}
           <div
-            className="absolute inset-0 bg-gradient-to-tr from-ink/80 via-ink/45 to-ink/5"
+            className="absolute inset-0 hidden bg-gradient-to-tr from-ink/80 via-ink/45 to-ink/5 sm:block"
             aria-hidden
           />
 
-          <div className="absolute inset-0 flex items-end">
+          <div className="absolute inset-0 hidden items-end sm:flex">
             <div className="container-page w-full pb-10 sm:pb-14 lg:pb-20">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -226,6 +234,45 @@ export function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               </button>
             </>
           ) : null}
+        </div>
+
+        {/* The same words, under the picture, on a phone.
+            A 16:9 banner is about 220px tall on a 390px screen — enough to show
+            the jewellery properly and far too little to read a headline over.
+            So the photograph keeps the whole frame and the words sit beneath it,
+            where they have room and full contrast. */}
+        <div className="container-page py-7 sm:hidden">
+          {slide.eyebrow ? (
+            <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-gold">
+              <span className="inline-block size-1.5 rotate-45 bg-gold" aria-hidden />
+              {slide.eyebrow}
+            </p>
+          ) : null}
+
+          <h1 className="mt-2.5 font-display text-[clamp(1.9rem,8vw,2.6rem)] leading-[1.08] text-ink">
+            {slide.title}
+            {slide.titleAccent ? (
+              <>
+                <br />
+                <span className="text-brand">{slide.titleAccent}</span>
+              </>
+            ) : null}
+          </h1>
+
+          {slide.body ? (
+            <p className="mt-3 text-[15px] leading-relaxed text-ink-2">{slide.body}</p>
+          ) : null}
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Button asChild size="lg">
+              <Link href={slide.ctaHref}>{slide.ctaLabel}</Link>
+            </Button>
+            {slide.secondaryLabel && slide.secondaryHref ? (
+              <Button asChild variant="secondary" size="lg">
+                <Link href={slide.secondaryHref}>{slide.secondaryLabel}</Link>
+              </Button>
+            ) : null}
+          </div>
         </div>
       </div>
 
