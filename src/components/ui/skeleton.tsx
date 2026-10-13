@@ -63,10 +63,10 @@ export function ProductDetailSkeleton() {
 /** Mirrors the category rail on the homepage. */
 export function CategoryRailSkeleton() {
   return (
-    <div className="flex gap-3 sm:grid sm:grid-cols-4 sm:gap-4 lg:grid-cols-6">
+    <div className="no-scrollbar flex gap-4 overflow-hidden sm:gap-5">
       {Array.from({ length: 6 }, (_, i) => (
-        <div key={i} className="w-28 shrink-0 sm:w-auto">
-          <Skeleton className="aspect-square rounded-full sm:rounded-[var(--radius-card)]" />
+        <div key={i} className="w-[104px] shrink-0 sm:w-[124px]">
+          <Skeleton className="aspect-square rounded-full" />
           <Skeleton className="mx-auto mt-2.5 h-3.5 w-16" />
         </div>
       ))}

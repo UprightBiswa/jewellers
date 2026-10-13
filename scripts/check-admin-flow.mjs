@@ -68,13 +68,18 @@ async function createTempProducts() {
     const cats = await c.query('select id, slug from "Category" order by "sortOrder" limit 2');
     if (cats.rowCount < 2) return [];
 
+    // Every product must say what it is made of, now that materials are a table.
+    const mat = await c.query('select id from "Material" where "isActive" order by "sortOrder" limit 1');
+    if (mat.rowCount === 0) return [];
+    const materialId = mat.rows[0].id;
+
     const made = [];
     for (const [n, cat] of cats.rows.entries()) {
       const id = randomUUID();
       await c.query(
-        `insert into "Product" (id, slug, sku, title, "categoryId", price, stock, status, "updatedAt")
-         values ($1, $2, $3, $4, $5, 123400, 3, 'ACTIVE', now())`,
-        [id, `check-flow-${n}-${Date.now()}`, `${CHECK_SKU}-${n}`, `Check Flow Temporary ${n}`, cat.id],
+        `insert into "Product" (id, slug, sku, title, "categoryId", "materialId", price, stock, status, "updatedAt")
+         values ($1, $2, $3, $4, $5, $6, 123400, 3, 'ACTIVE', now())`,
+        [id, `check-flow-${n}-${Date.now()}`, `${CHECK_SKU}-${n}`, `Check Flow Temporary ${n}`, cat.id, materialId],
       );
       await c.query(
         `insert into "ProductImage" (id, "productId", "publicId", url, alt, "sortOrder", "isPrimary")
@@ -197,7 +202,9 @@ try {
   const detail = await get(`/admin/products/${uniqueIds[0]}`);
   ok("a product opens", detail.status === 200, `status ${detail.status}`);
   ok("...showing the price field", detail.body.includes("Selling price"));
-  ok("...the purity field", detail.body.includes("Purity"));
+  // The field is labelled "Silver" now, and the options come from the
+  // materials table rather than a fixed enum.
+  ok("...the silver type field", detail.body.includes("Silver"));
   ok("...the photo uploader", /photo|Photo/.test(detail.body));
   ok("...and a save button", detail.body.includes("Save"));
   ok("...and the delete option", /Delete|delete/.test(detail.body));

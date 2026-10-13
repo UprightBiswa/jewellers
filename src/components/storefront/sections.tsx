@@ -138,28 +138,38 @@ export function CategoryRail({
   categories: { slug: string; name: string; nameBn: string | null; imagePublicId: string | null }[];
 }) {
   return (
+    /* One treatment at every width: a row that scrolls.
+       It used to be a scrolling row of circles on a phone and a 4-then-6 column
+       grid of rounded squares from sm up — so the same seven categories were
+       round on one screen and square on the next, and wrapped onto a second row
+       on a desktop because seven does not divide by six. A rail simply takes as
+       many as there are. */
     <ul
       className={cn(
-        "no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4",
-        "sm:mx-0 sm:grid sm:grid-cols-4 sm:gap-4 sm:overflow-visible sm:px-0 lg:grid-cols-6",
+        "no-scrollbar -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2",
+        "sm:gap-5 lg:-mx-1 lg:px-1",
       )}
     >
       {categories.map((c) => (
-        <li key={c.slug} className="w-28 shrink-0 snap-start sm:w-auto">
+        <li key={c.slug} className="w-[104px] shrink-0 snap-start sm:w-[124px]">
           <Link href={`/categories/${c.slug}`} className="group block text-center">
-            <div className="relative aspect-square overflow-hidden rounded-full bg-surface-2 ring-1 ring-line transition-[box-shadow,transform] duration-300 group-hover:ring-brand sm:rounded-[var(--radius-card)]">
+            <div className="relative aspect-square overflow-hidden rounded-full bg-surface-2 ring-1 ring-line transition-[box-shadow,transform] duration-300 group-hover:-translate-y-1 group-hover:ring-2 group-hover:ring-brand">
               <Image
                 src={imageUrl(c.imagePublicId ?? `demo/categories/${c.slug}`, "card")}
                 alt=""
                 fill
-                sizes="(max-width: 640px) 112px, 20vw"
+                sizes="124px"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </div>
-            <p className="mt-2.5 text-[13.5px] font-medium text-ink group-hover:text-brand">
+            {/* One line each. Two-line labels made the row ragged and pushed the
+                Bengali name out of alignment across the rail. */}
+            <p className="mt-3 truncate text-[13.5px] font-medium text-ink transition-colors group-hover:text-brand">
               {c.name}
             </p>
-            {c.nameBn ? <p className="bangla text-[12px] text-muted">{c.nameBn}</p> : null}
+            {c.nameBn ? (
+              <p className="bangla truncate text-[12px] text-muted">{c.nameBn}</p>
+            ) : null}
           </Link>
         </li>
       ))}

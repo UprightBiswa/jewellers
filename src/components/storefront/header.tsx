@@ -24,9 +24,11 @@ export async function Header() {
     count: c._count.products,
   }));
 
-  // The header shows the categories that actually have stock; the rest stay in
-  // the drawer and on the all-categories page.
-  const primary = navCategories.filter((c) => c.count > 0).slice(0, 8);
+  // Categories with stock first, but never an empty navigation: on a shop still
+  // being set up every count is zero, and filtering on that left the bar with
+  // nothing in it at all.
+  const stocked = navCategories.filter((c) => c.count > 0);
+  const primary = (stocked.length > 0 ? stocked : navCategories).slice(0, 8);
 
   return (
     <>
