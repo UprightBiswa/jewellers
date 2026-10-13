@@ -33,6 +33,15 @@ export const DEMO_COLLECTIONS = COLLECTIONS.map((c) => ({
   bannerPublicId: `demo/collections/${c.slug}`,
 }));
 
+/** The five the shop started with, keyed by the old enum value. */
+const MATERIALS: Record<string, { code: string; name: string; nameBn: string | null }> = {
+  S925: { code: "925", name: "925 Sterling Silver", nameBn: "রুপো ৯২৫" },
+  S999: { code: "999", name: "999 Fine Silver", nameBn: null },
+  OXIDISED: { code: "oxidised", name: "Oxidised Silver", nameBn: null },
+  GOLD_PLATED: { code: "gold-plated", name: "Gold Plated Silver", nameBn: null },
+  PLATED: { code: "plated", name: "Silver Plated", nameBn: null },
+};
+
 type DemoCard = ProductCard & { shelves: string[]; collections: string[] };
 
 export const DEMO_PRODUCTS: DemoCard[] = PRODUCTS.map((p) => {
@@ -51,7 +60,9 @@ export const DEMO_PRODUCTS: DemoCard[] = PRODUCTS.map((p) => {
     shortDesc: p.shortDesc,
     price: paise(p.price),
     compareAtPrice: p.compareAt ? paise(p.compareAt) : null,
-    purity: p.purity ?? "S925",
+    // The seed catalogue still names a purity the old way; map it to the
+    // material shape the cards now carry.
+    material: MATERIALS[p.purity ?? "S925"],
     weightG: p.weightG,
     hallmarked: p.hallmarked ?? false,
     isLivePrice: false,

@@ -9,13 +9,18 @@ export const metadata: Metadata = { title: "Add a product" };
 export const dynamic = "force-dynamic";
 
 export default async function NewProductPage() {
-  const [categories, collections] = await Promise.all([
+  const [categories, collections, materials] = await Promise.all([
     db.category.findMany({
       where: { isActive: true },
       select: { id: true, name: true },
       orderBy: { sortOrder: "asc" },
     }),
     db.collection.findMany({
+      where: { isActive: true },
+      select: { id: true, name: true },
+      orderBy: { sortOrder: "asc" },
+    }),
+    db.material.findMany({
       where: { isActive: true },
       select: { id: true, name: true },
       orderBy: { sortOrder: "asc" },
@@ -38,7 +43,12 @@ export default async function NewProductPage() {
         </p>
       </div>
 
-      <ProductForm initial={EMPTY_PRODUCT} categories={categories} collections={collections} />
+      <ProductForm
+        initial={EMPTY_PRODUCT}
+        categories={categories}
+        collections={collections}
+        materials={materials}
+      />
     </div>
   );
 }

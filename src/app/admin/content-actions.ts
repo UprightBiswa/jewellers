@@ -45,7 +45,7 @@ function fieldErrors(error: z.ZodError): Record<string, string> {
 
 /** A slug nobody else is using, by adding -2, -3 … when needed. */
 async function freeSlug(
-  table: "category" | "collection" | "page",
+  table: "category" | "collection" | "page" | "material",
   desired: string,
   ignoreId?: string,
 ): Promise<string> {
@@ -57,7 +57,9 @@ async function freeSlug(
         ? await db.category.findUnique({ where: { slug: candidate }, select: { id: true } })
         : table === "collection"
           ? await db.collection.findUnique({ where: { slug: candidate }, select: { id: true } })
-          : await db.page.findUnique({ where: { slug: candidate }, select: { id: true } });
+          : table === "page"
+          ? await db.page.findUnique({ where: { slug: candidate }, select: { id: true } })
+          : await db.material.findUnique({ where: { slug: candidate }, select: { id: true } });
 
     if (!existing || existing.id === ignoreId) return candidate;
   }
@@ -429,4 +431,93 @@ export async function moveHeroSlide(id: string, direction: "up" | "down"): Promi
   revalidatePath("/admin/homepage");
   revalidatePath("/");
   return { ok: true, message: "Moved." };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Materials — the silver types the shop sells in                             */
+/* -------------------------------------------------------------------------- */
+
+const materialSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().min(2, "Give it a name, like 925 Sterling Silver.").max(60),
+  nameBn: z.string().max(60).optional(),
+  code: z
+    .string()
+    .min(1, "Give it a short code for the spreadsheet, like 925.")
+    .max(24)
+    .regex(/^[a-zA-Z0-9-]+$/, "Letters, numbers and dashes only — it goes in the import sheet."),
+  sortOrder: z.number().int().min(0).default(0),
+  isActive: z.boolean().default(true),
+});
+
+export type MaterialInput = z.input<typeof materialSchema>;
+
+export async function saveMaterial(input: MaterialInput): Promise<ActionResult<{ id: string }>> {
+  const user = await requireStaff();
+
+  const parsed = materialSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, message: "Please check the highlighted fields.", fieldErrors: fieldErrors(parsed.error) };
+  }
+
+  const m = parsed.data;
+  const code = m.code.trim().toLowerCase();
+
+  // The code is what a spreadsheet says, so two materials cannot share one.
+  const clash = await db.material.findFirst({
+    where: { code, ...(m.id ? { NOT: { id: m.id } } : {}) },
+    select: { name: true },
+  });
+  if (clash) {
+    return {
+      ok: false,
+      message: `"${code}" is already used by ${clash.name}.`,
+      fieldErrors: { code: "Pick a different code." },
+    };
+  }
+
+  const data = {
+    name: m.name.trim(),
+    nameBn: m.nameBn?.trim() || null,
+    code,
+    sortOrder: m.sortOrder,
+    isActive: m.isActive,
+  };
+
+  const saved = m.id
+    ? await db.material.update({ where: { id: m.id }, data, select: { id: true } })
+    : await db.material.create({
+        data: { ...data, slug: await freeSlug("material", m.name) },
+        select: { id: true },
+      });
+
+  await audit(user.id, m.id ? "material.update" : "material.create", "Material", saved.id, data);
+
+  revalidatePath("/admin/materials");
+  revalidatePath("/");
+  return { ok: true, data: { id: saved.id }, message: m.id ? "Saved." : "Silver type added." };
+}
+
+export async function deleteMaterial(id: string): Promise<ActionResult> {
+  const user = await requireStaff();
+
+  // A material in use cannot go: every product made of it would lose the field
+  // that says what it is. Switching it off keeps those products intact and
+  // simply stops it being offered on anything new.
+  const inUse = await db.product.count({ where: { materialId: id } });
+  if (inUse > 0) {
+    await db.material.update({ where: { id }, data: { isActive: false } });
+    await audit(user.id, "material.retire", "Material", id);
+    revalidatePath("/admin/materials");
+    return {
+      ok: true,
+      message: `${inUse} ${inUse === 1 ? "piece is" : "pieces are"} made of this, so it was switched off rather than deleted. It will not be offered on new products.`,
+    };
+  }
+
+  await db.material.delete({ where: { id } });
+  await audit(user.id, "material.delete", "Material", id);
+
+  revalidatePath("/admin/materials");
+  return { ok: true, message: "Silver type deleted." };
 }

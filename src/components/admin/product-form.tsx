@@ -20,7 +20,7 @@ export type ProductFormValues = {
   shortDesc: string;
   description: string;
   status: "DRAFT" | "ACTIVE" | "ARCHIVED";
-  purity: "S925" | "S999" | "PLATED" | "GOLD_PLATED" | "OXIDISED";
+  materialId: string;
   priceMode: "FIXED" | "WEIGHT";
   priceRupees: string;
   compareAtRupees: string;
@@ -40,7 +40,7 @@ export type ProductFormValues = {
 
 export const EMPTY_PRODUCT: ProductFormValues = {
   title: "", titleBn: "", categoryId: "", shortDesc: "", description: "",
-  status: "DRAFT", purity: "S925", priceMode: "FIXED",
+  status: "DRAFT", materialId: "", priceMode: "FIXED",
   priceRupees: "", compareAtRupees: "", makingChargeRupees: "", weightG: "",
   stock: "1", hallmarked: false, huid: "",
   isFeatured: false, isTrending: false, isNewArrival: true,
@@ -69,10 +69,13 @@ export function ProductForm({
   initial,
   categories,
   collections,
+  materials,
 }: {
   initial: ProductFormValues;
   categories: Option[];
   collections: Option[];
+  /** The silver types the owner maintains, from /admin/materials. */
+  materials: Option[];
 }) {
   const router = useRouter();
   const [values, setValues] = useState<ProductFormValues>(initial);
@@ -98,7 +101,7 @@ export function ProductForm({
       shortDesc: values.shortDesc || undefined,
       description: values.description || undefined,
       status,
-      purity: values.purity,
+      materialId: values.materialId,
       priceMode: values.priceMode,
       priceRupees: num(values.priceRupees) ?? 0,
       compareAtRupees: num(values.compareAtRupees),
@@ -305,14 +308,28 @@ export function ProductForm({
           ) : null}
         </div>
 
-        <Field label="Purity" htmlFor="purity">
+        <Field
+          label="Silver"
+          htmlFor="materialId"
+          hint={
+            materials.length === 0
+              ? "No silver types yet — add one under Materials first."
+              : undefined
+          }
+        >
           <Select
-            id="purity"
-            value={values.purity}
-            onChange={(e) => set("purity", e.target.value as ProductFormValues["purity"])}
+            id="materialId"
+            value={values.materialId}
+            onChange={(e) => set("materialId", e.target.value)}
+            required
           >
-            {PURITY_OPTIONS.map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
+            <option value="" disabled>
+              Choose one
+            </option>
+            {materials.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
             ))}
           </Select>
         </Field>

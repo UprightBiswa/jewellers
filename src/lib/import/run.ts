@@ -226,6 +226,34 @@ export async function runImport(
 
   // Categories and collections are resolved once and cached, so a sheet of 300
   // chains does not ask for the Chains category 300 times.
+  /**
+   * The material a row's purity code refers to.
+   *
+   * Deliberately does not create one. Categories and collections are made on
+   * demand because a typo there costs a tidy-up; an invented silver quality is
+   * a claim about what a piece is made of.
+   */
+  const materialCache = new Map<string, string>();
+
+  async function materialId(code: string): Promise<string> {
+    const key = code.trim().toLowerCase();
+    const cached = materialCache.get(key);
+    if (cached) return cached;
+
+    const found = await db.material.findFirst({
+      where: { OR: [{ code: key }, { slug: key }], isActive: true },
+      select: { id: true },
+    });
+    if (!found) {
+      throw new Error(
+        `"${code}" is not one of the silver types this shop sells. Add it under Materials first.`,
+      );
+    }
+
+    materialCache.set(key, found.id);
+    return found.id;
+  }
+
   const categoryCache = new Map<string, string>();
   const collectionCache = new Map<string, string>();
 
@@ -295,7 +323,7 @@ export async function runImport(
         description: draft.description,
         categoryId: catId,
         status: draft.status,
-        purity: draft.purity,
+        materialId: await materialId(draft.purity),
         priceMode: draft.priceMode,
         price: rupeesToPaise(draft.priceRupees),
         compareAtPrice: draft.compareAtRupees ? rupeesToPaise(draft.compareAtRupees) : null,
@@ -446,7 +474,7 @@ export async function exportProducts(): Promise<ImportResult<string>> {
       price: true,
       compareAtPrice: true,
       weightG: true,
-      purity: true,
+      material: { select: { code: true } },
       hallmarked: true,
       huid: true,
       stock: true,
@@ -464,13 +492,6 @@ export async function exportProducts(): Promise<ImportResult<string>> {
     },
   });
 
-  const PURITY_OUT: Record<string, string> = {
-    S925: "925",
-    S999: "999",
-    PLATED: "plated",
-    GOLD_PLATED: "gold-plated",
-    OXIDISED: "oxidised",
-  };
 
   const headers = [
     "serial", "sku", "title", "title_bn", "category", "short_desc", "description",
@@ -505,7 +526,7 @@ export async function exportProducts(): Promise<ImportResult<string>> {
       p.price / 100,
       p.compareAtPrice ? p.compareAtPrice / 100 : "",
       p.weightG ? String(p.weightG) : "",
-      PURITY_OUT[p.purity] ?? "925",
+      p.material.code,
       p.hallmarked ? "yes" : "no",
       p.huid ?? "",
       sizes,

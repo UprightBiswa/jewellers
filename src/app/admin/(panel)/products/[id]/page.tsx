@@ -21,12 +21,12 @@ export default async function EditProductPage({
 }) {
   const { id } = await params;
 
-  const [product, categories, collections] = await Promise.all([
+  const [product, categories, collections, materials] = await Promise.all([
     db.product.findUnique({
       where: { id },
       select: {
         id: true, title: true, titleBn: true, slug: true, shortDesc: true, description: true,
-        categoryId: true, status: true, purity: true, priceMode: true,
+        categoryId: true, status: true, materialId: true, priceMode: true,
         price: true, compareAtPrice: true, makingCharge: true, weightG: true,
         stock: true, hallmarked: true, huid: true,
         isFeatured: true, isTrending: true, isNewArrival: true, tags: true,
@@ -52,6 +52,11 @@ export default async function EditProductPage({
       select: { id: true, name: true },
       orderBy: { sortOrder: "asc" },
     }),
+    db.material.findMany({
+      where: { isActive: true },
+      select: { id: true, name: true },
+      orderBy: { sortOrder: "asc" },
+    }),
   ]);
 
   // Returned, not thrown — see the note in components/admin/missing.tsx.
@@ -67,7 +72,7 @@ export default async function EditProductPage({
     shortDesc: product.shortDesc ?? "",
     description: product.description ?? "",
     status: product.status,
-    purity: product.purity,
+    materialId: product.materialId,
     priceMode: product.priceMode,
     priceRupees: rupees(product.price),
     compareAtRupees: rupees(product.compareAtPrice),
@@ -123,7 +128,12 @@ export default async function EditProductPage({
         </div>
       </div>
 
-      <ProductForm initial={initial} categories={categories} collections={collections} />
+      <ProductForm
+        initial={initial}
+        categories={categories}
+        collections={collections}
+        materials={materials}
+      />
 
       <ProductDangerZone
         productId={product.id}

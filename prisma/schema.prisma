@@ -239,6 +239,33 @@ model Collection {
   @@index([isActive, sortOrder])
 }
 
+/// A silver quality the shop sells in — 925 sterling, 999 fine, oxidised, and
+/// whatever Rahul starts offering next.
+///
+/// This was a Prisma enum, which meant adding "Rose gold plated" needed a
+/// developer and a migration. It is a table so the owner can add, rename and
+/// retire options himself, like every other list in the shop.
+///
+/// `code` keeps the old enum values working: the spreadsheet importer and the
+/// seed still say 925 and 999, and a row carries its own code so those keep
+/// matching after a rename.
+model Material {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  nameBn    String?
+  /// The short form used in a spreadsheet: 925, 999, plated, oxidised.
+  code      String   @unique
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@index([isActive, sortOrder])
+}
+
 model Product {
   id          String  @id @default(cuid())
   slug        String  @unique
@@ -250,7 +277,7 @@ model Product {
   categoryId  String
 
   status    ProductStatus @default(DRAFT)
-  purity    Purity        @default(S925)
+  materialId String
   priceMode PriceMode     @default(FIXED)
 
   // FIXED mode: price is authoritative.
@@ -278,6 +305,7 @@ model Product {
   updatedAt       DateTime @updatedAt
 
   category    Category            @relation(fields: [categoryId], references: [id])
+  material    Material            @relation(fields: [materialId], references: [id])
   images      ProductImage[]
   variants    ProductVariant[]
   collections ProductCollection[]
@@ -500,7 +528,7 @@ model OrderItem {
   qty           Int
   lineTotal     Int // paise
   weightG       Decimal? @db.Decimal(10, 3)
-  purity        Purity?
+  materialLabel String?
   taxRate       Decimal  @default(3.0) @db.Decimal(5, 2)
 
   order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)

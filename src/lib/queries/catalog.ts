@@ -34,7 +34,7 @@ export type ProductCard = {
   shortDesc: string | null;
   price: number;
   compareAtPrice: number | null;
-  purity: Purity;
+  material: { code: string; name: string; nameBn: string | null };
   weightG: number | null;
   hallmarked: boolean;
   isLivePrice: boolean;
@@ -55,7 +55,7 @@ const cardSelect = {
   shortDesc: true,
   price: true,
   compareAtPrice: true,
-  purity: true,
+  material: { select: { code: true, name: true, nameBn: true } },
   priceMode: true,
   weightG: true,
   makingCharge: true,
@@ -74,6 +74,18 @@ const cardSelect = {
 } satisfies Prisma.ProductSelect;
 
 type RawCard = Prisma.ProductGetPayload<{ select: typeof cardSelect }>;
+
+/**
+ * Which metal rate a material is priced against.
+ *
+ * MetalRate stays an enum on purpose: it is the price of pure silver per gram,
+ * a fact about metal rather than a list the shop maintains. Only 925 and 999
+ * have their own rate — a plated or oxidised piece is priced by the tag, and
+ * weight pricing is not used for those anyway.
+ */
+function rateKeyFor(code: string): Purity {
+  return code === "999" ? "S999" : "S925";
+}
 
 /** The silver rate in force right now, in paise per gram of pure metal. */
 export const getMetalRate = cache(async (purity: Purity = "S999"): Promise<number | null> =>
@@ -96,7 +108,7 @@ function toCard(p: RawCard, ratePerGram: number | null): ProductCard {
   const { total, isLive } = computePrice({
     priceMode: p.priceMode,
     price: p.price,
-    purity: p.purity,
+    purity: rateKeyFor(p.material.code),
     weightG,
     makingCharge: p.makingCharge,
     makingChargePct: p.makingChargePct ? Number(p.makingChargePct) : null,
@@ -113,7 +125,7 @@ function toCard(p: RawCard, ratePerGram: number | null): ProductCard {
     shortDesc: p.shortDesc,
     price: total,
     compareAtPrice: p.compareAtPrice,
-    purity: p.purity,
+    material: p.material,
     weightG,
     hallmarked: p.hallmarked,
     isLivePrice: isLive,
@@ -140,7 +152,8 @@ export type ListProductsArgs = {
   categorySlug?: string;
   collectionSlug?: string;
   q?: string;
-  purity?: Purity[];
+  /** Material codes, e.g. 925, 999, oxidised. */
+  purity?: string[];
   minPrice?: number;
   maxPrice?: number;
   inStockOnly?: boolean;
@@ -161,7 +174,7 @@ export async function listProducts(args: ListProductsArgs = {}) {
         ...(args.collectionSlug
           ? { collections: { some: { collection: { slug: args.collectionSlug } } } }
           : {}),
-        ...(args.purity?.length ? { purity: { in: args.purity } } : {}),
+        ...(args.purity?.length ? { material: { code: { in: args.purity } } } : {}),
         ...(args.minPrice !== undefined || args.maxPrice !== undefined
           ? { price: { gte: args.minPrice, lte: args.maxPrice } }
           : {}),
@@ -292,7 +305,7 @@ async function queryProductBySlug(slug: string) {
   const breakdown = computePrice({
     priceMode: product.priceMode,
     price: product.price,
-    purity: product.purity,
+    purity: rateKeyFor(product.material.code),
     weightG,
     makingCharge: product.makingCharge,
     makingChargePct: product.makingChargePct ? Number(product.makingChargePct) : null,
@@ -343,7 +356,7 @@ function demoProductDetail(slug: string): ProductDetail | null {
     price: card.price,
     compareAtPrice: card.compareAtPrice,
     priceMode: "FIXED",
-    purity: card.purity,
+    material: card.material,
     weightG: card.weightG,
     makingCharge: null,
     makingChargePct: null,
@@ -487,11 +500,12 @@ export async function getRelated(productId: string, categoryId: string, take = 4
 export function filterWhere(args: {
   minPrice?: number;
   maxPrice?: number;
-  purity?: Purity[];
+  /** Material codes, e.g. 925, 999, oxidised. */
+  purity?: string[];
   inStockOnly?: boolean;
 }): Prisma.ProductWhereInput {
   return {
-    ...(args.purity?.length ? { purity: { in: args.purity } } : {}),
+    ...(args.purity?.length ? { material: { code: { in: args.purity } } } : {}),
     ...(args.minPrice !== undefined || args.maxPrice !== undefined
       ? { price: { gte: args.minPrice, lte: args.maxPrice } }
       : {}),
@@ -567,5 +581,26 @@ export async function getCategoryShelves(
         .filter((s) => s.products.length >= 2);
     },
     () => [],
+  );
+}
+
+/**
+ * The silver types on offer, for the filter panel.
+ *
+ * Only the ones still offered: a retired material stays on the products already
+ * made of it, but should not appear as something to filter by.
+ */
+export async function listMaterials(): Promise<{ code: string; name: string }[]> {
+  return devFallback(
+    () =>
+      db.material.findMany({
+        where: { isActive: true },
+        select: { code: true, name: true },
+        orderBy: { sortOrder: "asc" },
+      }),
+    () => [
+      { code: "925", name: "925 Sterling Silver" },
+      { code: "999", name: "999 Fine Silver" },
+    ],
   );
 }

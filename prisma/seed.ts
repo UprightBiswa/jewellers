@@ -36,6 +36,33 @@ const db = new PrismaClient({ adapter });
 
 const paise = (rupees: number) => Math.round(rupees * 100);
 
+/**
+ * The seed catalogue still names the old enum values; the rows that replaced
+ * them carry fixed ids set by the materials migration, so the two line up
+ * without a lookup.
+ */
+const MATERIAL_ID: Record<string, string> = {
+  S925: "mat_s925",
+  S999: "mat_s999",
+  OXIDISED: "mat_oxid",
+  GOLD_PLATED: "mat_gold",
+  PLATED: "mat_plate",
+};
+
+const MATERIAL_NAME: Record<string, string> = {
+  S925: "925 Sterling Silver",
+  S999: "999 Fine Silver",
+  OXIDISED: "Oxidised Silver",
+  GOLD_PLATED: "Gold Plated Silver",
+  PLATED: "Silver Plated",
+};
+
+const materialIdFor = (code: string) => MATERIAL_ID[code] ?? "mat_s925";
+
+const LABEL_BY_ID: Record<string, string> = Object.fromEntries(
+  Object.entries(MATERIAL_ID).map(([code, id]) => [id, MATERIAL_NAME[code]]),
+);
+
 async function main() {
   console.log(`Seeding ${STORE.name}…`);
 
@@ -229,7 +256,7 @@ async function main() {
         description: p.description,
         categoryId,
         status: "ACTIVE",
-        purity: p.purity ?? "S925",
+        materialId: materialIdFor(p.purity ?? "S925"),
         priceMode: "FIXED",
         price: paise(p.price),
         compareAtPrice: p.compareAt ? paise(p.compareAt) : null,
@@ -373,7 +400,9 @@ async function main() {
               qty: 1,
               lineTotal: p.price,
               weightG: p.weightG,
-              purity: p.purity,
+              // A snapshot: the invoice keeps the words even if the
+              // material is renamed or retired later.
+              materialLabel: LABEL_BY_ID[p.materialId] ?? "925 Sterling Silver",
               taxRate: 0,
             })),
           },

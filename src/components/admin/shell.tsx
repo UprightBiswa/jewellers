@@ -18,6 +18,7 @@ import {
   Users,
   FileText,
   Images,
+  Gem,
   Menu,
   X,
 } from "lucide-react";
@@ -47,6 +48,7 @@ const NAV: NavItem[] = [
   { href: "/admin/products", label: "Products", Icon: Package, group: "The shop" },
   { href: "/admin/categories", label: "Categories", Icon: FolderTree, group: "The shop" },
   { href: "/admin/collections", label: "Collections", Icon: Layers, group: "The shop" },
+  { href: "/admin/materials", label: "Silver types", Icon: Gem, group: "The shop" },
   { href: "/admin/rate", label: "Silver rate", Icon: Coins, group: "The shop" },
 
   { href: "/admin/orders", label: "Orders", Icon: ReceiptText, group: "People" },

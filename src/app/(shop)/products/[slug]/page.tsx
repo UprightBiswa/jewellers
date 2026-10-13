@@ -6,7 +6,6 @@ import { getProductBySlug, getRelated } from "@/lib/queries/catalog";
 import { getSettings } from "@/lib/settings";
 import { imageUrl } from "@/lib/images/url";
 import { discountPercent, formatPaise } from "@/lib/money";
-import { PURITY_LABEL } from "@/lib/pricing";
 import { absoluteUrl } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
@@ -76,7 +75,7 @@ export default async function ProductPage({ params }: { params: Params }) {
       : product.stock > 0;
 
   const specs: [string, string][] = [
-    ["Purity", PURITY_LABEL[product.purity]],
+    ["Silver", product.material.name],
     ...(settings.catalog.showWeight && product.weightG
       ? ([["Weight", `${product.weightG} g (approx.)`]] as [string, string][])
       : []),
@@ -94,7 +93,7 @@ export default async function ProductPage({ params }: { params: Params }) {
     sku: product.sku,
     image: product.images.map((i) => imageUrl(i.publicId, "detail")),
     brand: { "@type": "Brand", name: settings.store.name },
-    material: PURITY_LABEL[product.purity],
+    material: product.material.name,
     ...(product.weightG
       ? { weight: { "@type": "QuantitativeValue", value: product.weightG, unitCode: "GRM" } }
       : {}),

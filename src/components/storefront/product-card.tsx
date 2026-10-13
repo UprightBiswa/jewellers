@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { imageUrl } from "@/lib/images/url";
 import { discountPercent, formatPaise } from "@/lib/money";
-import { PURITY_LABEL } from "@/lib/pricing";
 import { Badge } from "@/components/ui/badge";
 import { WishlistButton } from "./wishlist-button";
 import type { ProductCard as Card } from "@/lib/queries/catalog";
@@ -77,7 +76,7 @@ export function ProductCard({ product, priority }: { product: Card; priority?: b
 
         <div className="mt-3 grid gap-1">
           <p className="text-[11px] uppercase tracking-[0.12em] text-muted">
-            {PURITY_LABEL[product.purity]}
+            {product.material.name}
           </p>
 
           <h3 className="font-display text-[17px] leading-snug text-ink group-hover:text-brand transition-colors">

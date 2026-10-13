@@ -25,13 +25,14 @@ import { cn } from "@/lib/utils";
  * disorienting.
  */
 
-const PURITIES = [
-  { value: "S925", label: "925 Sterling" },
-  { value: "S999", label: "999 Fine" },
-  { value: "OXIDISED", label: "Oxidised" },
-  { value: "GOLD_PLATED", label: "Gold plated" },
-  { value: "PLATED", label: "Silver plated" },
-];
+/**
+ * The silver types come from the database now, passed down from the page.
+ *
+ * They used to be written here, which meant the filter offered five fixed
+ * options whatever the shop actually sold — add "Rose gold plated" in the admin
+ * and nobody could filter by it, retire one and it stayed on the list for ever.
+ */
+export type MaterialOption = { code: string; name: string };
 
 const PRICE_BANDS = [
   { label: "Under ₹999", min: "", max: "99900" },
@@ -72,9 +73,11 @@ export function countActive(params: URLSearchParams): number {
 function Controls({
   draft,
   onChange,
+  materials,
 }: {
   draft: Draft;
   onChange: (next: Draft) => void;
+  materials: MaterialOption[];
 }) {
   const band = (b: (typeof PRICE_BANDS)[number]) => draft.min === b.min && draft.max === b.max;
 
@@ -112,34 +115,36 @@ function Controls({
         </div>
       </fieldset>
 
+      {materials.length > 1 ? (
       <fieldset>
         <legend className="text-[12px] font-medium uppercase tracking-[0.12em] text-muted">
           Silver
         </legend>
         <div className="mt-3 grid gap-2.5">
-          {PURITIES.map((p) => (
+          {materials.map((p) => (
             <label
-              key={p.value}
+              key={p.code}
               className="flex cursor-pointer items-center gap-2.5 text-[15px] text-ink"
             >
               <input
                 type="checkbox"
-                checked={draft.purity.includes(p.value)}
+                checked={draft.purity.includes(p.code)}
                 onChange={() =>
                   onChange({
                     ...draft,
-                    purity: draft.purity.includes(p.value)
-                      ? draft.purity.filter((x) => x !== p.value)
-                      : [...draft.purity, p.value],
+                    purity: draft.purity.includes(p.code)
+                      ? draft.purity.filter((x) => x !== p.code)
+                      : [...draft.purity, p.code],
                   })
                 }
                 className="size-4 rounded accent-[var(--brand)]"
               />
-              {p.label}
+              {p.name}
             </label>
           ))}
         </div>
       </fieldset>
+      ) : null}
 
       <label className="flex cursor-pointer items-center gap-2.5 border-t border-line pt-5 text-[15px] text-ink">
         <input
@@ -155,7 +160,7 @@ function Controls({
 }
 
 /** Desktop column. Every tick applies immediately. */
-export function FilterSidebar() {
+export function FilterSidebar({ materials }: { materials: MaterialOption[] }) {
   const router = useRouter();
   const params = useSearchParams();
   const draft = readParams(params);
@@ -180,7 +185,7 @@ export function FilterSidebar() {
         )}
       </div>
       <div className="mt-5">
-        <Controls draft={draft} onChange={apply} />
+        <Controls draft={draft} onChange={apply} materials={materials} />
       </div>
       </div>
     </aside>
@@ -194,7 +199,7 @@ export function FilterSidebar() {
  * reason for it — on a phone the panel is closed, so the only clue is a small
  * number on a button. Each chip says what it is and removes just itself.
  */
-export function ActiveFilters() {
+export function ActiveFilters({ materials }: { materials: MaterialOption[] }) {
   const router = useRouter();
   const params = useSearchParams();
   const d = readParams(params);
@@ -210,7 +215,7 @@ export function ActiveFilters() {
   }
   for (const value of d.purity) {
     chips.push({
-      label: PURITIES.find((p) => p.value === value)?.label ?? value,
+      label: materials.find((p) => p.code === value)?.name ?? value,
       next: { ...d, purity: d.purity.filter((x) => x !== value) },
     });
   }
@@ -250,7 +255,7 @@ export function ActiveFilters() {
 }
 
 /** Phone: a button for the toolbar, and the sheet it opens. */
-export function FilterSheet({ total }: { total?: number }) {
+export function FilterSheet({ total, materials }: { total?: number; materials: MaterialOption[] }) {
   const router = useRouter();
   const params = useSearchParams();
   const [open, setOpen] = useState(false);
@@ -321,7 +326,7 @@ export function FilterSheet({ total }: { total?: number }) {
             </div>
 
             <div className="flex-1 overflow-y-auto p-4">
-              <Controls draft={draft} onChange={setDraft} />
+              <Controls draft={draft} onChange={setDraft} materials={materials} />
             </div>
 
             {/* Last in the drawer, which is where the thumb ends up. */}

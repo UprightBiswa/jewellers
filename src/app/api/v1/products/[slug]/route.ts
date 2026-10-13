@@ -29,7 +29,7 @@ export async function GET(
         price: product.price,
         compareAtPrice: product.compareAtPrice,
         priceBreakdown: product.breakdown,
-        purity: product.purity,
+        purity: product.material.name,
         weightG: product.weightG,
         hallmarked: product.hallmarked,
         huid: product.huid,

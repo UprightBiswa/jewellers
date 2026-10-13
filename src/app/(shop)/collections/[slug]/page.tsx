@@ -9,6 +9,7 @@ import {
   listProducts,
   type SortKey,
 } from "@/lib/queries/catalog";
+import { listMaterials } from "@/lib/queries/catalog";
 import { ProductListing } from "@/components/storefront/product-listing";
 import { FilterSheet, FilterSidebar } from "@/components/storefront/product-filters";
 import type { Purity } from "@/generated/prisma";
@@ -77,6 +78,8 @@ export default async function CollectionPage({
     sort: (sort as SortKey) ?? "newest",
     limit: 24,
   });
+  const materials = await listMaterials();
+
   const total = await countProducts(
     {
       status: "ACTIVE",
@@ -105,9 +108,9 @@ export default async function CollectionPage({
       </header>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[220px_1fr] lg:items-start">
-        <FilterSidebar />
+        <FilterSidebar materials={materials} />
         <ProductListing
-          toolbar={<FilterSheet total={total} />}
+          toolbar={<FilterSheet total={total} materials={materials} />}
           initial={products}
           initialCursor={nextCursor}
           query={isAll ? {} : { collection: slug }}

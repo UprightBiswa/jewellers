@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { ProductCard, ProductCardSkeleton } from "./product-card";
-import { ActiveFilters } from "./product-filters";
+import { ActiveFilters, type MaterialOption } from "./product-filters";
 import type { ProductCard as Card, SortKey } from "@/lib/queries/catalog";
 
 const SORTS: { value: SortKey; label: string }[] = [
@@ -30,6 +30,7 @@ export function ProductListing({
   query,
   total,
   toolbar,
+  materials = [],
 }: {
   initial: Card[];
   initialCursor: string | null;
@@ -39,6 +40,8 @@ export function ProductListing({
   /** The phone's Filter button, so it shares a bar with Sort instead of
       stacking a second toolbar above it. */
   toolbar?: React.ReactNode;
+  /** For naming the filter chips. */
+  materials?: MaterialOption[];
 }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -102,7 +105,7 @@ export function ProductListing({
     return (
       <div className="min-w-0">
         {toolbar ? <div className="mb-5 flex items-center gap-2 lg:hidden">{toolbar}</div> : null}
-        <ActiveFilters />
+        <ActiveFilters materials={materials} />
         <div className="rounded-[var(--radius-card)] border border-dashed border-line py-16 text-center">
           <p className="font-display text-xl text-ink">
             {filtered ? "Nothing matches those filters" : "Nothing here yet"}
@@ -154,7 +157,7 @@ export function ProductListing({
         </label>
       </div>
 
-      <ActiveFilters />
+      <ActiveFilters materials={materials} />
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((p, i) => (

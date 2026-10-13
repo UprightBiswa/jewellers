@@ -26,7 +26,8 @@ export default async function WishlistPage() {
         product: {
           select: {
             id: true, slug: true, title: true, titleBn: true, shortDesc: true,
-            price: true, compareAtPrice: true, purity: true, priceMode: true,
+            price: true, compareAtPrice: true, priceMode: true,
+            material: { select: { code: true, name: true, nameBn: true } },
             weightG: true, makingCharge: true, makingChargePct: true,
             hallmarked: true, stock: true, tags: true, status: true,
             category: { select: { slug: true, name: true } },
@@ -49,7 +50,7 @@ export default async function WishlistPage() {
       const { total, isLive } = computePrice({
         priceMode: p.priceMode,
         price: p.price,
-        purity: p.purity,
+        purity: p.material.code === "999" ? "S999" : "S925",
         weightG,
         makingCharge: p.makingCharge,
         makingChargePct: p.makingChargePct ? Number(p.makingChargePct) : null,
@@ -65,7 +66,7 @@ export default async function WishlistPage() {
         shortDesc: p.shortDesc,
         price: total,
         compareAtPrice: p.compareAtPrice,
-        purity: p.purity,
+        material: p.material,
         weightG,
         hallmarked: p.hallmarked,
         isLivePrice: isLive,

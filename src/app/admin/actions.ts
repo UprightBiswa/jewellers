@@ -77,7 +77,7 @@ const productSchema = z.object({
   description: z.string().max(8000).optional(),
 
   status: z.enum(["DRAFT", "ACTIVE", "ARCHIVED"]).default("DRAFT"),
-  purity: z.enum(["S925", "S999", "PLATED", "GOLD_PLATED", "OXIDISED"]).default("S925"),
+  materialId: z.string().min(1, "Choose a silver type."),
   priceMode: z.enum(["FIXED", "WEIGHT"]).default("FIXED"),
 
   /** Rupees as typed by the owner; converted to paise before storing. */
@@ -140,7 +140,7 @@ export async function saveProduct(input: ProductInput): Promise<ActionResult<{ i
     description: p.description?.trim() || null,
     categoryId: p.categoryId,
     status: p.status,
-    purity: p.purity,
+    materialId: p.materialId,
     priceMode: p.priceMode,
     price: rupeesToPaise(p.priceRupees),
     compareAtPrice: p.compareAtRupees ? rupeesToPaise(p.compareAtRupees) : null,
