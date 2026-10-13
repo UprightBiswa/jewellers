@@ -146,7 +146,10 @@ export function CategoryRail({
        many as there are. */
     <ul
       className={cn(
-        "no-scrollbar -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2",
+        // py-3, not pb-2. overflow-x-auto clips vertically as well, so the
+        // lift on hover was being sliced off at the top of the row — the
+        // circle appeared to be cut in half as the cursor reached it.
+        "no-scrollbar -mx-4 flex snap-x gap-4 overflow-x-auto px-4 py-3",
         "sm:gap-5 lg:-mx-1 lg:px-1",
       )}
     >
