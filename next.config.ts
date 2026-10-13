@@ -38,7 +38,17 @@ const nextConfig: NextConfig = {
    * which is the only way to check the rule that matters most in this project.
    * Development only — `next build` ignores it.
    */
-  allowedDevOrigins: ["127.0.0.1", "localhost", "10.57.117.11", "*.local"],
+  allowedDevOrigins: [
+    "127.0.0.1",
+    "localhost",
+    // Private ranges rather than one address: a laptop's LAN IP changes with
+    // the network, and the day it did the phone stopped hydrating with no clue
+    // on screen as to why.
+    "10.*",
+    "192.168.*",
+    "172.16.*",
+    "*.local",
+  ],
 
   images: {
     // Images are served straight from Cloudinary's edge — Vercel does no image

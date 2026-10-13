@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Marcellus, Manrope, Noto_Sans_Bengali } from "next/font/google";
+import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -9,22 +9,42 @@ import { SITE_URL } from "@/lib/site-url";
 
 import "./globals.css";
 
-const marcellus = Marcellus({
-  subsets: ["latin"],
-  weight: "400",
+const marcellus = localFont({
+  src: [{ path: "../../public/fonts/marcellus-400.woff2", weight: "400", style: "normal" }],
   variable: "--font-marcellus",
   display: "swap",
 });
 
-const manrope = Manrope({
-  subsets: ["latin"],
+const manrope = localFont({
+  src: [
+    { path: "../../public/fonts/manrope-400.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/manrope-500.woff2", weight: "500", style: "normal" },
+    { path: "../../public/fonts/manrope-600.woff2", weight: "600", style: "normal" },
+    { path: "../../public/fonts/manrope-700.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-manrope",
   display: "swap",
 });
 
-const notoBengali = Noto_Sans_Bengali({
-  subsets: ["bengali"],
-  weight: ["400", "500", "600"],
+/**
+ * Every font is served from this repository rather than fetched at build time.
+ *
+ * next/font/google downloads a font while the site is being built, so the build
+ * depends on Google being reachable from the builder. It was not: Vercel failed
+ * with module-not-found on the generated Noto Sans Bengali CSS, every deploy
+ * after that was the last good one, and the live admin broke because the
+ * database had moved on while the code had not.
+ *
+ * The files are in public/fonts, three weights, 105 KB each, Bengali subset
+ * only (U+0980-09FE). Noto is under the Open Font License, so shipping it is
+ * fine. A build that needs no network for its fonts cannot fail this way again.
+ */
+const notoBengali = localFont({
+  src: [
+    { path: "../../public/fonts/noto-bengali-400.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/noto-bengali-500.woff2", weight: "500", style: "normal" },
+    { path: "../../public/fonts/noto-bengali-600.woff2", weight: "600", style: "normal" },
+  ],
   variable: "--font-noto-bengali",
   display: "swap",
 });

@@ -155,6 +155,11 @@ Nothing here blocks launch. Every one degrades cleanly — see the service map i
 
 | # | Defect | Status |
 |---|---|---|
+| 48 | **The Vercel build failed on `next/font/google`** and every deploy after it served the last good build. Meanwhile the database had moved on, so the live admin threw "This screen did not load" on a product page that works locally — the code and the schema had drifted apart without anyone touching either. Fixed by self-hosting all three fonts | fixed |
+
+
+| # | Defect | Status |
+|---|---|---|
 | 44 | `notFound()` is broken on Next 16.3.5 — it returns 200 **and** never reaches a not-found boundary, leaving the stream on an unresolved Suspense placeholder. In the admin that showed the owner a skeleton for ever on a URL that had answered in under a second | worked around — admin detail pages `return <Missing/>` instead of throwing. Storefront still uses `noindex` |
 | 45 | ESLint cannot run — `typescript-eslint` has no TypeScript 7 support | open — `tsc` still type-checks |
 | 47 | **`prisma migrate` cannot reach Neon** — P1001 every time, while `pg` connects to the same URL in 2 seconds. The database is PostgreSQL 18.6, newer than Prisma 7.10's Rust engine. `db push` fails the same way, so it is the engine, not the URL. Workaround: write the migration SQL by hand, apply it with `pg`, and insert the row into `_prisma_migrations` so history stays in step — that is how `20261001000000_hero_slides` was applied | open |
