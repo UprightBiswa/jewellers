@@ -51,54 +51,69 @@ export function ProductGallery({ images, title }: { images: GalleryImage[]; titl
     };
   }, [images.length]);
 
+  function goTo(i: number) {
+    const el = strip.current;
+    if (el) el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
+  }
+
   if (images.length === 0) {
     return <div className="aspect-square rounded-[var(--radius-card)] bg-surface-2" />;
   }
 
   return (
     <>
-      {/* Phone: swipe through the pictures. */}
+      {/* Phone: swipe through the pictures, and tap a thumbnail to jump.
+          The slides are the width of this column, not the viewport. They were
+          w-screen with a negative margin, which burst out of the grid column the
+          gallery sits in and dragged the whole product page sideways. */}
       <div className="sm:hidden">
         <div
           ref={strip}
-          className="no-scrollbar -mx-4 flex snap-x snap-mandatory overflow-x-auto"
+          className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto rounded-[var(--radius-card)] bg-surface-2"
           aria-label={`${title} — ${images.length} photographs`}
         >
           {images.map((img, i) => (
-            <div key={img.id} className="w-screen shrink-0 snap-center px-4">
-              <div className="relative aspect-square overflow-hidden rounded-[var(--radius-card)] bg-surface-2">
-                <Image
-                  src={imageUrl(img.publicId, "detail")}
-                  alt={img.alt ?? title}
-                  fill
-                  priority={i === 0}
-                  sizes="100vw"
-                  className="object-contain"
-                />
-              </div>
+            <div key={img.id} className="relative aspect-square w-full shrink-0 snap-center">
+              <Image
+                src={imageUrl(img.publicId, "detail")}
+                alt={img.alt ?? title}
+                fill
+                priority={i === 0}
+                sizes="100vw"
+                className="object-contain"
+              />
             </div>
           ))}
         </div>
 
         {images.length > 1 ? (
-          <div className="mt-3 flex items-center justify-center gap-1.5">
+          <ul
+            className="no-scrollbar mt-3 flex gap-2 overflow-x-auto"
+            aria-label="Product images"
+          >
             {images.map((img, i) => (
-              <button
-                key={img.id}
-                type="button"
-                aria-label={`Photograph ${i + 1} of ${images.length}`}
-                aria-current={i === slide}
-                onClick={() => {
-                  const el = strip.current;
-                  if (el) el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
-                }}
-                className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
-                  i === slide ? "w-6 bg-brand" : "w-1.5 bg-line-strong",
-                )}
-              />
+              <li key={img.id} className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => goTo(i)}
+                  aria-label={`Photograph ${i + 1} of ${images.length}`}
+                  aria-current={i === slide}
+                  className={cn(
+                    "relative block size-14 overflow-hidden rounded-lg bg-surface-2 ring-1 transition-[box-shadow]",
+                    i === slide ? "ring-2 ring-brand" : "ring-line",
+                  )}
+                >
+                  <Image
+                    src={imageUrl(img.publicId, "thumb")}
+                    alt=""
+                    fill
+                    sizes="56px"
+                    className="object-cover"
+                  />
+                </button>
+              </li>
             ))}
-          </div>
+          </ul>
         ) : null}
       </div>
 
