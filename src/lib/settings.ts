@@ -83,7 +83,11 @@ export const settingsSchema = z.object({
     defaultPriceMode: z.enum(["FIXED", "WEIGHT"]).default("FIXED"),
     lowStockThreshold: z.number().default(3),
     showWeight: z.boolean().default(true),
+    /** The "Silver" row on a product page. */
     showPurity: z.boolean().default(true),
+    /** The "Hallmark" row. Off for a shop that does not hallmark at all —
+        "Tested in our shop" against every piece says less than nothing. */
+    showHallmark: z.boolean().default(true),
   }).prefault({}),
 });
 

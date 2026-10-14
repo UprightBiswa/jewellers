@@ -64,6 +64,7 @@ export function SettingsForms({ settings }: { settings: Settings }) {
     codFeeRupees: String(paiseToRupees(settings.payments.codFee)),
   });
   const [returns, setReturns] = useState(settings.returns);
+  const [catalog, setCatalog] = useState(settings.catalog);
   const [announcements, setAnnouncements] = useState(settings.announcements.join("\n"));
   const [social, setSocial] = useState(settings.social);
 
@@ -262,6 +263,59 @@ export function SettingsForms({ settings }: { settings: Settings }) {
             </Field>
           </>
         ) : null}
+      </Card>
+
+      <Card
+        title="What a product page shows"
+        description="Rows under the price. Switch off anything that does not apply to your pieces."
+        pending={saving === "catalog"}
+        onSave={() => save("catalog", catalog)}
+      >
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-3.5">
+          <input
+            type="checkbox"
+            checked={catalog.showPurity}
+            onChange={(e) => setCatalog({ ...catalog, showPurity: e.target.checked })}
+            className="mt-0.5 size-4 rounded border-line-strong accent-[var(--brand)]"
+          />
+          <span>
+            <span className="block text-[15px] text-ink">Silver</span>
+            <span className="block text-[13px] text-muted">
+              What the piece is made of — 925 Sterling Silver and so on.
+            </span>
+          </span>
+        </label>
+
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-3.5">
+          <input
+            type="checkbox"
+            checked={catalog.showWeight}
+            onChange={(e) => setCatalog({ ...catalog, showWeight: e.target.checked })}
+            className="mt-0.5 size-4 rounded border-line-strong accent-[var(--brand)]"
+          />
+          <span>
+            <span className="block text-[15px] text-ink">Weight</span>
+            <span className="block text-[13px] text-muted">
+              Only appears on pieces where you have entered one.
+            </span>
+          </span>
+        </label>
+
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-3.5">
+          <input
+            type="checkbox"
+            checked={catalog.showHallmark}
+            onChange={(e) => setCatalog({ ...catalog, showHallmark: e.target.checked })}
+            className="mt-0.5 size-4 rounded border-line-strong accent-[var(--brand)]"
+          />
+          <span>
+            <span className="block text-[15px] text-ink">Hallmark</span>
+            <span className="block text-[13px] text-muted">
+              Shows the BIS number on hallmarked pieces, and “Tested in our shop” on the rest.
+              Switch it off if you would rather not say either.
+            </span>
+          </span>
+        </label>
       </Card>
 
       <Card

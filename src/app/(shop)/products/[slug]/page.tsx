@@ -74,12 +74,27 @@ export default async function ProductPage({ params }: { params: Params }) {
       ? product.variants.some((v) => v.stock > 0)
       : product.stock > 0;
 
+  // Both rows are the owner's to show or hide. showPurity had been in the
+  // settings since the beginning and was never read, so the switch did nothing;
+  // the hallmark row had no switch at all and said "Tested in our shop" against
+  // every piece, which reads as a disclaimer rather than a fact.
   const specs: [string, string][] = [
-    ["Silver", product.material.name],
+    ...(settings.catalog.showPurity
+      ? ([["Silver", product.material.name]] as [string, string][])
+      : []),
     ...(settings.catalog.showWeight && product.weightG
       ? ([["Weight", `${product.weightG} g (approx.)`]] as [string, string][])
       : []),
-    ["Hallmark", product.hallmarked ? `BIS hallmarked${product.huid ? ` · ${product.huid}` : ""}` : "Tested in our shop"],
+    ...(settings.catalog.showHallmark
+      ? ([
+          [
+            "Hallmark",
+            product.hallmarked
+              ? `BIS hallmarked${product.huid ? ` · ${product.huid}` : ""}`
+              : "Tested in our shop",
+          ],
+        ] as [string, string][])
+      : []),
     ["Item code", product.sku],
     ["Category", product.category.name],
   ];

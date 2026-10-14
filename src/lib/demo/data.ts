@@ -145,6 +145,7 @@ export const DEMO_SETTINGS: Partial<Settings> = {
     lowStockThreshold: 2,
     showWeight: false,
     showPurity: true,
+    showHallmark: true,
   },
 };
 
