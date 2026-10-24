@@ -6,6 +6,7 @@ import { getSettings } from "@/lib/settings";
 import {
   getCategoryShelves,
   getShelf,
+  listMaterials,
   listCategories,
   listCollections,
 } from "@/lib/queries/catalog";
@@ -111,7 +112,7 @@ async function getHeroSlides(): Promise<HeroSlide[]> {
 }
 
 export default async function HomePage() {
-  const [settings, categories, collections, trending, featured, fresh, testimonials, slides, shelves] =
+  const [settings, categories, collections, trending, featured, fresh, testimonials, slides, shelves, materials] =
     await Promise.all([
       getSettings(),
       listCategories(),
@@ -122,13 +123,27 @@ export default async function HomePage() {
       getTestimonials(),
       getHeroSlides(),
       getCategoryShelves(4, 8),
+      listMaterials(),
     ]);
 
   // Every claim here is a setting, so the band cannot quietly go stale when the
   // owner changes the free-delivery threshold or switches COD off.
+  const materialNames = materials.map((m) => m.name);
+
   const rupees = (paise: number) => `₹${Math.round(paise / 100).toLocaleString("en-IN")}`;
   const promise = [
-    { label: "925 Sterling", detail: "Every piece, hallmarked where it is marked" },
+    // The silver the shop actually works in, read from the materials table.
+    // This said "925 Sterling — every piece, hallmarked where it is marked",
+    // which was written before the shop sold Silver 60 and claimed a hallmark
+    // on pieces that do not carry one. A promise band that says something the
+    // shop does not do is worse than one fact shorter.
+    {
+      label: materialNames.slice(0, 2).join(" · ") || "Real silver",
+      detail:
+        materialNames.length > 2
+          ? `and ${materialNames.length - 2} more, named on every piece`
+          : "Named on every piece",
+    },
     { label: "Made by hand", detail: `On our own bench in ${settings.store.city || "Tufanganj"}` },
     settings.shipping.freeAbove
       ? {
