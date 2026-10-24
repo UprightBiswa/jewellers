@@ -78,6 +78,29 @@ export const settingsSchema = z.object({
     youtube: z.string().default(""),
   }).prefault({}),
 
+  /**
+   * The band of facts under the first product rail on the front page.
+   *
+   * It used to be assembled in the page component from other settings, which
+   * kept it honest but meant the owner could not change a word of it — and the
+   * first line claimed a hallmark on pieces that do not carry one. It is a plain
+   * list now: his words, his order, add and remove as the shop changes.
+   */
+  promise: z
+    .array(
+      z.object({
+        label: z.string().min(1).max(40),
+        detail: z.string().max(90).default(""),
+      }),
+    )
+    .default([
+      { label: "925 Silver & Silver 60", detail: "Named on every piece" },
+      { label: "Made by hand", detail: "On our own bench in Tufanganj" },
+      { label: "Free delivery", detail: "On orders above ₹1,500" },
+      { label: "7-day exchange", detail: "Exchange for any other piece" },
+      { label: "UPI and cards", detail: "Paid securely before dispatch" },
+    ]),
+
   catalog: z.object({
     /** Fallback when a product does not override it */
     defaultPriceMode: z.enum(["FIXED", "WEIGHT"]).default("FIXED"),

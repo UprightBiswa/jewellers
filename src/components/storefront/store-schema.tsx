@@ -11,7 +11,7 @@ import { absoluteUrl } from "@/lib/utils";
  * admin corrects what Google reads.
  */
 export async function StoreSchema() {
-  const { store, shipping, returns } = await getSettings();
+  const { store, shipping, returns, payments } = await getSettings();
 
   const hasAddress = store.addressLines.length > 0 && store.city;
 
@@ -30,7 +30,17 @@ export async function StoreSchema() {
         ...(store.sinceYear ? { foundingDate: store.sinceYear } : {}),
         priceRange: "₹₹",
         currenciesAccepted: "INR",
-        paymentAccepted: "UPI, Credit Card, Debit Card, Cash on Delivery",
+        // Follows the setting. This was a fixed string, so the shop went on
+        // telling Google it takes cash on delivery after that was switched off
+        // — and structured data is exactly what a search result quotes.
+        paymentAccepted: [
+          "UPI",
+          "Credit Card",
+          "Debit Card",
+          payments.codEnabled ? "Cash on Delivery" : null,
+        ]
+          .filter(Boolean)
+          .join(", "),
         ...(hasAddress
           ? {
               address: {

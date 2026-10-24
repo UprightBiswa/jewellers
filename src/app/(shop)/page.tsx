@@ -6,7 +6,6 @@ import { getSettings } from "@/lib/settings";
 import {
   getCategoryShelves,
   getShelf,
-  listMaterials,
   listCategories,
   listCollections,
 } from "@/lib/queries/catalog";
@@ -112,7 +111,7 @@ async function getHeroSlides(): Promise<HeroSlide[]> {
 }
 
 export default async function HomePage() {
-  const [settings, categories, collections, trending, featured, fresh, testimonials, slides, shelves, materials] =
+  const [settings, categories, collections, trending, featured, fresh, testimonials, slides, shelves] =
     await Promise.all([
       getSettings(),
       listCategories(),
@@ -123,42 +122,12 @@ export default async function HomePage() {
       getTestimonials(),
       getHeroSlides(),
       getCategoryShelves(4, 8),
-      listMaterials(),
     ]);
 
-  // Every claim here is a setting, so the band cannot quietly go stale when the
-  // owner changes the free-delivery threshold or switches COD off.
-  const materialNames = materials.map((m) => m.name);
-
-  const rupees = (paise: number) => `₹${Math.round(paise / 100).toLocaleString("en-IN")}`;
-  const promise = [
-    // The silver the shop actually works in, read from the materials table.
-    // This said "925 Sterling — every piece, hallmarked where it is marked",
-    // which was written before the shop sold Silver 60 and claimed a hallmark
-    // on pieces that do not carry one. A promise band that says something the
-    // shop does not do is worse than one fact shorter.
-    {
-      label: materialNames.slice(0, 2).join(" · ") || "Real silver",
-      detail:
-        materialNames.length > 2
-          ? `and ${materialNames.length - 2} more, named on every piece`
-          : "Named on every piece",
-    },
-    { label: "Made by hand", detail: `On our own bench in ${settings.store.city || "Tufanganj"}` },
-    settings.shipping.freeAbove
-      ? {
-          label: "Free delivery",
-          detail: `On orders above ${rupees(settings.shipping.freeAbove)}`,
-        }
-      : { label: "All India delivery", detail: settings.shipping.deliveryDays },
-    {
-      label: `${settings.returns.windowDays}-day exchange`,
-      detail: settings.returns.buyback || "Exchange at the shop",
-    },
-    settings.payments.codEnabled
-      ? { label: "Cash on delivery", detail: "Pay when the parcel reaches you" }
-      : { label: "UPI and cards", detail: "Paid securely before dispatch" },
-  ];
+  // The band is the owner's own words now, edited at /admin/settings. It used
+  // to be assembled here from other settings — honest, but not his to change,
+  // and the first line claimed a hallmark on pieces that do not carry one.
+  const promise = settings.promise;
 
   // Named explicitly rather than "the first four": these are the ones with a
   // banner image, in the order they should read.

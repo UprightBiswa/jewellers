@@ -439,14 +439,15 @@ export function PromiseBand({
 }: {
   facts: { label: string; detail: string }[];
 }) {
-  if (facts.length === 0) return null;
+  const shown = facts.filter((f) => f.label.trim() !== "");
+  if (shown.length === 0) return null;
 
   return (
     <section className="border-y border-line bg-surface-2/50 py-10" aria-label="Why buy here">
       <div className="container-page">
         <Reveal>
         <ul className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-5">
-          {facts.map((f) => (
+          {shown.map((f) => (
             <li key={f.label} className="text-center">
               <p className="font-display text-[17px] leading-tight text-ink">{f.label}</p>
               <p className="mt-1 text-[13px] leading-snug text-muted">{f.detail}</p>

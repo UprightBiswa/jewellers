@@ -109,7 +109,8 @@ export async function readCartLines(cartId: string): Promise<ServerCartLine[]> {
         variantId: true,
         product: {
           select: {
-            id: true, slug: true, title: true, price: true, priceMode: true, purity: true,
+            id: true, slug: true, title: true, price: true, priceMode: true,
+            material: { select: { code: true } },
             weightG: true, makingCharge: true, makingChargePct: true, stock: true,
             status: true,
             images: { select: { publicId: true }, orderBy: { sortOrder: "asc" }, take: 1 },
@@ -127,7 +128,9 @@ export async function readCartLines(cartId: string): Promise<ServerCartLine[]> {
       const { total } = computePrice({
         priceMode: i.product.priceMode,
         price: i.product.price,
-        purity: i.product.purity,
+        // Only 925 and 999 have their own metal rate; everything else is
+        // priced by the tag anyway. Same bridge as lib/queries/catalog.ts.
+        purity: i.product.material.code === "999" ? "S999" : "S925",
         weightG: i.product.weightG ? Number(i.product.weightG) : null,
         makingCharge: i.product.makingCharge,
         makingChargePct: i.product.makingChargePct ? Number(i.product.makingChargePct) : null,

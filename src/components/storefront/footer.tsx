@@ -148,7 +148,14 @@ export async function Footer() {
             ))}
           </ul>
 
-          <p className="text-[12px] text-muted">UPI · Cards · Net banking · COD</p>
+          {/* Says COD only while COD is actually on. It was a fixed line, so the
+              footer went on advertising cash on delivery the day it was
+              switched off — the one place a customer looks to check. */}
+          <p className="text-[12px] text-muted">
+            {["UPI", "Cards", "Net banking", settings.payments.codEnabled ? "COD" : null]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
         </div>
       </div>
     </footer>

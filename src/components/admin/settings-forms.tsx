@@ -65,6 +65,7 @@ export function SettingsForms({ settings }: { settings: Settings }) {
   });
   const [returns, setReturns] = useState(settings.returns);
   const [catalog, setCatalog] = useState(settings.catalog);
+  const [promise, setPromise] = useState(settings.promise);
   const [announcements, setAnnouncements] = useState(settings.announcements.join("\n"));
   const [social, setSocial] = useState(settings.social);
 
@@ -263,6 +264,62 @@ export function SettingsForms({ settings }: { settings: Settings }) {
             </Field>
           </>
         ) : null}
+      </Card>
+
+      <Card
+        title="The band on the front page"
+        description="The row of short facts under the first set of products. Your words — say what is true of your shop."
+        pending={saving === "promise"}
+        onSave={() => save("promise", promise)}
+      >
+        <div className="grid gap-3">
+          {promise.map((row, i) => (
+            <div key={i} className="grid gap-2 rounded-lg border border-line p-3 sm:grid-cols-[1fr_1.4fr_auto] sm:items-start">
+              <Input
+                aria-label={`Fact ${i + 1} heading`}
+                placeholder="925 Silver & Silver 60"
+                value={row.label}
+                onChange={(e) =>
+                  setPromise(promise.map((r, n) => (n === i ? { ...r, label: e.target.value } : r)))
+                }
+              />
+              <Input
+                aria-label={`Fact ${i + 1} line underneath`}
+                placeholder="Named on every piece"
+                value={row.detail}
+                onChange={(e) =>
+                  setPromise(promise.map((r, n) => (n === i ? { ...r, detail: e.target.value } : r)))
+                }
+              />
+              <button
+                type="button"
+                onClick={() => setPromise(promise.filter((_, n) => n !== i))}
+                className="justify-self-start rounded-lg px-2.5 py-2 text-[13px] text-muted hover:bg-surface-2 hover:text-danger"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {promise.length < 6 ? (
+          <button
+            type="button"
+            onClick={() => setPromise([...promise, { label: "", detail: "" }])}
+            className="justify-self-start rounded-lg border border-line px-3.5 py-2 text-[14px] text-ink hover:bg-surface-2"
+          >
+            Add a fact
+          </button>
+        ) : (
+          <p className="text-[13px] text-muted">
+            Six is as many as fit across the row. Remove one to add another.
+          </p>
+        )}
+
+        <p className="text-[13px] text-muted">
+          Leave out anything that is not true today — cash on delivery, for instance, while it is
+          switched off. An empty heading is skipped.
+        </p>
       </Card>
 
       <Card
