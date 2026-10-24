@@ -36,27 +36,33 @@ export default async function CheckoutPage() {
       })
     : [];
 
+  // Narrower than the rest of the shop on purpose. The page container is 80rem,
+  // which left the form column around 800px on a desktop — an email box that
+  // wide reads as a mistake, and a line of input that long is harder to scan.
+  // 64rem puts the form at a normal measure and keeps the summary beside it.
   return (
     <div className="container-page py-8">
-      <h1 className="font-display text-[clamp(1.8rem,5vw,2.4rem)] text-ink">Checkout</h1>
+      <div className="mx-auto max-w-5xl">
+        <h1 className="font-display text-[clamp(1.8rem,5vw,2.4rem)] text-ink">Checkout</h1>
 
-      <CheckoutForm
-        lines={lines}
-        addresses={addresses}
-        signedIn={Boolean(session?.user)}
-        defaultEmail={session?.user?.email ?? ""}
-        settings={{
-          flatFee: settings.shipping.flatFee,
-          freeAbove: settings.shipping.freeAbove,
-          deliveryDays: settings.shipping.deliveryDays,
-          codEnabled: settings.payments.codEnabled,
-          codMaxOrder: settings.payments.codMaxOrder,
-          codFee: settings.payments.codFee,
-          storeName: settings.store.name,
-          whatsapp: settings.store.whatsapp,
-        }}
-        razorpay={{ enabled: isConfigured, keyId: publicCheckoutConfig().keyId }}
-      />
+        <CheckoutForm
+          lines={lines}
+          addresses={addresses}
+          signedIn={Boolean(session?.user)}
+          defaultEmail={session?.user?.email ?? ""}
+          settings={{
+            flatFee: settings.shipping.flatFee,
+            freeAbove: settings.shipping.freeAbove,
+            deliveryDays: settings.shipping.deliveryDays,
+            codEnabled: settings.payments.codEnabled,
+            codMaxOrder: settings.payments.codMaxOrder,
+            codFee: settings.payments.codFee,
+            storeName: settings.store.name,
+            whatsapp: settings.store.whatsapp,
+          }}
+          razorpay={{ enabled: isConfigured, keyId: publicCheckoutConfig().keyId }}
+        />
+      </div>
     </div>
   );
 }

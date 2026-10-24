@@ -17,6 +17,11 @@ import { shippingFee } from "@/lib/pricing";
 import { INDIAN_STATES, cn } from "@/lib/utils";
 import type { CartLine } from "@/lib/cart/store";
 
+/** What Razorpay sends to its "payment.failed" listener. */
+type RazorpayFailure = {
+  error?: { description?: string; reason?: string };
+};
+
 type SavedAddress = {
   id: string;
   label: string;
@@ -44,7 +49,10 @@ type CheckoutSettings = {
 
 declare global {
   interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on: (event: string, handler: (response: RazorpayFailure) => void) => void;
+    };
   }
 }
 
@@ -275,7 +283,37 @@ export function CheckoutForm({
       },
     });
 
-    checkout.open();
+    /*
+     * A declined card or an expired UPI request fires this, and only this.
+     * `ondismiss` does not run — Razorpay keeps its own window open so the
+     * customer can try another method — so with nothing listening the Pay
+     * button stayed disabled behind a spinner for the rest of the session, and
+     * the only way out was to reload the page.
+     *
+     * Razorpay's own description is shown rather than a house message: "card
+     * declined by issuing bank" tells someone to try another card, where
+     * "payment failed" tells them nothing and sends them to WhatsApp.
+     */
+    checkout.on("payment.failed", (response) => {
+      setPlacing(false);
+      setStage("idle");
+      toast.error(
+        response?.error?.description ??
+          "The payment did not go through. Your order is saved — you can pay from your orders page.",
+      );
+    });
+
+    // open() throws on options Razorpay will not accept — a key that does not
+    // match the order's account, most often. Without this the throw escaped
+    // into an async handler and the button stuck.
+    try {
+      checkout.open();
+    } catch (err) {
+      console.error("[checkout] Razorpay refused to open", err);
+      setPlacing(false);
+      setStage("idle");
+      toast.error("The payment window could not open. Please try again in a moment.");
+    }
   }
 
   const stageLabel =
@@ -548,7 +586,19 @@ export function CheckoutForm({
 
         <aside className="lg:sticky lg:top-28 lg:self-start">
           <div className="rounded-[var(--radius-card)] border border-line bg-surface p-5">
-            <h2 className="font-display text-lg text-ink">Your order</h2>
+            {/* "Change" rather than a bare count: the quantity is set in the bag
+                and there was no way back to it from here, so noticing a 4 that
+                should have been a 1 meant using the browser's back button and
+                hoping. */}
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="font-display text-lg text-ink">Your order</h2>
+              <Link
+                href="/cart"
+                className="text-[13px] text-muted underline-offset-4 hover:text-ink hover:underline"
+              >
+                Change
+              </Link>
+            </div>
 
             <ul className="mt-4 grid gap-3">
               {lines.map((line) => (
@@ -563,9 +613,16 @@ export function CheckoutForm({
                     />
                   </div>
                   <div className="min-w-0 flex-1 text-[14px]">
-                    <p className="truncate text-ink">{line.title}</p>
+                    {/* Two lines, not one. These titles run long — "Heart Dangle
+                        Payel with Green Gemstones(woman)" — and truncating the
+                        name of the thing someone is about to pay for is the one
+                        place on the site where an ellipsis is not acceptable. */}
+                    <p className="line-clamp-2 text-ink">{line.title}</p>
                     <p className="text-muted">
                       {line.variantLabel ? `${line.variantLabel} · ` : ""}Qty {line.qty}
+                      {/* A line of 4 showed only ₹3,596, which reads as the price
+                          of one ring. */}
+                      {line.qty > 1 ? ` · ${formatPaise(line.unitPrice)} each` : ""}
                     </p>
                   </div>
                   <p className="shrink-0 text-[14px] font-medium text-ink tnum">

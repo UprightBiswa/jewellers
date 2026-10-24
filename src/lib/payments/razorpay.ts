@@ -124,10 +124,38 @@ function timingSafeEqual(a: string, b: string): boolean {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-/** What the browser needs to open the checkout. Never the secret. */
+/**
+ * What the browser needs to open the checkout. Never the secret.
+ *
+ * `RAZORPAY_KEY_ID` wins over `NEXT_PUBLIC_RAZORPAY_KEY_ID`, which is the
+ * opposite of what this used to do, and the reason live payment failed the
+ * first time it was switched on.
+ *
+ * The order is created server-side with `RAZORPAY_KEY_ID` and signed with its
+ * secret. The browser then opens that order with whatever key id we hand it. If
+ * the two name different accounts — and they do the moment one is live and the
+ * other is still test — Razorpay refuses the order id, because it belongs to an
+ * account the key cannot see. Handing over the key that actually created the
+ * order makes that mismatch impossible.
+ *
+ * `NEXT_PUBLIC_RAZORPAY_KEY_ID` is inlined into the client bundle at build time
+ * and so goes stale behind a cached build, while `RAZORPAY_KEY_ID` is read per
+ * request. This module is server-only, so the per-request one is always here.
+ * The public variable stays as a fallback for anyone who set only that one.
+ */
 export function publicCheckoutConfig() {
+  const publicKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim();
+
+  if (keyId && publicKeyId && keyId !== publicKeyId) {
+    console.warn(
+      `[razorpay] RAZORPAY_KEY_ID (${keyId.slice(0, 12)}…) and ` +
+        `NEXT_PUBLIC_RAZORPAY_KEY_ID (${publicKeyId.slice(0, 12)}…) disagree. ` +
+        "Using the server one. Update both in the host and redeploy.",
+    );
+  }
+
   return {
-    keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? keyId ?? "",
+    keyId: keyId ?? publicKeyId ?? "",
     enabled: isConfigured,
   };
 }
