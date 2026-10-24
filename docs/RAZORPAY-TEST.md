@@ -140,14 +140,92 @@ attempt with the response it got. That page answers most of these on its own.
 
 Not before a real order has gone end to end in test mode.
 
-1. Complete KYC in Razorpay. Until then Live mode does not exist.
-2. Live mode → generate keys. They start `rzp_live_`.
-3. Replace `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` and
-   `NEXT_PUBLIC_RAZORPAY_KEY_ID` **in Vercel only**. Never in a file.
-4. Create the webhook again in Live mode — it is a separate webhook with its own
-   secret. Update `RAZORPAY_WEBHOOK_SECRET` to match.
-5. Regenerate the test keys, because the current ones were shared in chat.
-6. Place one real ₹1 order, then refund it from the Razorpay dashboard.
+### 6.1 The four variables in Vercel
 
-Keep the test keys somewhere. Every later change to checkout should be tried in
-test mode first.
+Project → Settings → Environment Variables. All four already exist with test
+values — edit each one, do not add a second copy.
+
+| Variable | Set it to |
+|---|---|
+| `RAZORPAY_KEY_ID` | the live key id, `rzp_live_…` |
+| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | **the same** live key id |
+| `RAZORPAY_KEY_SECRET` | the live key secret |
+| `RAZORPAY_WEBHOOK_SECRET` | the secret you invent in 6.2 — *not* the key secret |
+
+Two things that catch people here:
+
+- The key id goes in **twice**. The `NEXT_PUBLIC_` one is what the browser hands
+  to Razorpay's checkout popup; the plain one is what the server signs with.
+  Leave one on test and the popup and the server disagree about which account
+  the order belongs to, and every payment fails at the last step.
+- **Changing a variable does not change the running site.** Vercel bakes the
+  environment into a build. After saving, go to Deployments → the newest one
+  → ⋯ → Redeploy. Until you do, the shop is still on test keys and will take
+  no real money.
+
+### 6.2 The webhook
+
+Razorpay → Account & Settings → Webhooks → Add New Webhook. Make sure the
+dashboard is in **Live** mode first — a webhook added in Test mode will never
+fire for a real payment, and the page looks identical in both.
+
+**Webhook URL**
+
+```
+https://charubalasilver.in/api/webhooks/razorpay
+```
+
+**Secret** — Razorpay does not generate this. You invent it, type it into that
+box, and put the same string into `RAZORPAY_WEBHOOK_SECRET` in Vercel. They have
+to match character for character; that is the whole point of it. Any long random
+string will do — `openssl rand -hex 24`, or `node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"`.
+
+**Alert Email** — charubalasilver@gmail.com. Razorpay mails here when deliveries
+start failing, which is the only warning you get that orders have stopped
+confirming.
+
+**Active Events** — tick exactly three:
+
+| Event | What it does here |
+|---|---|
+| `payment.captured` | confirms the order, drops the email, counts the sale |
+| `order.paid` | the same, by the other name Razorpay sometimes uses |
+| `payment.failed` | marks the payment failed and **puts the stock back** |
+
+Everything else in that long list is answered `200 ignored` and does nothing.
+Ticking more is not harmful, only noise in the logs — except that each extra
+event is another thing to read when something breaks.
+
+`payment.failed` is the one people skip. Without it, a customer who abandons the
+bank page leaves their ring held in a pending order for ever, invisible to the
+next buyer.
+
+### 6.3 Check it worked
+
+```bash
+curl -s -o /dev/null -w "%{http_code}
+"   -X POST https://charubalasilver.in/api/webhooks/razorpay   -H "x-razorpay-signature: wrong" -d "{}"
+```
+
+**401** is the right answer: the endpoint is live and refusing anything it cannot
+verify. A 404 means the deploy has not landed; a 200 would mean the signature
+check is not running, which would be a bug.
+
+Then place one real order for the cheapest piece in the shop, pay it with your
+own UPI, and check three things:
+
+1. Razorpay → Webhooks → your webhook → **Logs** shows a delivery with a 200.
+2. `/admin/orders` shows the order as **Paid**, not Pending.
+3. The confirmation email arrived — or, if Resend is not verified yet, the
+   Vercel log shows it was composed. A missing email never means a missing order.
+
+Refund it from the Razorpay dashboard afterwards.
+
+### 6.4 Afterwards
+
+1. **Regenerate the live key secret** and update Vercel, if the secret has been
+   pasted into a chat, a message or a screenshot at any point. A live secret can
+   authorise refunds against the shop's own balance.
+2. Regenerate the test keys too, for the same reason.
+3. Keep a test key pair. Every later change to checkout is tried in test mode
+   first — that is what section 4 is for.

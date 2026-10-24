@@ -470,18 +470,25 @@ export function CheckoutForm({
                 </span>
               </label>
 
+              {/* Switched off in the admin means gone, not greyed out. A
+                  disabled row still saying "Pay when it arrives. ₹60 extra."
+                  reads as an option being withheld, and there is nothing on the
+                  page that answers why. An order that is merely over the COD
+                  ceiling is different — that one stays, because it explains
+                  itself and a smaller order would qualify. */}
+              {settings.codEnabled ? (
               <label
                 className={cn(
                   "flex gap-3 rounded-lg border p-4 transition-colors",
-                  (!settings.codEnabled || codTooBig) && "cursor-not-allowed opacity-55",
-                  settings.codEnabled && !codTooBig && payment === "COD"
+                  codTooBig && "cursor-not-allowed opacity-55",
+                  !codTooBig && payment === "COD"
                     ? "cursor-pointer border-brand bg-brand-soft"
                     : "cursor-pointer border-line hover:border-line-strong",
                 )}
               >
                 <input
                   type="radio" name="payment" checked={payment === "COD"}
-                  disabled={!settings.codEnabled || codTooBig}
+                  disabled={codTooBig}
                   onChange={() => setPayment("COD")}
                   className="mt-1 size-4 accent-[var(--color-brand)]"
                 />
@@ -499,6 +506,17 @@ export function CheckoutForm({
                   </span>
                 </span>
               </label>
+              ) : null}
+
+              {/* Both routes off. Rare, and only ever a configuration mistake,
+                  but an empty box under "How would you like to pay?" is the one
+                  thing worse than saying so. */}
+              {!razorpay.enabled && !settings.codEnabled ? (
+                <p className="rounded-lg border border-line bg-surface-2 p-4 text-[14.5px] text-muted">
+                  We cannot take payment on the site just now. Send us a message
+                  and we will take your order by hand.
+                </p>
+              ) : null}
             </div>
 
             {!razorpay.enabled && settings.whatsapp ? (

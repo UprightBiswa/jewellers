@@ -12,7 +12,6 @@ import {
 import { listMaterials } from "@/lib/queries/catalog";
 import { ProductListing } from "@/components/storefront/product-listing";
 import { FilterSheet, FilterSidebar } from "@/components/storefront/product-filters";
-import type { Purity } from "@/generated/prisma";
 
 type Params = Promise<{ slug: string }>;
 type Search = Promise<{ sort?: string
@@ -59,8 +58,10 @@ export default async function CollectionPage({
   const { sort, minPrice, maxPrice, purity, inStock } = await searchParams;
 
   // The filter panel writes these into the URL; the server does the filtering,
-  // so a shared link and a crawler both see the same list.
-  const purities = (Array.isArray(purity) ? purity : purity ? [purity] : []) as Purity[];
+  // so a shared link and a crawler both see the same list. These are Material
+  // codes the owner typed, not the old fixed Purity enum — casting them to it
+  // told the compiler a lie, and the query filters on material.code anyway.
+  const purities = Array.isArray(purity) ? purity : purity ? [purity] : [];
   const filters = {
     minPrice: minPrice ? Number(minPrice) : undefined,
     maxPrice: maxPrice ? Number(maxPrice) : undefined,
