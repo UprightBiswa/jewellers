@@ -24,13 +24,21 @@ export async function Footer() {
   const [settings, categories] = await Promise.all([getSettings(), listCategories()]);
   const { store, social, shipping, returns } = settings;
 
+  // The first cell said "925 & 999 silver — Hallmarked where marked, tested
+  // always", written before the shop had a catalogue. Every piece in it is
+  // Silver 60 and none carries a HUID, so that was a claim about purity and a
+  // claim about certification, both untrue, on every page including checkout.
+  // It comes from the band Rahul edits now, so there is one place to say what
+  // the shop sells and the footer cannot drift away from it again.
+  const silver = settings.promise[0] ?? { label: store.name, detail: store.tagline };
+
   return (
     <footer className="mt-20 border-t border-line bg-surface">
       {/* Trust strip — the three things a silver buyer actually checks */}
       <div className="border-b border-line">
         <div className="container-page grid gap-px sm:grid-cols-3">
           {[
-            ["925 & 999 silver", "Hallmarked where marked, tested always"],
+            [silver.label, silver.detail],
             [shipping.shipsTo, `Dispatch in ${shipping.dispatchDays}`],
             [`${returns.windowDays}-day returns`, returns.buyback],
           ].map(([title, sub]) => (
