@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import Link from "next/link";
 
 import {
@@ -10,6 +9,7 @@ import {
   type SortKey,
 } from "@/lib/queries/catalog";
 import { listMaterials } from "@/lib/queries/catalog";
+import { MissingPage } from "@/components/storefront/sections";
 import { ProductListing } from "@/components/storefront/product-listing";
 import { FilterSheet, FilterSidebar } from "@/components/storefront/product-filters";
 
@@ -71,7 +71,7 @@ export default async function CollectionPage({
   const isAll = slug === ALL;
 
   const collection = isAll ? null : await getCollectionBySlug(slug);
-  if (!isAll && !collection) notFound();
+  if (!isAll && !collection) return <MissingPage what="collection" />;
 
   const { products, nextCursor } = await listProducts({
     collectionSlug: isAll ? undefined : slug,

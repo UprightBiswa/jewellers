@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import Link from "next/link";
 
 import {
@@ -10,6 +9,7 @@ import {
   type SortKey,
 } from "@/lib/queries/catalog";
 import { listMaterials } from "@/lib/queries/catalog";
+import { MissingPage } from "@/components/storefront/sections";
 import { ProductListing } from "@/components/storefront/product-listing";
 import { FilterSheet, FilterSidebar } from "@/components/storefront/product-filters";
 
@@ -32,9 +32,12 @@ export const revalidate = 300;
  * correctly answers 404. It is a framework bug, not this page's doing, and
  * removing generateStaticParams did not help (that was an earlier wrong guess).
  *
- * Mitigation until it is fixed upstream: the not-found page carries
- * `robots: noindex`, so Google will not index a dead product URL as a real
- * page even though the status is wrong. Re-test after each Next upgrade.
+ * Mitigation until it is fixed upstream: this page and the collections page
+ * render MissingPage and return, rather than calling notFound() and rendering
+ * nothing. The status code is still wrong — the not-found page carries
+ * `robots: noindex` so Google will not index a dead URL as a real page — but a
+ * customer who follows a stale link now reads a sentence instead of staring at
+ * a blank white screen. Re-test after each Next upgrade.
  */
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
@@ -73,7 +76,7 @@ export default async function CategoryPage({
   };
 
   const category = await getCategoryBySlug(slug);
-  if (!category) notFound();
+  if (!category) return <MissingPage what="category" />;
 
   const { products, nextCursor } = await listProducts({
     categorySlug: slug,

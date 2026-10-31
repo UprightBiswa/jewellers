@@ -9,6 +9,9 @@ import { Spinner } from "@/components/ui/spinner";
 import { ImageUploader, type UploadedImage } from "@/components/admin/image-uploader";
 import { deleteHeroSlide, moveHeroSlide, saveHeroSlide } from "@/app/admin/content-actions";
 
+/** One place a slide's button can send someone. */
+export type Destination = { href: string; label: string };
+
 export type SlideRow = {
   id: string;
   eyebrow: string | null;
@@ -54,6 +57,72 @@ const EMPTY: Draft = {
 const field =
   "h-11 rounded-lg border border-line-strong bg-surface px-3.5 text-[15px] text-ink focus:border-brand focus:outline-none focus:ring-3 focus:ring-brand/20";
 
+const OTHER = "__other__";
+
+/**
+ * Where a button goes, chosen rather than typed.
+ *
+ * A typed path is a path that can be wrong, and wrong in a way nothing catches:
+ * "/collections/dhantrass" was saved for a category that lives at
+ * "/categories/dhantrass", so the button on the front page led to a 404 and the
+ * admin looked perfectly healthy. The owner knows the category is called
+ * Dhanteras Collection; he has no reason to know whether it is a collection or
+ * a category in the database, and that distinction is the whole trap.
+ *
+ * "Somewhere else" stays, because a slide pointing at a policy page or an
+ * outside link is reasonable and a list cannot cover it. A link saved before
+ * this existed also keeps working: it lands in that box rather than being
+ * silently swapped for the first option.
+ */
+function LinkPicker({
+  value,
+  onChange,
+  destinations,
+  required,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+  destinations: Destination[];
+  required?: boolean;
+}) {
+  const known = destinations.some((d) => d.href === value);
+  const [typing, setTyping] = useState(!known && value !== "");
+
+  return (
+    <div className="grid gap-2">
+      <select
+        value={typing ? OTHER : value}
+        onChange={(e) => {
+          if (e.target.value === OTHER) {
+            setTyping(true);
+            return;
+          }
+          setTyping(false);
+          onChange(e.target.value);
+        }}
+        className={field}
+      >
+        {!required ? <option value="">Nowhere — no second button</option> : null}
+        {destinations.map((d) => (
+          <option key={d.href} value={d.href}>
+            {d.label}
+          </option>
+        ))}
+        <option value={OTHER}>Somewhere else…</option>
+      </select>
+
+      {typing ? (
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="/pages/shipping-policy"
+          className={field}
+        />
+      ) : null}
+    </div>
+  );
+}
+
 /**
  * The big pictures at the top of the shop.
  *
@@ -65,7 +134,13 @@ const field =
  * accent colour. Rahul does not need to know that; the form calls them "first
  * line" and "second line, in gold" and the carousel does the rest.
  */
-export function HeroManager({ slides }: { slides: SlideRow[] }) {
+export function HeroManager({
+  slides,
+  destinations,
+}: {
+  slides: SlideRow[];
+  destinations: Destination[];
+}) {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [confirming, setConfirming] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -194,12 +269,12 @@ export function HeroManager({ slides }: { slides: SlideRow[] }) {
           </label>
           <label className="grid gap-1.5">
             <span className="text-sm font-medium text-ink">Button goes to</span>
-            <input
+            <LinkPicker
+              key={`cta-${draft.id ?? "new"}`}
               value={draft.ctaHref}
-              onChange={(e) => set("ctaHref", e.target.value)}
-              placeholder="/collections/all"
+              onChange={(next) => set("ctaHref", next)}
+              destinations={destinations}
               required
-              className={field}
             />
           </label>
         </div>
@@ -220,11 +295,11 @@ export function HeroManager({ slides }: { slides: SlideRow[] }) {
             </label>
             <label className="grid gap-1.5">
               <span className="text-sm text-ink">Goes to</span>
-              <input
+              <LinkPicker
+                key={`second-${draft.id ?? "new"}`}
                 value={draft.secondaryHref}
-                onChange={(e) => set("secondaryHref", e.target.value)}
-                placeholder="/collections/under-999"
-                className={field}
+                onChange={(next) => set("secondaryHref", next)}
+                destinations={destinations}
               />
             </label>
           </div>

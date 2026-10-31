@@ -342,41 +342,36 @@ export function MadeToOrderBand({ whatsapp }: { whatsapp?: string }) {
   );
 }
 
-/**
- * The promise band.
- *
- * Five facts, and every one is read from settings rather than written here — the
- * free-delivery threshold moves during a festival, the exchange window is the
- * owner's to set, and COD may be switched off the day online payment is
- * switched on. A band of claims that quietly goes stale is worse than no band.
- *
- * It sits directly under the first product rail because that is where a
- * first-time visitor decides whether a shop they have never heard of can be
- * trusted with a UPI payment.
- */
-export function PromiseBand({
-  facts,
-}: {
-  facts: { label: string; detail: string }[];
-}) {
-  const shown = facts.filter((f) => f.label.trim() !== "");
-  if (shown.length === 0) return null;
+/* -------------------------------------------------------------------------- */
+/* A page that is not there                                                   */
+/* -------------------------------------------------------------------------- */
 
+/**
+ * What a wrong URL shows.
+ *
+ * `notFound()` answers 200 on Next 16.3.5 and never reaches a boundary, so a
+ * mistyped slug rendered nothing at all — no heading, no message, the site's
+ * default <title>, a blank white page. That is worse than a 404, because
+ * nothing about it says anything is wrong: a hero button pointing at
+ * /collections/dhantrass when the category lives at /categories/dhantrass sent
+ * customers to an empty screen and looked healthy from the admin.
+ *
+ * Until the framework bug is fixed this says so in words. The status code is
+ * still wrong; the page is not.
+ */
+export function MissingPage({ what }: { what: string }) {
   return (
-    <section className="border-y border-line bg-surface-2/50 py-10" aria-label="Why buy here">
-      <div className="container-page">
-        <Reveal>
-        <ul className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-5">
-          {shown.map((f) => (
-            <li key={f.label} className="text-center">
-              <p className="font-display text-[17px] leading-tight text-ink">{f.label}</p>
-              <p className="mt-1 text-[13px] leading-snug text-muted">{f.detail}</p>
-            </li>
-          ))}
-        </ul>
-        </Reveal>
+    <div className="container-page py-20">
+      <div className="mx-auto max-w-md rounded-[var(--radius-card)] border border-dashed border-line py-16 text-center">
+        <p className="font-display text-xl text-ink">We could not find that {what}</p>
+        <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
+          It may have been renamed or taken down. Everything we make is still here.
+        </p>
+        <Button asChild variant="secondary" className="mt-5">
+          <Link href="/collections/all">See all jewellery</Link>
+        </Button>
       </div>
-    </section>
+    </div>
   );
 }
 

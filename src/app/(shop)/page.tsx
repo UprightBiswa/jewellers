@@ -15,7 +15,6 @@ import {
   MadeToOrderBand,
   ProductRail,
   CategoryShelves,
-  PromiseBand,
   SectionHeading,
   ShopByPrice,
   StoryStrip,
@@ -124,14 +123,18 @@ export default async function HomePage() {
       getCategoryShelves(4, 8),
     ]);
 
-  // The band is the owner's own words now, edited at /admin/settings. It used
-  // to be assembled here from other settings — honest, but not his to change,
-  // and the first line claimed a hallmark on pieces that do not carry one.
-  const promise = settings.promise;
+  // The band that used to sit here is gone. Its first fact and the footer's
+  // first fact were the same sentence, twice on one screen — Rahul spotted it
+  // before anyone else did. The footer keeps it; nothing is lost but the
+  // repetition.
 
   // Named explicitly rather than "the first four": these are the ones with a
   // banner image, in the order they should read.
-  const BANNER_SLUGS = ["under-999", "lightweight", "traditional", "festive"];
+  //
+  // "under-999" is deliberately not here. Shop by price leads with the same
+  // "Under ₹999", so the banner repeated a tile a few hundred pixels above it
+  // — two routes to one page, which reads as a mistake rather than as choice.
+  const BANNER_SLUGS = ["lightweight", "traditional", "festive"];
   const banners = BANNER_SLUGS.map((slug) => collections.find((c) => c.slug === slug)).filter(
     (c): c is NonNullable<typeof c> => Boolean(c),
   );
@@ -174,8 +177,6 @@ export default async function HomePage() {
           </Reveal>
         </section>
       ) : null}
-
-      <PromiseBand facts={promise} />
 
       <section className="container-page py-12">
         <SectionHeading eyebrow="Whatever you have in mind" title="Shop by price" />
