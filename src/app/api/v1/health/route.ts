@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { ok, fail } from "@/lib/api/response";
-import { features } from "@/lib/env";
+import { features, integrationReasons } from "@/lib/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,6 +30,10 @@ export async function GET() {
         email: features.email,
         redis: features.redis,
       },
+      // Named variables and expected shapes only — never a value. Without this
+      // a false flag said nothing about whether the key was missing, wrong, or
+      // pasted with its quotes.
+      notConfigured: integrationReasons(),
       time: new Date().toISOString(),
     });
   } catch {

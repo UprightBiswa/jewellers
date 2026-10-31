@@ -1,7 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 
-import { isGoogleAuthConfigured } from "@/lib/integrations";
+import { credential, isGoogleAuthConfigured } from "@/lib/integrations";
 
 /**
  * Edge-safe half of the auth setup.
@@ -18,10 +18,9 @@ import { isGoogleAuthConfigured } from "@/lib/integrations";
  * a hosting dashboard — would otherwise put a Google button on the login form
  * that fails the moment anyone presses it.
  */
-const googleEnabled = isGoogleAuthConfigured(
-  process.env.AUTH_GOOGLE_ID,
-  process.env.AUTH_GOOGLE_SECRET,
-);
+const googleId = credential(process.env.AUTH_GOOGLE_ID);
+const googleSecret = credential(process.env.AUTH_GOOGLE_SECRET);
+const googleEnabled = isGoogleAuthConfigured(googleId, googleSecret);
 
 export const ADMIN_ROLES = ["OWNER", "STAFF"] as const;
 
@@ -47,8 +46,8 @@ export const authConfig = {
   providers: googleEnabled
     ? [
         Google({
-          clientId: process.env.AUTH_GOOGLE_ID,
-          clientSecret: process.env.AUTH_GOOGLE_SECRET,
+          clientId: googleId,
+          clientSecret: googleSecret,
           allowDangerousEmailAccountLinking: true,
         }),
       ]

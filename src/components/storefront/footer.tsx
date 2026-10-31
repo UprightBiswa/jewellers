@@ -11,7 +11,9 @@ const HELP_LINKS = [
   ["/contact", "Contact & support"],
   ["/account/orders", "Track your order"],
   ["/pages/shipping-policy", "Shipping & delivery"],
-  ["/pages/returns-policy", "Returns & exchange"],
+  // Label set below, because what this page is called depends on whether there
+  // is a policy to describe.
+  ["/pages/returns-policy", ""],
   ["/pages/about", "About us"],
 ] as const;
 
@@ -32,6 +34,12 @@ export async function Footer() {
   // the shop sells and the footer cannot drift away from it again.
   const silver = settings.promise[0] ?? { label: store.name, detail: store.tagline };
 
+  const helpLinks = HELP_LINKS.map(([href, label]) =>
+    href === "/pages/returns-policy"
+      ? ([href, returns.enabled ? "Returns & exchange" : "Returns policy"] as const)
+      : ([href, label] as const),
+  );
+
   return (
     <footer className="mt-20 border-t border-line bg-surface">
       {/* Trust strip — the three things a silver buyer actually checks */}
@@ -40,7 +48,9 @@ export async function Footer() {
           {[
             [silver.label, silver.detail],
             [shipping.shipsTo, `Dispatch in ${shipping.dispatchDays}`],
-            [`${returns.windowDays}-day returns`, returns.buyback],
+            returns.enabled
+              ? [`${returns.windowDays}-day returns`, returns.buyback]
+              : ["No returns or exchange", "Please ask us anything before you order"],
           ].map(([title, sub]) => (
             <div key={title} className="py-6 text-center sm:px-6">
               <p className="font-display text-[17px] text-ink">{title}</p>
@@ -124,7 +134,7 @@ export async function Footer() {
         <nav aria-label="Help" className="lg:col-span-2">
           <h2 className="text-[11px] uppercase tracking-[0.14em] text-muted">Help</h2>
           <ul className="mt-4 grid gap-2 text-sm">
-            {HELP_LINKS.map(([href, label]) => (
+            {helpLinks.map(([href, label]) => (
               <li key={href}>
                 <Link href={href} className="text-ink-2 hover:text-brand">{label}</Link>
               </li>

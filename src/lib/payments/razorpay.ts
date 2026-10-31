@@ -1,7 +1,7 @@
 import "server-only";
 import crypto from "node:crypto";
 import Razorpay from "razorpay";
-import { isRazorpayConfigured } from "@/lib/integrations";
+import { credential, isRazorpayConfigured } from "@/lib/integrations";
 
 /**
  * Razorpay.
@@ -15,9 +15,9 @@ import { isRazorpayConfigured } from "@/lib/integrations";
  * gone end to end.
  */
 
-const keyId = process.env.RAZORPAY_KEY_ID?.trim();
-const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
-const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET?.trim();
+const keyId = credential(process.env.RAZORPAY_KEY_ID);
+const keySecret = credential(process.env.RAZORPAY_KEY_SECRET);
+const webhookSecret = credential(process.env.RAZORPAY_WEBHOOK_SECRET);
 
 /**
  * "Set" is not the same as "usable".
@@ -144,7 +144,7 @@ function timingSafeEqual(a: string, b: string): boolean {
  * The public variable stays as a fallback for anyone who set only that one.
  */
 export function publicCheckoutConfig() {
-  const publicKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim();
+  const publicKeyId = credential(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID);
 
   if (keyId && publicKeyId && keyId !== publicKeyId) {
     console.warn(

@@ -116,8 +116,18 @@ export default async function ContactPage() {
               <div>
                 <dt className="font-medium text-ink">Can I return it?</dt>
                 <dd className="text-muted">
-                  Yes, within {returns.windowDays} days, unworn and in its box.
-                  Except {returns.nonReturnable.toLowerCase()}.
+                  {returns.enabled ? (
+                    <>
+                      Yes, within {returns.windowDays} days, unworn and in its box.
+                      Except {returns.nonReturnable.toLowerCase()}.
+                    </>
+                  ) : (
+                    <>
+                      No — we do not take pieces back or exchange them. Message us
+                      before you order and we will send more photographs or check a
+                      size for you.
+                    </>
+                  )}
                 </dd>
               </div>
               <div>

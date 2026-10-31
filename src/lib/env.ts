@@ -1,7 +1,9 @@
 import { z } from "zod";
 import {
+  integrationReason,
   isCloudinaryConfigured,
   isGoogleAuthConfigured,
+  isGoogleClientId,
   isRazorpayConfigured,
   isResendKey,
   isUpstashConfigured,
@@ -125,3 +127,53 @@ export const features = {
 export const corsOrigins = env.API_CORS_ORIGINS.split(",")
   .map((s) => s.trim())
   .filter(Boolean);
+
+
+/**
+ * Why each integration that is off is off.
+ *
+ * "googleAuth: false" is true and useless: it does not distinguish a variable
+ * nobody set from one set to the wrong thing from one pasted with the quotes
+ * still around it. Finding out meant guessing and redeploying. Each line names
+ * a variable and the shape expected of it, and never any part of the value.
+ */
+export function integrationReasons(): string[] {
+  return [
+    integrationReason(
+      "AUTH_GOOGLE_ID",
+      env.AUTH_GOOGLE_ID,
+      "does not end with .apps.googleusercontent.com",
+      isGoogleClientId(env.AUTH_GOOGLE_ID),
+    ),
+    integrationReason(
+      "AUTH_GOOGLE_SECRET",
+      env.AUTH_GOOGLE_SECRET,
+      "is empty",
+      features.googleAuth || !isGoogleClientId(env.AUTH_GOOGLE_ID),
+    ),
+    integrationReason(
+      "RESEND_API_KEY",
+      env.RESEND_API_KEY,
+      "does not start with re_",
+      features.email,
+    ),
+    integrationReason(
+      "RAZORPAY_KEY_ID",
+      env.RAZORPAY_KEY_ID,
+      "does not start with rzp_, or RAZORPAY_KEY_SECRET is too short",
+      features.razorpay,
+    ),
+    integrationReason(
+      "CLOUDINARY_CLOUD_NAME",
+      env.CLOUDINARY_CLOUD_NAME,
+      "or CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET is missing or malformed",
+      features.cloudinary,
+    ),
+    integrationReason(
+      "UPSTASH_REDIS_REST_URL",
+      env.UPSTASH_REDIS_REST_URL,
+      "is not an https URL, or UPSTASH_REDIS_REST_TOKEN is missing",
+      features.redis,
+    ),
+  ].filter((r): r is string => r !== null);
+}

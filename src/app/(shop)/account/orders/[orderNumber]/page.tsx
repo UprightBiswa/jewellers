@@ -192,7 +192,9 @@ export default async function AccountOrderPage({
         <div className="rounded-[var(--radius-card)] border border-line bg-surface p-4">
           <h3 className="font-display text-base text-ink">Need help?</h3>
           <p className="mt-2 text-[14px] text-ink-2">
-            Exchange within {settings.returns.windowDays} days. {settings.returns.buyback}
+            {settings.returns.enabled
+              ? `Exchange within ${settings.returns.windowDays} days. ${settings.returns.buyback}`
+              : "Something wrong with this order? Message us and we will put it right."}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {settings.store.whatsapp ? (

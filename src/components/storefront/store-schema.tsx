@@ -64,14 +64,23 @@ export async function StoreSchema() {
             closes: "20:00",
           },
         ],
-        hasMerchantReturnPolicy: {
-          "@type": "MerchantReturnPolicy",
-          applicableCountry: "IN",
-          returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
-          merchantReturnDays: returns.windowDays,
-          returnMethod: "https://schema.org/ReturnByMail",
-          returnFees: "https://schema.org/FreeReturn",
-        },
+        // Follows the setting. Stating a finite return window to Google while
+        // the shop takes nothing back is the kind of claim that shows up in a
+        // search result and then has to be argued about with a customer.
+        hasMerchantReturnPolicy: returns.enabled
+          ? {
+              "@type": "MerchantReturnPolicy",
+              applicableCountry: "IN",
+              returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+              merchantReturnDays: returns.windowDays,
+              returnMethod: "https://schema.org/ReturnByMail",
+              returnFees: "https://schema.org/FreeReturn",
+            }
+          : {
+              "@type": "MerchantReturnPolicy",
+              applicableCountry: "IN",
+              returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+            },
       },
       {
         "@type": "WebSite",

@@ -131,6 +131,9 @@ export const DEMO_SETTINGS: Partial<Settings> = {
     shipsTo: "All India by Delhivery · same-day in Tufanganj and Coochbehar",
   },
   returns: {
+    // Charubala takes nothing back. Preview mode should look like the shop it
+    // stands in for, not like a shop with a policy it does not have.
+    enabled: false,
     windowDays: 7,
     buyback: "Exchange for any other piece within 7 days",
     nonReturnable: "Made-to-order, custom-size and engraved pieces",

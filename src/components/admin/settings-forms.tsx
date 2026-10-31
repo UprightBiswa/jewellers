@@ -358,6 +358,32 @@ export function SettingsForms({ settings }: { settings: Settings }) {
         pending={saving === "returns"}
         onSave={() => save("returns", returns)}
       >
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-line p-3.5">
+          <input
+            type="checkbox"
+            checked={returns.enabled}
+            onChange={(e) => setReturns({ ...returns, enabled: e.target.checked })}
+            className="mt-0.5 size-4 accent-[var(--color-brand)]"
+          />
+          <span className="text-[15px]">
+            <span className="font-medium text-ink">We take pieces back</span>
+            <span className="mt-0.5 block text-[13px] text-muted">
+              Turn this off if you do not accept returns or exchanges. The shop will
+              say so plainly instead of staying quiet about it.
+            </span>
+          </span>
+        </label>
+
+        {!returns.enabled ? (
+          <p className="rounded-lg border border-line bg-surface-2 p-3.5 text-[13px] text-muted">
+            Your product pages, the footer and the answers on Contact now read
+            &ldquo;No returns or exchange&rdquo;. Check your Returns &amp; exchange page
+            under Pages — the words there are yours and this does not change them.
+          </p>
+        ) : null}
+
+        {returns.enabled ? (
+        <>
         <Field label="Return window (days)" htmlFor="windowDays">
           <Input id="windowDays" inputMode="numeric" className="w-24 tnum"
             value={String(returns.windowDays)}
@@ -380,6 +406,8 @@ export function SettingsForms({ settings }: { settings: Settings }) {
           <Input id="nonReturnable" value={returns.nonReturnable}
             onChange={(e) => setReturns({ ...returns, nonReturnable: e.target.value })} />
         </Field>
+        </>
+        ) : null}
       </Card>
 
       <Card

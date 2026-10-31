@@ -267,11 +267,25 @@ export default async function ProductPage({ params }: { params: Params }) {
             ) : null}
 
             <section className="mt-8 rounded-[var(--radius-card)] border border-line bg-surface p-5">
-              <h2 className="font-display text-lg text-ink">Care and returns</h2>
+              <h2 className="font-display text-lg text-ink">
+                {settings.returns.enabled ? "Care and returns" : "Before you buy"}
+              </h2>
               <ul className="mt-3 grid gap-2 text-[14.5px] text-ink-2">
-                <li>{settings.returns.windowDays}-day returns, unworn and in its box.</li>
-                <li>{settings.returns.buyback}</li>
-                <li>Cannot be returned: {settings.returns.nonReturnable.toLowerCase()}.</li>
+                {settings.returns.enabled ? (
+                  <>
+                    <li>{settings.returns.windowDays}-day returns, unworn and in its box.</li>
+                    <li>{settings.returns.buyback}</li>
+                    <li>Cannot be returned: {settings.returns.nonReturnable.toLowerCase()}.</li>
+                  </>
+                ) : (
+                  /* Said here rather than left out. A customer who reads this
+                     before paying is being treated better than one who finds
+                     out afterwards, and the question gets asked either way. */
+                  <>
+                    <li>No returns or exchange — please choose carefully.</li>
+                    <li>Ask us anything about size, weight or finish before you order.</li>
+                  </>
+                )}
                 <li>Store in the pouch provided; keep away from perfume and chlorine.</li>
               </ul>
             </section>

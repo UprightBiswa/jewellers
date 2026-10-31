@@ -1,6 +1,6 @@
 import "server-only";
 import { Resend } from "resend";
-import { isResendKey } from "@/lib/integrations";
+import { credential, isResendKey } from "@/lib/integrations";
 import type { ReactElement } from "react";
 import { SITE_URL } from "@/lib/site-url";
 
@@ -13,7 +13,7 @@ import { SITE_URL } from "@/lib/site-url";
  * local development works with no account.
  */
 
-const apiKey = process.env.RESEND_API_KEY?.trim();
+const apiKey = credential(process.env.RESEND_API_KEY);
 
 /**
  * A Resend key is always `re_…`. Anything else — an empty box filled with a

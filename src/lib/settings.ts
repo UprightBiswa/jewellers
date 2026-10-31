@@ -59,6 +59,20 @@ export const settingsSchema = z.object({
   }).prefault({}),
 
   returns: z.object({
+    /*
+     * Whether the shop takes anything back at all.
+     *
+     * Charubala does not, and that has to be sayable. Before this the only
+     * question the settings asked was how many days, so "none" was not an
+     * option — the shop could promise a shorter exchange but never no
+     * exchange, and the footer, the product page, the contact answers and the
+     * structured data Google reads all stated a policy that did not exist.
+     *
+     * Switched off, every one of those says so instead of going quiet. A
+     * customer who reads "no returns" before paying is being treated better
+     * than one who finds out after.
+     */
+    enabled: z.boolean().default(true),
     // At least one day. Clearing the box in the admin used to write 0, and the
     // shop then advertised "0-day returns" beside a line promising seven.
     windowDays: z.number().int().min(1, "A return window of zero days is not a policy.").default(7),
@@ -97,7 +111,6 @@ export const settingsSchema = z.object({
       { label: "925 Silver & Silver 60", detail: "Named on every piece" },
       { label: "Made by hand", detail: "On our own bench in Tufanganj" },
       { label: "Free delivery", detail: "On orders above ₹1,500" },
-      { label: "7-day exchange", detail: "Exchange for any other piece" },
       { label: "UPI and cards", detail: "Paid securely before dispatch" },
     ]),
 
