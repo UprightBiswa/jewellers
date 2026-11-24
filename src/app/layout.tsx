@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Toaster } from "sonner";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@/components/analytics";
 
 import { getSettings } from "@/lib/settings";
 import { SITE_URL } from "@/lib/site-url";
@@ -108,11 +107,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-dvh bg-bg text-ink antialiased">
         {children}
-        {/* Both packages were installed and never mounted, so the dashboard
-            had nothing to show. They send no cookies and no personal data, which
-            is why they can go in without a consent banner. */}
+        {/* One component, which mounts Vercel's two plus any tag whose key is
+            set. This imported Analytics straight from @vercel/analytics/next,
+            which has the same name as ours and shadowed it — so the Meta pixel
+            and GA4 in components/analytics.tsx were written, reviewed and never
+            once rendered. Vercel's own send no cookies and no personal data,
+            which is why they need no consent banner; Meta's does, so it loads
+            only where the key is set. */}
         <Analytics />
-        <SpeedInsights />
         <Toaster
           position="bottom-center"
           toastOptions={{

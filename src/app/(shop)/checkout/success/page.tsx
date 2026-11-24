@@ -9,6 +9,7 @@ import { formatPaise } from "@/lib/money";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { RefreshCart } from "@/components/storefront/refresh-cart";
+import { PixelPurchase } from "@/components/analytics";
 
 export const metadata: Metadata = {
   title: "Order placed",
@@ -53,6 +54,15 @@ export default async function CheckoutSuccessPage({
     <div className="container-page py-12">
       {/* The bag was emptied on the server; tell the header's badge about it. */}
       <RefreshCart />
+
+      {/* Reported once the money is actually ours — paid online, or a COD order
+          the owner has agreed to send. A PENDING payment is one that may still
+          fail at the bank, and a Purchase reported for it would teach Meta's ad
+          targeting to chase people who do not complete. Rupees, not paise:
+          Meta's `value` is a currency amount, and nothing else here is. */}
+      {isPaid || isCod ? (
+        <PixelPurchase value={order.total / 100} orderNumber={order.orderNumber} />
+      ) : null}
 
       <div className="mx-auto max-w-2xl">
         <div className="text-center">
